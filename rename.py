@@ -96,9 +96,6 @@ def rename():
                 if has_serial_number \
                 else new_file_name
 
-            new_file_name = [dir_path, f'{new_file_name}{ext}'] \
-                if new_name else [dir_path, f'{new_file_name}{ext}']
-
             new_file_path = os.path.join(*new_file_name)
 
             # rename
