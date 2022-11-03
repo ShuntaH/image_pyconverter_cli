@@ -2,35 +2,9 @@ import argparse
 from enum import Enum
 
 
-class Tasks(Enum):
-    RENAME = 'rename'
-
-
-def validate_task_arg(*, task: str, tasks: list = None):
-    tasks = ', '.join([task.value for task in tasks])
-    if task not in tasks:
-        raise ValueError(f'Wrong task name. choose task from "{tasks}"')
-
-
-def ic():
-    args = args_config()
-    task = args.task
-    tasks = [task.value for task in Tasks]
-
-    validate_task_arg(task=task, tasks=tasks)
-
-    # taskに応じて呼び出すメソッドを変更する
-    if task != Tasks.RENAME.value:
-        # rename task
-        pass
-
-    print('hhh')
-
-    # if task = Ta
-
-
 def args_config():
     arg_parser = argparse.ArgumentParser()
+    arg_parser.add_argument('-dr', '--dryrun', action='store_true', default=True)
     arg_parser.add_argument(
         'task',
         help='task name.',
@@ -39,3 +13,23 @@ def args_config():
     )
     args = arg_parser.parse_args()
     return args
+
+
+class Tasks(Enum):
+    RENAME = 'rename'
+
+
+def ic():
+    args = args_config()
+    task = args.task
+    tasks = [task.value for task in Tasks]
+    dryrun = args.dryrun
+    print(f'{task} task starts. [DRY-RUN: {dryrun}]')
+
+    # taskに応じて呼び出すメソッドを変更する
+    if task == Tasks.RENAME.value:
+        # rename task
+        from lib import rename
+        rename.main(dryrun=dryrun)
+
+    print(f'{task} task ends. [DRY-RUN: {dryrun}]')
