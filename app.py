@@ -31,6 +31,11 @@ def ic():
 
 def args_config():
     arg_parser = argparse.ArgumentParser()
-    arg_parser.add_argument('task', help='task name.', type=str)
+    arg_parser.add_argument(
+        'task',
+        help='task name.',
+        type=str,
+        choices=[task.value for task in Tasks]
+    )
     args = arg_parser.parse_args()
     return args
