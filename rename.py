@@ -3,7 +3,6 @@ import glob
 import os
 import sys
 
-from utils import common
 from utils.common import common_print, add_common_arguments
 
 

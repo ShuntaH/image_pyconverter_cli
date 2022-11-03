@@ -3,10 +3,6 @@ from contextlib import contextmanager
 
 @contextmanager
 def add_common_arguments(arg_parser):
-    """
-    output log at the beginning and end of a task.
-    """
-
     # __enter__
     try:
         arg_parser.add_argument('-dr', '--dryrun', action='store_true', default=True)
@@ -22,7 +18,6 @@ def common_print(args, task_name=''):
     """
     output log at the beginning and end of a task.
     """
-
     # __enter__
     try:
         dryrun = args.dryrun
