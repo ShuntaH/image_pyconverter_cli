@@ -22,6 +22,13 @@ def get_args():
             '-sn',
             '--serial_number',
             help='add serial number to last position of file name?',
+            default=True,
+            action='store_true')
+        arg_parser.add_argument(
+            '-tf',
+            '--title_file',
+            help='whether to write the list of file names to a text file.',
+            default=False,
             action='store_true')
         args = arg_parser.parse_args()
     return args
@@ -41,6 +48,7 @@ def rename():
         prefix = f'{args.prefix}{separator}' if args.prefix else ''
         suffix = f'{separator}{args.suffix}' if args.suffix else ''
         has_serial_number = args.serial_number
+        whether_to_make_title_file = args.title_file
 
         print(
             f'################# Options => \n'
@@ -50,6 +58,7 @@ def rename():
             f'suffix: {suffix}\n'
             f'separator: {separator}\n'
             f'serial number: {has_serial_number}\n'
+            f'whether to　make　title　file: {args.title_file}\n'
             f'################# \n'
         )
 
@@ -80,6 +89,9 @@ def rename():
               f'{target_images}\n'
               f'################# \n')
 
+        titles = []
+        new_titles = []
+
         for index, file_path in enumerate(file_paths):
             # file '/User/macbook/a.jpg'
 
@@ -87,6 +99,7 @@ def rename():
 
             if ext not in valid_extensions:
                 print(f'skip {file_path}. the extension is not valid.')
+                continue
 
             new_file_name = prefix + new_name + suffix \
                 if new_name else prefix + file_name + suffix
@@ -96,10 +109,24 @@ def rename():
                 if has_serial_number \
                 else new_file_name
 
-            new_file_path = os.path.join(*new_file_name)
+            if whether_to_make_title_file:
+                titles.append(file_name)
+                if new_name:
+                    new_titles.append(new_file_name)
+
+            new_file_path = os.path.join(dir_path, new_file_name + ext)
 
             # rename
             if not dryrun:
                 os.rename(file_path, new_file_path)
 
             print(f'{file_path} => {new_file_path}')
+
+        if whether_to_make_title_file:
+            text_file_path = os.path.join(dir_path, 'title.txt')
+            print(text_file_path)
+            with open(text_file_path, mode='w') as f:
+                if new_name:
+                    titles = [*titles, '\n\n\n', *new_titles]
+                print(titles)
+                f.write('\n'.join(titles))
