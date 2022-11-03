@@ -6,8 +6,8 @@ class Tasks(Enum):
     RENAME = 'rename'
 
 
-def validate_task_arg(task: str):
-    tasks = ', '.join([task.value for task in Tasks])
+def validate_task_arg(*, task: str, tasks: list = None):
+    tasks = ', '.join([task.value for task in tasks])
     if task not in tasks:
         raise ValueError(f'Wrong task name. choose task from "{tasks}"')
 
@@ -15,8 +15,15 @@ def validate_task_arg(task: str):
 def ic():
     args = args_config()
     task = args.task
+    tasks = [task.value for task in Tasks]
 
-    validate_task_arg(task=task)
+    validate_task_arg(task=task, tasks=tasks)
+
+    # taskに応じて呼び出すメソッドを変更する
+    if task != Tasks.RENAME.value:
+        # rename task
+        pass
+
     print('hhh')
 
     # if task = Ta
