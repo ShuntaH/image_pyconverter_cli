@@ -6,7 +6,8 @@ setup(
     install_requires=["Pillow"],
     entry_points={
         "console_scripts": [
-            "ic_rename = rename:rename"
+            "ic_rename = app:rename",
+            "ic_resize = app:resize",
         ]
     }
 )

@@ -35,7 +35,7 @@ def get_args():
     return args
 
 
-def rename():
+def main():
     with common_print(
             args=get_args(),
             task_name=sys._getframe().f_code.co_name  # function name
@@ -73,6 +73,7 @@ def rename():
         # => ['/User/macbook/a.jpg', '/User/macbook/b.jpg', '/User/macbook/c.jpg']
         if not file_paths:
             Stdout.styled_stdout(Bcolors.FAIL.value, 'No Target images.')
+            return
 
         target_images = '\n'.join(file_paths)
         Stdout.styled_stdout(
