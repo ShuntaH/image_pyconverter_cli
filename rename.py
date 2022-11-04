@@ -109,11 +109,13 @@ def rename():
 
             new_file_name = prefix + new_name + suffix \
                 if new_name else prefix + file_name + suffix
+            # prefix_title_suffix
 
             # add serial number
             new_file_name = f'{new_file_name}{separator}{str(index)}' \
                 if has_serial_number \
                 else new_file_name
+            # prefix_title_suffix_1
 
             if whether_to_make_title_file:
                 titles.append(file_name)
@@ -121,10 +123,12 @@ def rename():
                     new_titles.append(new_file_name)
 
             new_file_path = os.path.join(dir_path, new_file_name + ext)
+            # /User/macbook/a.jpg
 
             # rename
             if not dryrun:
                 os.rename(file_path, new_file_path)
+            # => /User/macbook/a.jpg -> /User/macbook/b.jpg
 
             Stdout.styled_stdout(
                 Bcolors.OKGREEN.value,
