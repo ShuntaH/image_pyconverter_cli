@@ -2,6 +2,7 @@ import argparse
 import glob
 import os
 import sys
+from decimal import Decimal, ROUND_HALF_UP
 from pathlib import Path
 
 from utils.stdout import Stdout, Bcolors
@@ -13,7 +14,7 @@ def get_args():
     with add_common_arguments(arg_parser) as arg_parser:
         arg_parser.add_argument('dir_path', help='e.g. /Users/macbook/images')
         arg_parser.add_argument('width', type=int)
-        arg_parser.add_argument('-h', '--height', type=int)
+        arg_parser.add_argument('-hi', '--height', default=0, type=int)
         arg_parser.add_argument(
             '-p', '--prefix',
             default=True,
@@ -73,7 +74,7 @@ def main():
             f'directory path: {dir_path}\n'
             f'width: {new_width}\n'
             f'height: {new_height}\n'
-            f' whether_to_keep_aspect_ratio: {args. whether_to_keep_aspect_ratio}\n'
+            f'whether to keep aspect ratio: {whether_to_keep_aspect_ratio}\n'
             f'images_in_directory: {target_images}\n'
         )
 
@@ -95,24 +96,47 @@ def main():
 
             image = Image.open(file_path)
             aspect_ratio = image.height / image.width
-            resized_image
+
             if whether_to_keep_aspect_ratio:
                 new_height = new_width * aspect_ratio
-                resized_image = image.resize((new_width, new_height), Image.ANTIALIAS)
             else:
-                resized_image = image.resize((new_width, new_height), Image.ANTIALIAS)
+                if not new_height:
+                    new_height = image.height
+
+            valid_width = int(
+                Decimal(
+                    str(new_width)
+                ).quantize(
+                    Decimal('0'),
+                    rounding=ROUND_HALF_UP
+                )
+            )
+            valid_height = int(
+                Decimal(
+                    str(new_height)
+                ).quantize(
+                    Decimal('0'),
+                    rounding=ROUND_HALF_UP
+                )
+            )
+            resized_image = image.resize((valid_width, valid_height), Image.ANTIALIAS)
 
             resized_image_dir_path = os.path.join(dir_path, 'resized_images')
             Path(f"{resized_image_dir_path}").mkdir(parents=True, exist_ok=True)
 
             new_file_name = "resize_" + file_name
-            resized_image_path = os.path.join(resized_image_dir_path, new_file_name)
-            if not dryrun:
-                resized_image.save(resized_image_path)
+            resized_image_path = os.path.join(resized_image_dir_path, new_file_name + ext)
+            # if not dryrun:
+            #
+            resized_image.save(resized_image_path)
 
             Stdout.styled_stdout(
                 Bcolors.OKGREEN.value,
+                f'File name: {os.path.basename(file_path)}\n'
                 f'Width: {str(image.width)} => {str(new_width)}\n'
                 f'Height: {str(image.height)} => {str(new_height)}\n'
-                f'Aspect ratio: {str(aspect_ratio)}'
+                f'Aspect ratio: {str(aspect_ratio)}\n'
+                f'Size: {str(os.stat(resized_image_path).st_size)}\n'
+                f'Info: {str(image.info)}\n'
+                f'##################################################'
             )
