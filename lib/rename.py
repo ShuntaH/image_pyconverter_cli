@@ -90,7 +90,6 @@ def main():
         )
 
         titles = []
-        new_titles = []
 
         Stdout.styled_stdout(
             Bcolors.OKCYAN.value,
@@ -98,7 +97,10 @@ def main():
         )
 
         for index, file_path in enumerate(file_paths):
+            # todo 順番が狂う 数字が全角になっている
             # file '/User/macbook/a.jpg'
+
+            index = index + 1
 
             file_name, ext = os.path.splitext(os.path.basename(file_path))  # => a, .jpg
 
@@ -118,10 +120,10 @@ def main():
                 else new_file_name
             # prefix_title_suffix_1
 
+            title = ''
             if whether_to_make_title_file:
-                titles.append(file_name)
-                if new_name:
-                    new_titles.append(new_file_name)
+                title = f'before: {file_name}\nafter: {new_file_name}'
+                titles.append(title)
 
             new_file_path = os.path.join(dir_path, new_file_name + ext)
             # /User/macbook/a.jpg
@@ -139,6 +141,4 @@ def main():
         if whether_to_make_title_file:
             text_file_path = os.path.join(dir_path, 'title.txt')
             with open(text_file_path, mode='w') as f:
-                if new_name:
-                    titles = [*titles, '\n\n\n', *new_titles]
-                f.write('\n'.join(titles))
+                f.write('\n\n'.join(titles))
