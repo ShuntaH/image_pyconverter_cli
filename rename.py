@@ -3,7 +3,8 @@ import glob
 import os
 import sys
 
-from utils.common import common_print, add_common_arguments
+from utils.stdout import Stdout, Bcolors
+from utils.with_statement import common_print, add_common_arguments
 
 
 def get_args():
@@ -50,18 +51,6 @@ def rename():
         has_serial_number = args.serial_number
         whether_to_make_title_file = args.title_file
 
-        print(
-            f'################# Options => \n'
-            f'directory path: {dir_path}\n'
-            f'new name: {new_name}\n'
-            f'prefix: {prefix}\n'
-            f'suffix: {suffix}\n'
-            f'separator: {separator}\n'
-            f'serial number: {has_serial_number}\n'
-            f'whether to　make　title　file: {args.title_file}\n'
-            f'################# \n'
-        )
-
         valid_extensions = [
             '.jpg',
             '.jpeg',
@@ -79,18 +68,33 @@ def rename():
             '.svg',
             '.svgz'
         ]
+
         file_paths = glob.glob(f'{dir_path}/*')
         # => ['/User/macbook/a.jpg', '/User/macbook/b.jpg', '/User/macbook/c.jpg']
         if not file_paths:
-            print('No Target images.')
+            Stdout.styled_stdout(Bcolors.FAIL.value, 'No Target images.')
 
         target_images = '\n'.join(file_paths)
-        print(f'################# Target images => \n'
-              f'{target_images}\n'
-              f'################# \n')
+        Stdout.styled_stdout(
+            Bcolors.OKBLUE.value,
+            f'Options => \n'
+            f'directory path: {dir_path}\n'
+            f'new name: {new_name}\n'
+            f'prefix: {prefix}\n'
+            f'suffix: {suffix}\n'
+            f'separator: {separator}\n'
+            f'serial number: {has_serial_number}\n'
+            f'whether to　make　title　file: {args.title_file}\n'
+            f'images_in_directory: {target_images}\n'
+        )
 
         titles = []
         new_titles = []
+
+        Stdout.styled_stdout(
+            Bcolors.OKCYAN.value,
+            f'the task gets start.'
+        )
 
         for index, file_path in enumerate(file_paths):
             # file '/User/macbook/a.jpg'
@@ -98,7 +102,9 @@ def rename():
             file_name, ext = os.path.splitext(os.path.basename(file_path))  # => a, .jpg
 
             if ext not in valid_extensions:
-                print(f'skip {file_path}. the extension is not valid.')
+                Stdout.styled_stdout(
+                    Bcolors.WARNING.value,
+                    f'{file_path} is skipped. the extension is not valid.')
                 continue
 
             new_file_name = prefix + new_name + suffix \
@@ -120,13 +126,14 @@ def rename():
             if not dryrun:
                 os.rename(file_path, new_file_path)
 
-            print(f'{file_path} => {new_file_path}')
+            Stdout.styled_stdout(
+                Bcolors.OKGREEN.value,
+                f'{file_path} => {new_file_path}'
+            )
 
         if whether_to_make_title_file:
             text_file_path = os.path.join(dir_path, 'title.txt')
-            print(text_file_path)
             with open(text_file_path, mode='w') as f:
                 if new_name:
                     titles = [*titles, '\n\n\n', *new_titles]
-                print(titles)
                 f.write('\n'.join(titles))
