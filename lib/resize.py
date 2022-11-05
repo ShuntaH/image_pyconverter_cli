@@ -6,23 +6,22 @@ from decimal import Decimal, ROUND_HALF_UP
 from pathlib import Path
 
 from utils.stdout import Stdout, Bcolors
-from utils.with_statement import common_print, add_common_arguments
+from utils.with_statement import common_print, add_extra_arguments_to
 
 
 def get_args():
     arg_parser = argparse.ArgumentParser()
-    with add_common_arguments(arg_parser) as arg_parser:
+    with add_extra_arguments_to(arg_parser) as arg_parser:
         arg_parser.add_argument('dir_path', help='e.g. /Users/macbook/images')
+        # todo フォルダ名に&が入るとダメ
         arg_parser.add_argument('width', type=int)
         arg_parser.add_argument('-hi', '--height', default=0, type=int)
-        arg_parser.add_argument(
-            '-p', '--prefix',
-            default=True,
-            action='store_true',
-            help='you can add an extra word as prefix.')
+        # arg_parser.add_argument(
+        #     '-p', '--prefix',
+        #     action='store_true',
+        #     help='you can add an extra word as prefix.')
         arg_parser.add_argument(
             '-ka', '--keep_aspect',
-            default=True,
             action='store_true')
         args = arg_parser.parse_args()
     return args

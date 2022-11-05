@@ -4,12 +4,12 @@ import os
 import sys
 
 from utils.stdout import Stdout, Bcolors
-from utils.with_statement import common_print, add_common_arguments
+from utils.with_statement import common_print, add_extra_arguments_to
 
 
 def get_args():
     arg_parser = argparse.ArgumentParser()
-    with add_common_arguments(arg_parser) as arg_parser:
+    with add_extra_arguments_to(arg_parser) as arg_parser:
         arg_parser.add_argument('dir_path', help='e.g. /Users/macbook/images')
         arg_parser.add_argument('-nn', '--new_name', help='you can replace a new name.')
         arg_parser.add_argument('-p', '--prefix', help='you can add an extra word as prefix.')
@@ -97,7 +97,7 @@ def main():
         )
 
         for index, file_path in enumerate(file_paths):
-            # todo 順番が狂う 数字が全角になっている
+            # todo 順番が狂う 連番を for のループインデックスでつけると画像は毎回順番通りではないので変な連番をつけることになる。ので連番をつけるなら、既存の数字をそのまま残しておいた方が良い 数字が全角になっている 置換ですべき
             # file '/User/macbook/a.jpg'
 
             index = index + 1
