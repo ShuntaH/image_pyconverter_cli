@@ -40,9 +40,53 @@ def main():
             args=get_args(),
             task_name=sys._getframe().f_code.co_name  # function name
     ) as args:
+        """
+        # replace a word
+        # 検索文字をと変更後文字を受け取り検索して置換
+        # name.png => new_name.png
+        
+        # replace multiple words
+        # replace.replace として処理
+        # name1_name2_name3.png => nameA_nameB_nameC.png
+        
+        # replace some words
+        # name1_name2_name3.png => nameA_name2_nameB.png
+        
+        
+        # add prefix
+        name.png => prefix_name.png
+        
+        # add suffix
+        name.png => name_suffix.png
+        
+        # add both prefix and suffix
+        name.png => prefix_name_suffix.png
+        
+        # normalize serial number
+        name００１.png => name001.png
+        
+        # normalize japanese
+        # 日本語のままでもブラウザから見るとき、勝手にエンコードされるので日本語のままでも問題ない
+        日本語の名前.png => nihongononamae.png or 日本語の名前.png
+        
+        # normalize space character
+        # space character is a special one. So you should input "name1 name2.png"
+        name1 name2.png => name1_name2.png
+        name1　name2.png => name1_name2.png
+        
+        # change separator
+        # name1_name2.png => name1-name2.png
+        
+        # replace special characters
+        &;^.png => ---.png
+        
+        # add serial number
+        foo.png => foo001.png
+        bar.png => bar002.png
+        """
 
         # arguments
-        dryrun = args.dryrun
+        run = args.run
         dir_path = args.dir_path  # => /Users/macbook/images
         new_name = args.new_name if args.new_name else ''
         separator = args.separator
@@ -129,7 +173,7 @@ def main():
             # /User/macbook/a.jpg
 
             # rename
-            if not dryrun:
+            if not run:
                 os.rename(file_path, new_file_path)
             # => /User/macbook/a.jpg -> /User/macbook/b.jpg
 
