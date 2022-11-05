@@ -49,10 +49,6 @@ def main():
         # replace.replace として処理
         # name1_name2_name3.png => nameA_nameB_nameC.png
         
-        # replace some words
-        # name1_name2_name3.png => nameA_name2_nameB.png
-        
-        
         # add prefix
         name.png => prefix_name.png
         
@@ -67,7 +63,7 @@ def main():
         
         # normalize japanese
         # 日本語のままでもブラウザから見るとき、勝手にエンコードされるので日本語のままでも問題ない
-        日本語の名前.png => nihongononamae.png or 日本語の名前.png
+        日本語の名前.png => bar.png or 日本語の名前.png
         
         # normalize space character
         # space character is a special one. So you should input "name1 name2.png"
