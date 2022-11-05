@@ -58,7 +58,7 @@ def main():
         # add both prefix and suffix
         name.png => prefix_name_suffix.png
         
-        # normalize serial number
+        # normalize full-width number
         name００１.png => name001.png
         
         # normalize japanese
