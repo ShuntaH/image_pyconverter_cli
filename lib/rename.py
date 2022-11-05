@@ -55,28 +55,25 @@ def main():
         # add suffix
         name.png => name_suffix.png
         
-        # add both prefix and suffix
+        # add both prefix and suffix ok
         name.png => prefix_name_suffix.png
         
-        # normalize full-width number
+        # normalize full-width number ok
         name００１.png => name001.png
         
-        # normalize japanese
+        # normalize japanese ok
         # 日本語のままでもブラウザから見るとき、勝手にエンコードされるので日本語のままでも問題ない
         日本語の名前.png => bar.png or 日本語の名前.png
         
-        # normalize space character
+        # normalize space character ok
         # space character is a special one. So you should input "name1 name2.png"
         name1 name2.png => name1_name2.png
         name1　name2.png => name1_name2.png
         
-        # change separator
-        # name1_name2.png => name1-name2.png
-        
-        # replace special characters
+        # replace special characters ok
         &;^.png => ---.png
         
-        # add serial number
+        # add serial number ok
         foo.png => foo001.png
         bar.png => bar002.png
         """
