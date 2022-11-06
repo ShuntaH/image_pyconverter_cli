@@ -9,8 +9,8 @@ from typing import Optional, Pattern
 
 from jaconv import jaconv
 
-from src.utils import Stdout, Bcolors
-from src.utils import common_print, add_extra_arguments_to
+from src.utils.stdout import Stdout, Bcolors
+from src.utils.with_statement import common_print, add_extra_arguments_to
 
 
 class DefaultValues(enum.Enum):

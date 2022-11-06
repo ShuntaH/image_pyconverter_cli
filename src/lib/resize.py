@@ -5,8 +5,8 @@ import sys
 from decimal import Decimal, ROUND_HALF_UP
 from pathlib import Path
 
-from src.utils import Stdout, Bcolors
-from src.utils import common_print, add_extra_arguments_to
+from src.utils.stdout import Stdout, Bcolors
+from src.utils.with_statement import common_print, add_extra_arguments_to
 
 
 def get_args():
