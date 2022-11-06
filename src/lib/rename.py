@@ -48,11 +48,9 @@ class DefaultValues(enum.Enum):
 class Rename:
     """
     # replace a word
-    # 検索文字をと変更後文字を受け取り検索して置換
     # name.png => new_name.png
 
     # replace multiple words
-    # replace.replace として処理
     # name1_name2_name3.png => nameA_nameB_nameC.png
 
     # add prefix
@@ -61,29 +59,29 @@ class Rename:
     # add suffix
     name.png => name_suffix.png
 
-    # add both prefix and suffix ok
+    # add both prefix and suffix
     name.png => prefix_name_suffix.png
 
-    # normalize full-width number ok
+    # normalize full-width number
     name００１.png => name001.png
 
-    # normalize invalid characters ok
+    # normalize invalid characters
     # you can choose whether to normalize invalid characters
     because they are encoded automatically on a browser.
     日本語の名前.png => bar.png or 日本語の名前.png
 
-    # normalize space character ok
+    # normalize space characters
     # space character is a special one. So you should input "name1 name2.png"
     name1 name2.png => name1_name2.png
     name1　name2.png => name1_name2.png
 
-    # replace delimiters with a specified separator ok
+    # replace delimiters with a specified separator
     name1,name2.name3-name4_name5.png => name1_name2_name3_name4_name5.png
 
-    # replace special characters ok
+    # replace special characters
     &;^.png => ---.png
 
-    # add serial number ok
+    # add serial number
     foo.png => foo001.png
     bar.png => bar002.png
     """
