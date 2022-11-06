@@ -7,7 +7,6 @@ from typing import Optional, Pattern
 
 from jaconv import jaconv
 
-from src.utils import get_image_paths
 from src.utils.stdout import Stdout, Bcolors
 from src.utils.with_statement import task, add_extra_arguments_to
 
@@ -55,7 +54,6 @@ class DefaultValues(enum.Enum):
 
 @dataclasses.dataclass
 class Rename:
-
     image_path: str
 
     words_before_replacement: list[str] = dataclasses.field(default_factory=[])
@@ -93,6 +91,8 @@ class Rename:
     @renamed_image_name.setter
     def renamed_image_name(self, image_name: str):
         self.__renamed_image_name = image_name
+
+    def renamed_image
 
     @property
     def is_extension_valid(self) -> bool:
@@ -213,6 +213,7 @@ class Rename:
         because they are encoded automatically on a browser.
         日本語の名前.png => bar.png or 日本語の名前.png
 
+
         # add both prefix and suffix
         name.png => prefix_name_suffix.png
 
@@ -234,8 +235,8 @@ class Rename:
 
         # normalize full-width characters
 
-
-    def image_path_before_after(self):
+    def image_name_for_log(self) -> str:
+        return f'{self.original_image_name}'
 
 
 def get_args():
@@ -289,7 +290,6 @@ def get_args():
             type=re.Pattern,
             default=DefaultValues.UNAVAILABLE_FILE_NAME_CHAR_PATTERN.value
         )
-
 
         arg_parser.add_argument(
             '-keep_unavailable_chars',
