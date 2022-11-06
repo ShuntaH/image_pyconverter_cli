@@ -98,7 +98,7 @@ class Rename:
     replace_with_separator_pattern: Pattern = DefaultValues.REPLACE_WITH_SEPARATOR_PATTERN.value
     separator: str = DefaultValues.SEPARATOR.value
 
-    keep_unavailable_chars: bool = False
+    is_unavailable_chars_kept: bool = False
     alternative_unavailable_word: str = DefaultValues.ALTERNATIVE_UNAVAILABLE_WORD.value
     available_char_pattern: Pattern = DefaultValues.AVAILABLE_CHAR_PATTERN.value
 
@@ -256,8 +256,8 @@ def get_args():
         )
 
         arg_parser.add_argument(
-            '-kuc',
-            '--has_unavailable_chars',
+            '-keep_unavailable_chars',
+            '--is_unavailable_chars_kept',
             help='you can specify a word with which unavailable characters is replaced.',
             action='store_true'
         )
@@ -276,8 +276,8 @@ def get_args():
         )
 
         arg_parser.add_argument(
-            '-hsn',
-            '--has_serial_number',
+            '-add_serial_number',
+            '--is_serial_number_added',
             help='add serial number to last position of file name?',
             action='store_true'
         )
@@ -297,8 +297,8 @@ def get_args():
         )
 
         arg_parser.add_argument(
-            '-htf',
-            '--has_text_file',
+            '-make_title_file',
+            '--is_title_file_made',
             help='whether to write the list of file names to a text file.',
             default=False,
             action='store_true'
@@ -326,16 +326,16 @@ def main():
         separator: bool = args.separator
         replace_with_separator_pattern: Pattern = args.replace_with_separator_pattern
 
-        has_unavailable_chars: bool = args.has_unavailable_chars
+        is_unavailable_chars_kept: bool = args.is_unavailable_chars_kept
         alternative_unavailable_char: str = args.alternative_unavailable_char
         available_char_pattern: re.Pattern = args.available_char_pattern
 
-        has_serial_number: bool = args.has_serial_number
+        is_serial_number_added: bool = args.is_serial_number_added
         serial_number_zero_padding_digit: int = args.serial_number_zero_padding_digit
 
         valid_extensions = list[str] = args.valid_extensions
 
-        has_text_file: bool = args.has_text_file
+        is_title_file_made: bool = args.is_title_file_made
 
         valid_extensions = args.valid_extensions
 
@@ -354,7 +354,7 @@ def main():
         #     f'prefix: {prefix}\n'
         #     f'suffix: {suffix}\n'
         #     f'separator: {separator}\n'
-        #     f'serial number: {has_serial_number}\n'
+        #     f'serial number: {is_serial_number_added}\n'
         #     f'whether to　make　title　file: {args.title_file}\n'
         #     f'images_in_directory: {target_images}\n'
         # )
@@ -370,9 +370,6 @@ def main():
             # file '/User/macbook/a.jpg'
             index = index + 1
 
-            file_name, ext = os.path.splitext(os.path.basename(image_path))
-            # => a, .jpg
-
             rename = Rename(
                 image_path=image_path,
                 words_before_replacement=words_before_replacement,
@@ -381,7 +378,7 @@ def main():
                 suffix=suffix,
                 replace_with_separator_pattern=replace_with_separator_pattern,
                 separator=separator,
-                keep_unavailable_chars=has_unavailable_chars
+                keep_unavailable_chars=is_unavailable_chars_kept
             )
 
             if ext not in valid_extensions:
@@ -396,7 +393,7 @@ def main():
 
             # add serial number
             new_file_name = f'{new_file_name}{separator}{str(index)}' \
-                if has_serial_number \
+                if is_serial_number_added \
                 else new_file_name
             # prefix_title_suffix_1
 
