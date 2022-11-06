@@ -1,24 +1,206 @@
 import argparse
-import glob
+import enum
 import os
+import re
+import dataclasses
 import sys
+from typing import Optional, Pattern
+
+from jaconv import jaconv
 
 from utils.stdout import Stdout, Bcolors
 from utils.with_statement import common_print, add_extra_arguments_to
 
 
+class DefaultValues(enum.Enum):
+    SEPARATOR = '_'
+    PREFIX = ''
+    SUFFIX = ''
+    ALTERNATIVE_SPECIAL_CHAR = '-'
+    ALTERNATIVE_JA_WORD = 'x'
+    REPLACE_WITH_SEPARATOR_PATTERN = re.compile(r'[ 　\t\n]')
+    AVAILABLE_CHAR_PATTERN = re.compile(r'[^-_,!()a-zA-Z0-9]')
+
+
+@dataclasses.dataclass
+class Rename:
+    image_path: str
+    words_before_replacement: list[str] = dataclasses.field(default_factory=[])
+    words_after_replacement: list[str] = dataclasses.field(default_factory=[])
+    separator: str = DefaultValues.SEPARATOR.value
+    prefix: str = DefaultValues.PREFIX.value
+    suffix: str = DefaultValues.SUFFIX.value
+    alternative_special_char: str = DefaultValues.ALTERNATIVE_SPECIAL_CHAR.value
+    alternative_unavailable_word: str = DefaultValues.ALTERNATIVE_SPECIAL_CHAR.value
+    keep_unavailable_word: bool = False
+    available_char_pattern: Pattern = DefaultValues.AVAILABLE_CHAR_PATTERN.value
+    replace_with_separator_pattern: Pattern = DefaultValues.REPLACE_WITH_SEPARATOR_PATTERN.value
+    current_serial_number: Optional[int] = None
+    zero_padding_degit: int = 3  # 001 002
+    valid_extensions: list[str] = dataclasses.field(default_factory=lambda: [
+        '.jpg',
+        '.jpeg',
+        '.JPG',
+        '.JPEG',
+        '.jpe',
+        '.jfif',
+        '.pjpeg',
+        '.pjp',
+        '.png',
+        '.gif',
+        '.tiff',
+        '.tif',
+        '.webp',
+        '.svg',
+        '.svgz'
+    ])
+
+    def __post_init__(self):
+        self.original_image_name, self.ext = os.path.splitext(os.path.basename(self.image_path))
+        # => bar, .jpg
+        self.__renamed_image_name: str = self.original_image_name
+        self.zero_padding_string: str = '{{0:0{}d}}'.format(self.zero_padding_degit)  # {0:03}
+
+    @property
+    def renamed_image_name(self) -> str:
+        pass
+
+    @renamed_image_name.setter
+    def renamed_image_name(self, image_name: str):
+        self.__renamed_image_name = image_name
+
+    @property
+    def is_extension_valid(self) -> bool:
+        if self.ext not in self.valid_extensions:
+            Stdout.styled_stdout(
+                Bcolors.WARNING.value,
+                f'{self.image_path} is skipped. the extension is not valid.')
+            return False
+        return True
+
+    def replace_word(self, before: str, after: str) -> None:
+        """
+        If there are multiple substitutions, make successive substitutions.
+
+        >>> t = 'abc'
+        'abc'
+
+        >>> rt1 = t.replace('a', 'b')
+        'bbc'
+        >>> rt1 = rt1.replace('b', 'c')
+        'ccc'
+
+        >>> rt2 = t.replace('a', 'b')
+        'bbc'
+        >>> rt2 = t.replace('b', 'c')
+        'acc'
+        """
+        self.renamed_image_name = self.renamed_image_name.replace(before, after)
+
+    def replace_words(self) -> None:
+        if not self.words_before_replacement:
+            return
+
+        for before, after in zip(
+                self.words_before_replacement,
+                self.words_after_replacement
+        ):
+            self.replace_word(before=before, after=after)
+
+    def add_prefix_suffix(self) -> None:
+        _prefix = f'{self.prefix}{self.separator}' \
+            if self.prefix and type(self.prefix) is str \
+            else DefaultValues.PREFIX.value
+        _suffix = f'{self.separator}{self.suffix}' \
+            if self.suffix and type(self.suffix) is str \
+            else DefaultValues.SUFFIX.value
+        self.renamed_image_name = f'{_prefix}{self.renamed_image_name}{_suffix}'
+
+    def add_serial_number(self) -> None:
+        if not self.current_serial_number:
+            return
+        self.renamed_image_name = self.renamed_image_name \
+                                  + self.zero_padding_string.format(self.current_serial_number)
+
+    def zen2han(self) -> None:
+        """
+        Before removing illegal characters from an image name,
+        change illegal characters that can be fixed from full-width to half-width.
+        >>> name００１.png => name001.png
+        """
+        self.renamed_image_name = jaconv.z2h(
+            self.renamed_image_name,
+            kana=False, ascii=True, digit=True
+        )
+
+    def replace_unavailable_words(self):
+        """
+        >>> p = re.compile(r'[^-_,!()a-zA-Z0-9]')
+        >>> p.sub('X', '-_,!()abcあ* &^%')
+        '-_,!()abcXXXXX'
+
+        also remove empty space.
+        """
+        if self.keep_unavailable_word:
+            return
+        self.available_char_pattern.sub(
+            self.alternative_unavailable_word,
+            self.renamed_image_name
+        )
+
+    def replace_with_separator(self):
+        """
+        Replace spaces, tabs, and newlines with separators.
+
+        p = re.compile(r"[ 　\t\n]")
+        p.sub('_', ' half-width　full-width　')
+        >>> '_half-width_full-width_'
+        """
+        self.replace_with_separator_pattern.sub(
+            self.separator,
+            self.renamed_image_name
+        )
+
+
 def get_args():
     arg_parser = argparse.ArgumentParser()
     with add_extra_arguments_to(arg_parser) as arg_parser:
-        arg_parser.add_argument('dir_path', help='e.g. /Users/macbook/images')
-        arg_parser.add_argument('-nn', '--new_name', help='you can replace a new name.')
-        arg_parser.add_argument('-p', '--prefix', help='you can add an extra word as prefix.')
-        arg_parser.add_argument('-s', '--suffix', help='you can add an extra word as suffix.')
+        arg_parser.add_argument(
+            'dir_path',
+            help='e.g. /Users/macbook/images'
+        )
+        arg_parser.add_argument(
+            '-before', '--words_before_replacement',
+            nargs="*", type=str,
+            help='you can replace a new name.'
+        )
+        arg_parser.add_argument(
+            '-after', '--words_after_replacement',
+            nargs="*", type=str,
+            help='you can replace a new name.'
+        )
+        arg_parser.add_argument(
+            '-p', '--prefix',
+            help='you can add an extra word as prefix.',
+            default=DefaultValues.PREFIX.value
+        )
+        arg_parser.add_argument(
+            '-s', '--suffix',
+            help='you can add an extra word as suffix.',
+            default=DefaultValues.SUFFIX.value
+        )
         arg_parser.add_argument(
             '-sep',
             '--separator',
             help='you can specify word separator.',
-            default='_')
+            default=DefaultValues.SEPARATOR.value
+        )
+        arg_parser.add_argument(
+            '-alt_sp_char',
+            '--alternative_special_char',
+            help='',
+            default='_'
+        )
         arg_parser.add_argument(
             '-sn',
             '--serial_number',
