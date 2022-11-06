@@ -107,7 +107,7 @@ dist/
 downloads/
 eggs/
 .eggs/
-lib/
+src/utils/
 lib64/
 parts/
 sdist/
@@ -176,7 +176,7 @@ profile_default/
 ipython_config.py
 
 # pyenv
-#   For a library or package, you might want to ignore these files since the code is
+#   For a library or src, you might want to ignore these files since the code is
 #   intended to run in multiple environments; otherwise, check them in:
 # .python-version
 
