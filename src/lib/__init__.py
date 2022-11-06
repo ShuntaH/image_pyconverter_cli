@@ -1,18 +1,16 @@
-import dataclasses
 import glob
 
 from src.utils.stdout import Stdout, Bcolors
 
 
-@dataclasses.dataclass
-class Library:
-    dir_path: str
+def get_image_paths(dir_path: str) -> list[str]:
+    """
+    >>> ['/User/macbook/a.jpg', '/User/macbook/b.jpg', '/User/macbook/c.jpg']
+    :return:
+    """
+    image_paths = sorted(glob.glob(f'{dir_path}/*'))
 
-    @property
-    def image_paths(self) -> list[str]:
-        image_paths = sorted(glob.glob(f'{self.dir_path}/*'))
-        # => ['/User/macbook/a.jpg', '/User/macbook/b.jpg', '/User/macbook/c.jpg']
-        if not image_paths:
-            Stdout.styled_stdout(Bcolors.FAIL.value, 'No images.')
-            raise ValueError
-        return image_paths
+    if not image_paths:
+        Stdout.styled_stdout(Bcolors.FAIL.value, 'No images.')
+        raise ValueError
+    return image_paths

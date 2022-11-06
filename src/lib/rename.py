@@ -7,6 +7,7 @@ from typing import Optional, Pattern
 
 from jaconv import jaconv
 
+from src.lib import get_image_paths
 from src.utils.stdout import Stdout, Bcolors
 from src.utils.with_statement import task, add_extra_arguments_to
 
@@ -54,8 +55,8 @@ class DefaultValues(enum.Enum):
 
 @dataclasses.dataclass
 class Rename:
-    image_path: str
 
+    image_path: str
     words_before_replacement: list[str] = dataclasses.field(default_factory=[])
     words_after_replacement: list[str] = dataclasses.field(default_factory=[])
 
@@ -78,9 +79,19 @@ class Rename:
     valid_extensions: list[str] = dataclasses.field(
         default_factory=lambda: DefaultValues.VALID_EXTENSIONS.value)
 
+    is_image_name_file_made: bool = False
+
+
+    # To create a list of names of converted images,
+    # each time an instance is created from this class,
+    # this list is not initialized and the same list is used.
+    image_name_comparisons_for_file = []
+
+
     def __post_init__(self):
-        self.original_image_name, self.ext = os.path.splitext(os.path.basename(self.image_path))
-        # => bar, .jpg
+        self.dir_path = os.path.dirname(self.image_path)
+        self.original_image_name_with_ext = os.path.basename(self.image_path)
+        self.original_image_name, self.ext = os.path.splitext(self.original_image_name_with_ext)  # 'bar', '.jpg'
         self.__renamed_image_name: str = self.original_image_name
         self.zero_padding_string: str = '{{0:0{}d}}'.format(self.zero_padding_digit)  # {0:03}
 
@@ -92,7 +103,13 @@ class Rename:
     def renamed_image_name(self, image_name: str):
         self.__renamed_image_name = image_name
 
-    def renamed_image
+    @property
+    def renamed_image_name_with_ext(self):
+        return f'{self.renamed_image_name}{self.ext}'
+
+    @property
+    def renamed_image_path(self):
+        return os.path.join(self.dir_path, self.renamed_image_name_with_ext)
 
     @property
     def is_extension_valid(self) -> bool:
@@ -235,8 +252,21 @@ class Rename:
 
         # normalize full-width characters
 
-    def image_name_for_log(self) -> str:
-        return f'{self.original_image_name}'
+    @property
+    def image_name_comparison_for_file(self) -> str:
+        return f'{self.original_image_name_with_ext} => {self.renamed_image_name_with_ext}'
+
+    def append_image_name_comparison(self) -> None:
+        if not self.is_image_name_file_made:
+            return
+        self.image_name_comparisons_for_file.append(self.image_name_comparison_for_file)
+
+    @classmethod
+    def make_image_name_file(cls, dir_path: str):
+        text_file_path = os.path.join(dir_path, 'image_names.txt')
+        with open(text_file_path, mode='w') as f:
+            f.write('\n\n'.join(cls.image_name_comparisons_for_file))
+
 
 
 def get_args():
@@ -334,10 +364,10 @@ def get_args():
         )
 
         arg_parser.add_argument(
-            '-make_title_file',
-            '--is_title_file_made',
+            '-make_image_name_file',
+            '--is_image_name_file_made',
             help='whether to write the list of file names to a text file.',
-            default=False,
+            default=True,
             action='store_true'
         )
         args = arg_parser.parse_args()
@@ -349,10 +379,7 @@ def main():
             args=get_args(),
             task_name='rename'  # function name
     ) as args:
-        # arguments
-        run: bool = args.run
         image_paths = get_image_paths(dir_path=args.dir_path)
-
         titles = []
 
         for index, image_path in enumerate(image_paths):
@@ -377,7 +404,6 @@ def main():
                 valid_extensions=args.valid_extensions
             )
 
-            new_file_path = os.path.join(dir_path, new_file_name + ext)
             # /User/macbook/a.jpg
 
             # rename
@@ -391,6 +417,4 @@ def main():
             )
 
         if whether_to_make_title_file:
-            text_file_path = os.path.join(dir_path, 'title.txt')
-            with open(text_file_path, mode='w') as f:
-                f.write('\n\n'.join(titles))
+
