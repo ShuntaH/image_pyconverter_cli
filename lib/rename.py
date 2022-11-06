@@ -14,31 +14,18 @@ from utils.with_statement import common_print, add_extra_arguments_to
 
 
 class DefaultValues(enum.Enum):
-    SEPARATOR = '_'
     PREFIX = ''
     SUFFIX = ''
-    ALTERNATIVE_SPECIAL_CHAR = '-'
-    ALTERNATIVE_JA_WORD = 'x'
-    REPLACE_WITH_SEPARATOR_PATTERN = re.compile(r'[ 　\t\n.,\-_]')  # include delimiters
-    AVAILABLE_CHAR_PATTERN = re.compile(r'[^-_!()a-zA-Z0-9]')
 
+    REPLACE_WITH_SEPARATOR_PATTERN = re.compile(r'[ 　\t\n.,\-_]')
+    SEPARATOR = '_'
 
-@dataclasses.dataclass
-class Rename:
-    image_path: str
-    words_before_replacement: list[str] = dataclasses.field(default_factory=[])
-    words_after_replacement: list[str] = dataclasses.field(default_factory=[])
-    separator: str = DefaultValues.SEPARATOR.value
-    prefix: str = DefaultValues.PREFIX.value
-    suffix: str = DefaultValues.SUFFIX.value
-    alternative_special_char: str = DefaultValues.ALTERNATIVE_SPECIAL_CHAR.value
-    alternative_unavailable_word: str = DefaultValues.ALTERNATIVE_SPECIAL_CHAR.value
-    keep_unavailable_word: bool = False
-    available_char_pattern: Pattern = DefaultValues.AVAILABLE_CHAR_PATTERN.value
-    replace_with_separator_pattern: Pattern = DefaultValues.REPLACE_WITH_SEPARATOR_PATTERN.value
-    current_serial_number: Optional[int] = None
-    zero_padding_degit: int = 3  # 001 002
-    valid_extensions: list[str] = dataclasses.field(default_factory=lambda: [
+    AVAILABLE_CHAR_PATTERN = re.compile(r'[^-_!()a-zA-Z0-9]')  # exclude special and not ascii char
+    ALTERNATIVE_UNAVAILABLE_CHAR = 'x'
+
+    ZERO_PADDING_DIGIT = 3
+
+    VALID_EXTENSIONS = [
         '.jpg',
         '.jpeg',
         '.JPG',
@@ -54,13 +41,77 @@ class Rename:
         '.webp',
         '.svg',
         '.svgz'
-    ])
+    ]
+
+
+@dataclasses.dataclass
+class Rename:
+    """
+    # replace a word
+    # 検索文字をと変更後文字を受け取り検索して置換
+    # name.png => new_name.png
+
+    # replace multiple words
+    # replace.replace として処理
+    # name1_name2_name3.png => nameA_nameB_nameC.png
+
+    # add prefix
+    name.png => prefix_name.png
+
+    # add suffix
+    name.png => name_suffix.png
+
+    # add both prefix and suffix ok
+    name.png => prefix_name_suffix.png
+
+    # normalize full-width number ok
+    name００１.png => name001.png
+
+    # normalize invalid characters ok
+    # you can choose whether to normalize invalid characters
+    because they are encoded automatically on a browser.
+    日本語の名前.png => bar.png or 日本語の名前.png
+
+    # normalize space character ok
+    # space character is a special one. So you should input "name1 name2.png"
+    name1 name2.png => name1_name2.png
+    name1　name2.png => name1_name2.png
+
+    # replace delimiters with a specified separator ok
+    name1,name2.name3-name4_name5.png => name1_name2_name3_name4_name5.png
+
+    # replace special characters ok
+    &;^.png => ---.png
+
+    # add serial number ok
+    foo.png => foo001.png
+    bar.png => bar002.png
+    """
+    image_path: str
+
+    words_before_replacement: list[str] = dataclasses.field(default_factory=[])
+    words_after_replacement: list[str] = dataclasses.field(default_factory=[])
+
+    prefix: str = DefaultValues.PREFIX.value
+    suffix: str = DefaultValues.SUFFIX.value
+
+    replace_with_separator_pattern: Pattern = DefaultValues.REPLACE_WITH_SEPARATOR_PATTERN.value
+    separator: str = DefaultValues.SEPARATOR.value
+
+    keep_unavailable_chars: bool = False
+    alternative_unavailable_word: str = DefaultValues.ALTERNATIVE_UNAVAILABLE_WORD.value
+    available_char_pattern: Pattern = DefaultValues.AVAILABLE_CHAR_PATTERN.value
+
+    current_serial_number: Optional[int] = None
+    zero_padding_digit: int = DefaultValues.ZERO_PADDING_DIGIT.value  # 001 002
+    valid_extensions: list[str] = dataclasses.field(
+        default_factory=lambda: DefaultValues.VALID_EXTENSIONS.value)
 
     def __post_init__(self):
         self.original_image_name, self.ext = os.path.splitext(os.path.basename(self.image_path))
         # => bar, .jpg
         self.__renamed_image_name: str = self.original_image_name
-        self.zero_padding_string: str = '{{0:0{}d}}'.format(self.zero_padding_degit)  # {0:03}
+        self.zero_padding_string: str = '{{0:0{}d}}'.format(self.zero_padding_digit)  # {0:03}
 
     @property
     def renamed_image_name(self) -> str:
@@ -121,7 +172,7 @@ class Rename:
         if not self.current_serial_number:
             return
         self.renamed_image_name = self.renamed_image_name \
-                                  + self.zero_padding_string.format(self.current_serial_number)
+            + self.zero_padding_string.format(self.current_serial_number)
 
     def zen2han(self) -> None:
         """
@@ -134,9 +185,9 @@ class Rename:
             kana=False, ascii=True, digit=True
         )
 
-    def replace_unavailable_words(self):
+    def replace_unavailable_words(self) -> None:
         """
-        >>> p = re.compile(r'[^-_,!()a-zA-Z0-9]')
+        >>> p = re.compile(r'[^-_!()a-zA-Z0-9]')
         >>> p.sub('X', '-_,!()abcあ* &^%')
         '-_,!()abcXXXXX'
 
@@ -144,12 +195,12 @@ class Rename:
         """
         if self.keep_unavailable_word:
             return
-        self.available_char_pattern.sub(
+        self.renamed_image_name = self.available_char_pattern.sub(
             self.alternative_unavailable_word,
             self.renamed_image_name
         )
 
-    def replace_with_separator(self):
+    def replace_with_separator(self) -> None:
         """
         Replace spaces, tabs, and newlines with separators.
 
@@ -157,7 +208,7 @@ class Rename:
         p.sub('_', ' bar　foo　')
         >>> '_bar_foo_'
         """
-        self.replace_with_separator_pattern.sub(
+        self.renamed_image_name = self.replace_with_separator_pattern.sub(
             self.separator,
             self.renamed_image_name
         )
@@ -197,23 +248,61 @@ def get_args():
             default=DefaultValues.SEPARATOR.value
         )
         arg_parser.add_argument(
-            '-alt_sp_char',
-            '--alternative_special_char',
-            help='',
+            '-rwsp',
+            '--replace_with_separator_pattern',
+            help='you can specify word separator.',
+            type=re.Pattern,
+            default=DefaultValues.REPLACE_WITH_SEPARATOR_PATTERN.value
+        )
+
+        arg_parser.add_argument(
+            '-kuc',
+            '--has_unavailable_chars',
+            help='you can specify a word with which unavailable characters is replaced.',
+            action='store_true'
+        )
+        arg_parser.add_argument(
+            '-alt_uc',
+            '--alternative_unavailable_char',
+            help='you can specify a word with which unavailable characters is replaced.',
             default='_'
         )
         arg_parser.add_argument(
-            '-sn',
-            '--serial_number',
-            help='add serial number to last position of file name?',
-            default=True,
-            action='store_true')
+            '-acp',
+            '--available_char_pattern',
+            help='you can specify word separator.',
+            type=re.Pattern,
+            default=DefaultValues.AVAILABLE_CHAR_PATTERN.value
+        )
+
         arg_parser.add_argument(
-            '-tf',
-            '--title_file',
+            '-hsn',
+            '--has_serial_number',
+            help='add serial number to last position of file name?',
+            action='store_true'
+        )
+        arg_parser.add_argument(
+            '-snzpd',
+            '--serial_number_zero_padding_digit',
+            help='zero_padding_digit of serial number?',
+            type=int,
+            default=DefaultValues.ZERO_PADDING_DIGIT.value
+        )
+
+        arg_parser.add_argument(
+            '-ext', '--valid_extensions',
+            nargs="*", type=str,
+            help='.png .jpg ...',
+            default=DefaultValues.VALID_EXTENSIONS.value
+        )
+
+        arg_parser.add_argument(
+            '-htf',
+            '--has_text_file',
             help='whether to write the list of file names to a text file.',
             default=False,
-            action='store_true')
+            action='store_true'
+        )
         args = arg_parser.parse_args()
     return args
 
@@ -223,94 +312,52 @@ def main():
             args=get_args(),
             task_name=sys._getframe().f_code.co_name  # function name
     ) as args:
-        """
-        # replace a word
-        # 検索文字をと変更後文字を受け取り検索して置換
-        # name.png => new_name.png
-        
-        # replace multiple words
-        # replace.replace として処理
-        # name1_name2_name3.png => nameA_nameB_nameC.png
-        
-        # add prefix
-        name.png => prefix_name.png
-        
-        # add suffix
-        name.png => name_suffix.png
-        
-        # add both prefix and suffix ok
-        name.png => prefix_name_suffix.png
-        
-        # normalize full-width number ok
-        name００１.png => name001.png
-        
-        # normalize japanese ok
-        # 日本語のままでもブラウザから見るとき、勝手にエンコードされるので日本語のままでも問題ない
-        日本語の名前.png => bar.png or 日本語の名前.png
-        
-        # normalize space character ok
-        # space character is a special one. So you should input "name1 name2.png"
-        name1 name2.png => name1_name2.png
-        name1　name2.png => name1_name2.png
-        
-        # replace delimiters with a specified separator
-        name1,name2.name3-name4_name5.png => name1_name2_name3_name4_name5.png
-
-        # replace special characters ok
-        &;^.png => ---.png
-        
-        # add serial number ok
-        foo.png => foo001.png
-        bar.png => bar002.png
-        """
 
         # arguments
-        run = args.run
-        dir_path = args.dir_path  # => /Users/macbook/images
-        new_name = args.new_name if args.new_name else ''
-        separator = args.separator
-        prefix = f'{args.prefix}{separator}' if args.prefix else ''
-        suffix = f'{separator}{args.suffix}' if args.suffix else ''
-        has_serial_number = args.serial_number
-        whether_to_make_title_file = args.title_file
+        run: bool = args.run
+        dir_path: str = args.dir_path  # => /Users/macbook/images
 
-        valid_extensions = [
-            '.jpg',
-            '.jpeg',
-            '.JPG',
-            '.JPEG',
-            '.jpe',
-            '.jfif',
-            '.pjpeg',
-            '.pjp',
-            '.png',
-            '.gif',
-            '.tiff',
-            '.tif',
-            '.webp',
-            '.svg',
-            '.svgz'
-        ]
+        prefix = args.prefix
+        suffix = args.suffix
 
-        file_paths = glob.glob(f'{dir_path}/*')
+        words_before_replacement: list[str] = args.words_before_replacement
+        words_after_replacement: list[str] = args.words_after_replacement
+
+        separator: bool = args.separator
+        replace_with_separator_pattern: Pattern = args.replace_with_separator_pattern
+
+        has_unavailable_chars: bool = args.has_unavailable_chars
+        alternative_unavailable_char: str = args.alternative_unavailable_char
+        available_char_pattern: re.Pattern = args.available_char_pattern
+
+        has_serial_number: bool = args.has_serial_number
+        serial_number_zero_padding_digit: int = args.serial_number_zero_padding_digit
+
+        valid_extensions = list[str] = args.valid_extensions
+
+        has_text_file: bool = args.has_text_file
+
+        valid_extensions = args.valid_extensions
+
+        image_paths = sorted(glob.glob(f'{dir_path}/*'))
         # => ['/User/macbook/a.jpg', '/User/macbook/b.jpg', '/User/macbook/c.jpg']
-        if not file_paths:
-            Stdout.styled_stdout(Bcolors.FAIL.value, 'No Target images.')
+        if not image_paths:
+            Stdout.styled_stdout(Bcolors.FAIL.value, 'No images.')
             return
 
-        target_images = '\n'.join(file_paths)
-        Stdout.styled_stdout(
-            Bcolors.OKBLUE.value,
-            f'Options => \n'
-            f'directory path: {dir_path}\n'
-            f'new name: {new_name}\n'
-            f'prefix: {prefix}\n'
-            f'suffix: {suffix}\n'
-            f'separator: {separator}\n'
-            f'serial number: {has_serial_number}\n'
-            f'whether to　make　title　file: {args.title_file}\n'
-            f'images_in_directory: {target_images}\n'
-        )
+        # target_images = '\n'.join(file_paths)
+        # Stdout.styled_stdout(
+        #     Bcolors.OKBLUE.value,
+        #     f'Options => \n'
+        #     f'directory path: {dir_path}\n'
+        #     f'new name: {new_name}\n'
+        #     f'prefix: {prefix}\n'
+        #     f'suffix: {suffix}\n'
+        #     f'separator: {separator}\n'
+        #     f'serial number: {has_serial_number}\n'
+        #     f'whether to　make　title　file: {args.title_file}\n'
+        #     f'images_in_directory: {target_images}\n'
+        # )
 
         titles = []
 
@@ -319,13 +366,23 @@ def main():
             f'the task gets start.'
         )
 
-        for index, file_path in enumerate(file_paths):
-            # todo 順番が狂う 連番を for のループインデックスでつけると画像は毎回順番通りではないので変な連番をつけることになる。ので連番をつけるなら、既存の数字をそのまま残しておいた方が良い 数字が全角になっている 置換ですべき
+        for index, image_path in enumerate(image_paths):
             # file '/User/macbook/a.jpg'
-
             index = index + 1
 
-            file_name, ext = os.path.splitext(os.path.basename(file_path))  # => a, .jpg
+            file_name, ext = os.path.splitext(os.path.basename(image_path))
+            # => a, .jpg
+
+            rename = Rename(
+                image_path=image_path,
+                words_before_replacement=words_before_replacement,
+                words_after_replacement=words_after_replacement,
+                prefix=prefix,
+                suffix=suffix,
+                replace_with_separator_pattern=replace_with_separator_pattern,
+                separator=separator,
+                keep_unavailable_chars=has_unavailable_chars
+            )
 
             if ext not in valid_extensions:
                 Stdout.styled_stdout(

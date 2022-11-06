@@ -1,7 +1,7 @@
 from setuptools import setup
 
 setup(
-    name='image_converter',  # ツール名
+    name='image_pyconverter_cli',
     version='1.0.0',
     install_requires=["Pillow", 'jaconv'],
     entry_points={
