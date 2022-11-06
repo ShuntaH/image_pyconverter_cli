@@ -27,9 +27,8 @@ class DefaultValues(enum.Enum):
     # you will see ":".
     ALTERNATIVE_UNAVAILABLE_FILE_NAME_CHAR = '-'
 
-
-    AVAILABLE_CHAR_IN_URL_PATTERN = re.compile(r'[^-_a-zA-Z0-9]')  # urlに使える文字
-    ALTERNATIVE_UNAVAILABLE_CHAR_IN_URL = 'x'
+    UNAVAILABLE_URL_CHAR_PATTERN = re.compile(r'[^-_a-zA-Z0-9]')
+    ALTERNATIVE_UNAVAILABLE_URL_CHAR = 'x'
 
     IS_SERIAL_NUMBER_ADDED = False
     ZERO_PADDING_DIGIT = 3
@@ -69,9 +68,9 @@ class Rename:
     replacement_with_separator_pattern: Pattern = DefaultValues.REPLACEMENT_WITH_SEPARATOR_PATTERN.value
     separator: str = DefaultValues.SEPARATOR.value
 
-    is_unavailable_chars_kept: bool = False
-    alternative_unavailable_char: str = DefaultValues.ALTERNATIVE_UNAVAILABLE_CHAR_IN_URL.value
-    available_char_pattern: Pattern = DefaultValues.AVAILABLE_CHAR_IN_URL_PATTERN.value
+    is_unavailable_url_chars_kept: bool = False
+    alternative_unavailable_url_char: str = DefaultValues.ALTERNATIVE_UNAVAILABLE_URL_CHAR.value
+    unavailable_url_char_pattern: Pattern = DefaultValues.UNAVAILABLE_URL_CHAR_PATTERN.value
 
     is_serial_number_added: bool = DefaultValues.IS_SERIAL_NUMBER_ADDED.value
     current_index: Optional[int] = None
@@ -81,12 +80,10 @@ class Rename:
 
     is_image_name_file_made: bool = False
 
-
     # To create a list of names of converted images,
     # each time an instance is created from this class,
     # this list is not initialized and the same list is used.
     image_name_comparisons_for_file = []
-
 
     def __post_init__(self):
         self.dir_path = os.path.dirname(self.image_path)
@@ -178,18 +175,28 @@ class Rename:
             kana=False, ascii=True, digit=True
         )
 
-    def replace_unavailable_chars(self) -> None:
+    def replace_unavailable_file_name_chars(self) -> None:
         """
-        >>> p = re.compile(r'[^-_!()a-zA-Z0-9]')
-        >>> p.sub('X', '-_,!()abcあ* &^%')
-        '-_,!()abcXXXXX'
+        >>> p = re.compile(r'[/:*?"<>|¥]')
+        >>> p.sub('X', '-_,!(/:*?"<>|¥)あabc')
+        '-_,!(XXXXXXXXX)あabc'
+        """
+        self.renamed_image_name = self.unavailable_file_name_char_pattern.sub(
+            self.alternative_unavailable_file_name_char,
+            self.renamed_image_name
+        )
 
-        also remove empty space.
+    def replace_unavailable_url_chars(self) -> None:
         """
-        if self.is_unavailable_chars_kept:
+        to remove unavailable characters in url.
+        >>> p = re.compile(r'[^-_a-zA-Z0-9]')
+        >>> p.sub('X', '-_,!()abcあ* &^%')
+        '-_XXXXabcXXXXXX''
+        """
+        if self.is_unavailable_url_chars_kept:
             return
-        self.renamed_image_name = self.available_char_pattern.sub(
-            self.alternative_unavailable_char,
+        self.renamed_image_name = self.unavailable_url_char_pattern.sub(
+            self.alternative_unavailable_url_char,
             self.renamed_image_name
         )
 
@@ -245,12 +252,14 @@ class Rename:
         self.replace_words()
         self.zen2han()
         self.replace_with_separator()
-        self.replace_unavailable_chars()
-        self.replace_unavailable_chars()
-
-        # add prefix, suffix or both
+        self.replace_unavailable_file_name_chars()
+        self.replace_unavailable_url_chars()
+        self.add_prefix_suffix()
+        self.add_serial_number()
 
         # normalize full-width characters
+        if self.run:
+            os.rename(self.image_path, self.renamed_image_path)
 
     @property
     def image_name_comparison_for_file(self) -> str:
@@ -268,7 +277,6 @@ class Rename:
             f.write('\n\n'.join(cls.image_name_comparisons_for_file))
 
 
-
 def get_args():
     arg_parser = argparse.ArgumentParser()
     with add_extra_arguments_to(arg_parser) as arg_parser:
@@ -282,6 +290,7 @@ def get_args():
             nargs="*", type=str,
             help='you can replace a new name.'
         )
+
         arg_parser.add_argument(
             '-p', '--prefix',
             help='you can add an extra word as prefix.',
@@ -292,6 +301,7 @@ def get_args():
             help='you can add an extra word as suffix.',
             default=DefaultValues.SUFFIX.value
         )
+
         arg_parser.add_argument(
             '-sep',
             '--separator',
@@ -322,24 +332,23 @@ def get_args():
         )
 
         arg_parser.add_argument(
-            '-keep_unavailable_chars',
-            '--is_unavailable_chars_kept',
-            help='you can specify a word with which unavailable characters is replaced.',
-            type=str,
+            '-keep_unavailable_url_chars',
+            '--is_unavailable_url_chars_kept',
+            help='whether to replace an unavailable characters in url.',
             action='store_true'
         )
         arg_parser.add_argument(
-            '-alt_uc',
-            '--alternative_unavailable_char',
+            '-alt_uuc',
+            '--alternative_unavailable_url_char',
             help='you can specify a word with which unavailable characters is replaced.',
-            default='_'
+            default=DefaultValues.ALTERNATIVE_UNAVAILABLE_URL_CHAR.value
         )
         arg_parser.add_argument(
-            '-acp',
-            '--available_char_pattern',
-            help='you can specify word separator.',
+            '-uccp',
+            '--unavailable_url_char_pattern',
+            help='compiled unavailable url character pattern.',
             type=re.Pattern,
-            default=DefaultValues.AVAILABLE_CHAR_IN_URL_PATTERN.value
+            default=DefaultValues.UNAVAILABLE_URL_CHAR_PATTERN.value
         )
 
         arg_parser.add_argument(
@@ -380,11 +389,9 @@ def main():
             task_name='rename'  # function name
     ) as args:
         image_paths = get_image_paths(dir_path=args.dir_path)
-        titles = []
 
         for index, image_path in enumerate(image_paths):
             # file '/User/macbook/a.jpg'
-
             rename = Rename(
                 image_path=image_path,
                 words_before_replacement=args.words_before_replacement,
@@ -395,26 +402,15 @@ def main():
                 separator=args.separator,
                 unavailable_file_name_char_pattern=args.unavailable_file_name_char_pattern,
                 alternative_unavailable_file_name_char=args.unavailable_file_name_char,
-                is_unavailable_chars_kept=args.is_unavailable_chars_kept,
-                alternative_unavailable_char=args.alternative_unavailable_char,
-                available_char_pattern=args.available_char_pattern,
+                is_unavailable_url_chars_kept=args.is_unavailable_url_chars_kept,
+                alternative_unavailable_url_char=args.alternative_unavailable_url_char,
+                unavailable_url_char_pattern=args.unavailable_url_char_pattern,
                 is_serial_number_added=args.is_serial_number_added,
                 current_index=index,
                 zero_padding_digit=args.serial_number_zero_padding_digit,
                 valid_extensions=args.valid_extensions
             )
 
-            # /User/macbook/a.jpg
+            rename.rename()
 
-            # rename
-            if not run:
-                os.rename(file_path, new_file_path)
-            # => /User/macbook/a.jpg -> /User/macbook/b.jpg
-
-            Stdout.styled_stdout(
-                Bcolors.OKGREEN.value,
-                f'{file_path} => {new_file_path}'
-            )
-
-        if whether_to_make_title_file:
-
+        Rename.make_image_name_file(dir_path=args.dir_path)
