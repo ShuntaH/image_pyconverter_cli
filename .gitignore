@@ -107,7 +107,7 @@ dist/
 downloads/
 eggs/
 .eggs/
-utils/
+package/utils/
 lib64/
 parts/
 sdist/
