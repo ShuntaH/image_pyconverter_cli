@@ -6,7 +6,7 @@ from decimal import Decimal, ROUND_HALF_UP
 from pathlib import Path
 
 from src.utils.stdout import Stdout, Bcolors
-from src.utils.with_statement import common_print, add_extra_arguments_to
+from src.utils.with_statement import task, add_extra_arguments_to
 
 
 def get_args():
@@ -28,7 +28,7 @@ def get_args():
 
 
 def main():
-    with common_print(
+    with task(
             args=get_args(),
             task_name=sys._getframe().f_code.co_name  # function name
     ) as args:
