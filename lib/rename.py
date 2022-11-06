@@ -1,5 +1,6 @@
 import argparse
 import enum
+import glob
 import os
 import re
 import dataclasses
@@ -18,8 +19,8 @@ class DefaultValues(enum.Enum):
     SUFFIX = ''
     ALTERNATIVE_SPECIAL_CHAR = '-'
     ALTERNATIVE_JA_WORD = 'x'
-    REPLACE_WITH_SEPARATOR_PATTERN = re.compile(r'[ 　\t\n]')
-    AVAILABLE_CHAR_PATTERN = re.compile(r'[^-_,!()a-zA-Z0-9]')
+    REPLACE_WITH_SEPARATOR_PATTERN = re.compile(r'[ 　\t\n.,\-_]')  # include delimiters
+    AVAILABLE_CHAR_PATTERN = re.compile(r'[^-_!()a-zA-Z0-9]')
 
 
 @dataclasses.dataclass
@@ -153,8 +154,8 @@ class Rename:
         Replace spaces, tabs, and newlines with separators.
 
         p = re.compile(r"[ 　\t\n]")
-        p.sub('_', ' half-width　full-width　')
-        >>> '_half-width_full-width_'
+        p.sub('_', ' bar　foo　')
+        >>> '_bar_foo_'
         """
         self.replace_with_separator_pattern.sub(
             self.separator,
@@ -252,6 +253,9 @@ def main():
         name1 name2.png => name1_name2.png
         name1　name2.png => name1_name2.png
         
+        # replace delimiters with a specified separator
+        name1,name2.name3-name4_name5.png => name1_name2_name3_name4_name5.png
+
         # replace special characters ok
         &;^.png => ---.png
         
