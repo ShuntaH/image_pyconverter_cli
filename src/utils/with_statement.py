@@ -17,7 +17,7 @@ def add_extra_arguments_to(arg_parser):
             help='.png .jpg ...',
             default=VALID_EXTENSIONS
         )
-        arg_parser.add_argument('-dr', '--run', action='store_true')
+        arg_parser.add_argument('-r', '--run', action='store_true')
         yield arg_parser
 
     # __exit__
