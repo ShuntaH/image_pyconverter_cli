@@ -105,13 +105,24 @@ def main():
             if run:
                 resized_image.save(resized_image_path)
 
-            Stdout.styled_stdout(
-                Bcolors.OKGREEN.value,
-                f'File name: {os.path.basename(file_path)}\n'
-                f'Width: {str(image.width)} => {str(new_width)}\n'
-                f'Height: {str(image.height)} => {str(new_height)}\n'
-                f'Aspect ratio: {str(aspect_ratio)}\n'
-                f'Size: {str(os.stat(resized_image_path).st_size)}\n'
-                f'Info: {str(image.info)}\n'
-                f'##################################################'
-            )
+                Stdout.styled_stdout(
+                    Bcolors.OKGREEN.value,
+                    f'File name: {os.path.basename(file_path)}\n'
+                    f'Width: {str(image.width)} => {str(new_width)}\n'
+                    f'Height: {str(image.height)} => {str(new_height)}\n'
+                    f'Aspect ratio: {str(aspect_ratio)}\n'
+                    f'Size: {str(os.stat(resized_image_path).st_size)}\n'
+                    f'Info: {str(image.info)}\n'
+                    f'##################################################'
+                )
+            else:
+                Stdout.styled_stdout(
+                    Bcolors.OKGREEN.value,
+                    f'File name: {os.path.basename(file_path)}\n'
+                    f'Width: {str(image.width)} => {str(new_width)}\n'
+                    f'Height: {str(image.height)} => {str(new_height)}\n'
+                    f'Aspect ratio: {str(aspect_ratio)}\n'
+                    f'Info: {str(image.info)}\n'
+                    f'##################################################'
+                )
+

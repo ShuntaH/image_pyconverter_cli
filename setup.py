@@ -13,7 +13,7 @@ setup(
     entry_points={
         "console_scripts": [
             "ic_rename = app:rename",
-            "ic_resize = app:resize",
+            "ic_resize = src.app:resize",
         ]
     }
 )
