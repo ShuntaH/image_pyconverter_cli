@@ -5,6 +5,7 @@ import sys
 from decimal import Decimal, ROUND_HALF_UP
 from pathlib import Path
 
+from src.lib import get_image_paths
 from src.utils.stdout import Stdout, Bcolors
 from src.utils.with_statement import task, add_extra_arguments_to
 
@@ -12,14 +13,9 @@ from src.utils.with_statement import task, add_extra_arguments_to
 def get_args():
     arg_parser = argparse.ArgumentParser()
     with add_extra_arguments_to(arg_parser) as arg_parser:
-        arg_parser.add_argument('dir_path', help='e.g. /Users/macbook/images')
         # todo フォルダ名に&が入るとダメ
         arg_parser.add_argument('width', type=int)
         arg_parser.add_argument('-hi', '--height', default=0, type=int)
-        # arg_parser.add_argument(
-        #     '-p', '--prefix',
-        #     action='store_true',
-        #     help='you can add an extra word as prefix.')
         arg_parser.add_argument(
             '-ka', '--keep_aspect',
             action='store_true')
@@ -30,41 +26,21 @@ def get_args():
 def main():
     with task(
             args=get_args(),
-            task_name=sys._getframe().f_code.co_name  # function name
+            task_name='resize'
     ) as args:
 
         from PIL import Image
 
         # arguments
-        dryrun = args.dryrun
+        run = args.run
         dir_path = args.dir_path  # => /Users/macbook/images
         new_width = args.width
         new_height = args.height
         whether_to_keep_aspect_ratio = args.keep_aspect
 
-        valid_extensions = [
-            '.jpg',
-            '.jpeg',
-            '.JPG',
-            '.JPEG',
-            '.jpe',
-            '.jfif',
-            '.pjpeg',
-            '.pjp',
-            '.png',
-            '.gif',
-            '.tiff',
-            '.tif',
-            '.webp',
-            '.svg',
-            '.svgz'
-        ]
+        valid_extensions = args.valid_extensions
 
-        file_paths = glob.glob(f'{dir_path}/*')
-        # => ['/User/macbook/a.jpg', '/User/macbook/b.jpg', '/User/macbook/c.jpg']
-        if not file_paths:
-            Stdout.styled_stdout(Bcolors.FAIL.value, 'No Target images.')
-            return
+        file_paths = get_image_paths(dir_path=dir_path)
 
         target_images = '\n'.join(file_paths)
         Stdout.styled_stdout(
@@ -125,9 +101,9 @@ def main():
 
             new_file_name = "resize_" + file_name
             resized_image_path = os.path.join(resized_image_dir_path, new_file_name + ext)
-            # if not dryrun:
-            #
-            resized_image.save(resized_image_path)
+
+            if run:
+                resized_image.save(resized_image_path)
 
             Stdout.styled_stdout(
                 Bcolors.OKGREEN.value,

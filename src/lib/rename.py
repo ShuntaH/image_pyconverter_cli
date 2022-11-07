@@ -365,12 +365,12 @@ def get_args():
             default=DefaultValues.ZERO_PADDING_DIGIT.value
         )
 
-        arg_parser.add_argument(
-            '-ext', '--valid_extensions',
-            nargs="*", type=str,
-            help='.png .jpg ...',
-            default=DefaultValues.VALID_EXTENSIONS.value
-        )
+        # arg_parser.add_argument(
+        #     '-ext', '--valid_extensions',
+        #     nargs="*", type=str,
+        #     help='.png .jpg ...',
+        #     default=DefaultValues.VALID_EXTENSIONS.value
+        # )
 
         arg_parser.add_argument(
             '-make_image_name_file',

@@ -14,3 +14,6 @@ def get_image_paths(dir_path: str) -> list[str]:
         Stdout.styled_stdout(Bcolors.FAIL.value, 'No images.')
         raise ValueError
     return image_paths
+
+
+# class BaseLibrary:
