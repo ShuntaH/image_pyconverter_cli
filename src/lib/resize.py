@@ -11,7 +11,6 @@ from src.utils.with_statement import task, add_extra_arguments_to
 
 class DefaultValues(enum.Enum):
     PREFIX = 'resize_'
-
     VALID_EXTENSIONS = [
         '.jpg',
         '.jpeg',

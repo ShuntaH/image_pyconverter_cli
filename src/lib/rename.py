@@ -143,8 +143,8 @@ class Rename:
             return
 
         for before, after in zip(
-                self.words_before_replacement,
-                self.words_after_replacement
+            self.words_before_replacement,
+            self.words_after_replacement
         ):
             self.replace_word(before=before, after=after)
 
@@ -275,6 +275,7 @@ class Rename:
         text_file_path = os.path.join(dir_path, 'image_names.txt')
         with open(text_file_path, mode='w') as f:
             f.write('\n\n'.join(cls.image_name_comparisons_for_file))
+        cls.image_name_comparisons_for_file = list()
 
 
 def get_args():
@@ -365,12 +366,12 @@ def get_args():
             default=DefaultValues.ZERO_PADDING_DIGIT.value
         )
 
-        # arg_parser.add_argument(
-        #     '-ext', '--valid_extensions',
-        #     nargs="*", type=str,
-        #     help='.png .jpg ...',
-        #     default=DefaultValues.VALID_EXTENSIONS.value
-        # )
+        arg_parser.add_argument(
+            '-ext', '--valid_extensions',
+            nargs="*", type=str,
+            help='.png .jpg ...',
+            default=DefaultValues.VALID_EXTENSIONS.value
+        )
 
         arg_parser.add_argument(
             '-make_image_name_file',
