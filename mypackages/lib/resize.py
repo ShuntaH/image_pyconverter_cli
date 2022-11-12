@@ -4,9 +4,9 @@ import os
 from decimal import Decimal, ROUND_HALF_UP
 from pathlib import Path
 
-from src.lib import get_image_paths
-from src.utils.stdout import Stdout, Bcolors
-from src.utils.with_statement import task, add_extra_arguments_to
+from mypackages.lib import get_image_paths
+from mypackages.utils.stdout import Stdout, Bcolors
+from mypackages.utils.with_statement import task, add_extra_arguments_to
 
 
 class DefaultValues(enum.Enum):
