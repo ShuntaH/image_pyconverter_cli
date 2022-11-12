@@ -6,7 +6,7 @@ setup(
     # https://setuptools.pypa.io/en/latest/userguide/quickstart.html#package-discovery
     packages=find_packages(
         # All keyword arguments below are optional:
-        where='src',  # '.' by default
+        # where='src',  # '.' by default
     ),
     version='1.0.0',
     install_requires=["Pillow", 'jaconv'],
