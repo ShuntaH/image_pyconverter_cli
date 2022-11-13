@@ -27,11 +27,7 @@ DEPENDENCIES = [
     'jaconv'
 ]
 
-# TEST_DEPENDENCIES = [
-#     'hypothesis',
-#     'mock',
-#     'python-Levenshtein',
-# ]
+TEST_DEPENDENCIES = ['pytest']
 
 VERSION = '1.0.0'
 # URL = 'https://github.com/google/python-fire'
@@ -75,5 +71,5 @@ setup(
         ]
     },
 
-    # tests_require=TEST_DEPENDENCIES,
+    tests_require=TEST_DEPENDENCIES,
 )
