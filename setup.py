@@ -65,8 +65,7 @@ setup(
         'Operating System :: Unix',
     ],
 
-    # packages=['src.app'],
-    # packages=[],
+    package_dir={"": "src"},
     install_requires=DEPENDENCIES,
 
     entry_points={
