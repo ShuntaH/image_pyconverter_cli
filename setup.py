@@ -1,19 +1,4 @@
-# Copyright (C) 2018 Google Inc.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-# http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-
-"""The setup.py file for Python Fire."""
-
+"""The setup.py file for image_pyconverter_cli."""
 from setuptools import setup
 
 LONG_DESCRIPTION = """
@@ -26,23 +11,17 @@ DEPENDENCIES = [
     'Pillow',
     'jaconv'
 ]
-
-# TEST_DEPENDENCIES = [
-#     'hypothesis',
-#     'mock',
-#     'python-Levenshtein',
-# ]
-
+TEST_DEPENDENCIES = ['pytest']
 VERSION = '1.0.0'
-# URL = 'https://github.com/google/python-fire'
+AUTHOR = 'ShuntaH'
+NAME = 'image_pyconverter_cli'
 
 setup(
-    name='image_pyconverter_cli',
+    name=NAME,
     version=VERSION,
     description=SHORT_DESCRIPTION,
     long_description=LONG_DESCRIPTION,
-    author='ShuntaH',
-
+    author=AUTHOR,
     classifiers=[
         'Development Status :: 1 - Beta',
 
@@ -64,16 +43,13 @@ setup(
         'Operating System :: MacOS',
         'Operating System :: Unix',
     ],
-
     package_dir={"": "src"},
     install_requires=DEPENDENCIES,
-
     entry_points={
         "console_scripts": [
             "ic_rename=app:rename",
             "ic_resize=app:resize"
         ]
     },
-
-    # tests_require=TEST_DEPENDENCIES,
+    tests_require=TEST_DEPENDENCIES,
 )
