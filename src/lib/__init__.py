@@ -9,7 +9,7 @@ def get_image_paths(dir_path: str) -> list[str]:
     :return:
     """
     image_paths = sorted(glob.glob(f'{dir_path}/*'))
-
+    print(image_paths)
     if not image_paths:
         Stdout.styled_stdout(Bcolors.FAIL.value, 'No images.')
         raise ValueError
