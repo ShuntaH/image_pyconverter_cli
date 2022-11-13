@@ -7,9 +7,9 @@ from typing import Optional, Pattern
 
 from jaconv import jaconv
 
-from lib import get_image_paths
-from utils.stdout import Stdout, Bcolors
-from utils.with_statement import task, add_extra_arguments_to
+from src.lib import get_image_paths
+from src.utils.stdout import Stdout, Bcolors
+from src.utils.with_statement import task, add_extra_arguments_to
 
 
 class DefaultValues(enum.Enum):

@@ -1,6 +1,6 @@
 import glob
 
-from utils.stdout import Stdout, Bcolors
+from src.utils.stdout import Stdout, Bcolors
 
 
 def get_image_paths(dir_path: str) -> list[str]:
