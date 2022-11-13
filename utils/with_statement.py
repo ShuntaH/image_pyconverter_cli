@@ -1,7 +1,5 @@
 from contextlib import contextmanager
 
-from src.utils.constants import VALID_EXTENSIONS
-
 
 @contextmanager
 def add_extra_arguments_to(arg_parser):
@@ -10,12 +8,6 @@ def add_extra_arguments_to(arg_parser):
         arg_parser.add_argument(
             'dir_path',
             help='e.g. /Users/macbook/images'
-        )
-        arg_parser.add_argument(
-            '-ext', '--valid_extensions',
-            nargs="*", type=str,
-            help='.png .jpg ...',
-            default=VALID_EXTENSIONS
         )
         arg_parser.add_argument('-r', '--run', action='store_true')
         yield arg_parser
