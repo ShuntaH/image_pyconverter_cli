@@ -9,7 +9,7 @@ def add_extra_arguments_to(arg_parser):
             'dir_path',
             help='e.g. /Users/macbook/images'
         )
-        arg_parser.add_argument('-dr', '--run', action='store_true')
+        arg_parser.add_argument('-r', '--run', action='store_true')
         yield arg_parser
 
     # __exit__

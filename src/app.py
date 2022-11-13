@@ -1,8 +1,8 @@
 def rename():
-    from lib import rename
-    rename.main()
+    from lib.rename import main
+    main()
 
 
 def resize():
-    from lib import resize
-    resize.main()
+    from lib.resize import main
+    main()
