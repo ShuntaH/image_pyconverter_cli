@@ -1,6 +1,6 @@
 from contextlib import contextmanager
 
-from mypackage.utils.constants import VALID_EXTENSIONS
+from src.utils.constants import VALID_EXTENSIONS
 
 
 @contextmanager
