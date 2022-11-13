@@ -1,2 +1,5 @@
+import subprocess
+
+
 def test_rename():
-    assert 1 == 1
+    subprocess.run(['ic_rename', 'src/tests/images'])

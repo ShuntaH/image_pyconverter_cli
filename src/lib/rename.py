@@ -382,6 +382,7 @@ def get_args():
             default=True,
             action='store_true'
         )
+
         args = arg_parser.parse_args()
     return args
 
