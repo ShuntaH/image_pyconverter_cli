@@ -11,6 +11,7 @@ def add_extra_arguments_to(arg_parser):
     try:
         arg_parser.add_argument(
             'dir_path',
+            type=str,
             help='e.g. /Users/macbook/images'
         )
         arg_parser.add_argument('-r', '--run', action='store_true')

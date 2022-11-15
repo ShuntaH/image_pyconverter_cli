@@ -1,37 +1,36 @@
 import argparse
-import subprocess
 
-from src.utils.tests import abs_image_paths
 from utils.with_statements import add_extra_arguments_to
 
 
 def test_add_extra_arguments_to():
-    """
-    check
-    * optional args
-    * nargs
-    *
+    """Whether you can get "run" and "dir_path" arguments"""
 
-
-    """
     arg_parser = argparse.ArgumentParser()
 
     with add_extra_arguments_to(arg_parser) as arg_parser:
+        pass
 
+    ###############################################
+    # The following code should not be executed
+    # because an error will occur
+    # because the command is not actually entered.
+    # args = arg_parser.parse_args()
+    ###############################################
 
-        arg_parser.add_argument(
-            '-before', '--words_before_replacement',
-            nargs="*", type=str,
-            help='you can replace a new name.'
-        )
-        arg_parser.add_argument(
-            '-after', '--words_after_replacement',
-            nargs="*", type=str,
-            help='you can replace a new name.'
-        )
+    actions = arg_parser._actions
 
-        arg_parser.add_argument(
-            '-p', '--prefix',
-            help='you can add an extra word as prefix.',
-            default=DefaultValues.PREFIX.value
-        )
+    for action in actions:
+
+        if '--help' in action.option_strings:
+            continue
+
+        if action.dest == 'dir_path':
+            assert action.dest == 'dir_path'
+            assert action.type is str
+
+        if action.dest == 'run':
+            assert '-r' in action.option_strings
+            assert '--run' in action.option_strings
+            assert action.default is False
+            assert action.type is None

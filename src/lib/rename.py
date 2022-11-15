@@ -382,7 +382,6 @@ def get_args():
             '-make_image_name_file',
             '--is_image_name_file_made',
             help='whether to write the list of file names to a text file.',
-            default=True,
             action='store_true'
         )
 
