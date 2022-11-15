@@ -3,7 +3,7 @@ import enum
 import os
 import re
 import dataclasses
-from typing import Optional, Pattern
+from typing import Optional, Pattern, ClassVar
 
 from jaconv import jaconv
 
@@ -83,7 +83,7 @@ class Rename:
     # To create a list of names of converted images,
     # each time an instance is created from this class,
     # this list is not initialized and the same list is used.
-    image_name_comparisons_for_file = []
+    image_name_comparisons_for_file: ClassVar[list] = []
 
     def __post_init__(self):
         self.dir_path = os.path.dirname(self.image_path)
@@ -296,11 +296,13 @@ def get_args():
 
         arg_parser.add_argument(
             '-p', '--prefix',
+            type=str,
             help='you can add an extra word as prefix.',
             default=DefaultValues.PREFIX.value
         )
         arg_parser.add_argument(
             '-s', '--suffix',
+            type=str,
             help='you can add an extra word as suffix.',
             default=DefaultValues.SUFFIX.value
         )
@@ -308,6 +310,7 @@ def get_args():
         arg_parser.add_argument(
             '-sep',
             '--separator',
+            type=str,
             help='you can specify word separator.',
             default=DefaultValues.SEPARATOR.value
         )
