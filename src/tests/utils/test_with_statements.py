@@ -9,16 +9,11 @@ def test_add_extra_arguments_to():
     arg_parser = argparse.ArgumentParser()
 
     with add_extra_arguments_to(arg_parser) as arg_parser:
-        # todo 位置引数を指定しないとこのモジュールのパスがはいる
-        # todo デフォルトを指定すると位置引数が足りないエラーが起きる
-        arg_parser.add_argument(
-            'hoge',
-            default='hoge',
-            type=str,
-            help='e.g. /Users/macbook/images'
-        )
-        # hoge のdestに target actionの内容が勝手に入る
-        # テストではターミナルからの発火ではないのでダミーを用意しなくて都合が良いか
+        # If no positional argument is specified,
+        # the path of this module is the value of this positional argument.
+        # If a default value is set for a positional argument and
+        # the positional argument is omitted, there are not enough arguments and an error occurs.
+        pass
 
     actions = arg_parser._actions
 
