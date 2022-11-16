@@ -3,6 +3,7 @@ import enum
 import os
 import re
 import dataclasses
+from functools import cached_property
 from typing import Optional, Pattern, ClassVar
 
 from jaconv import jaconv
@@ -13,6 +14,9 @@ from src.utils.with_statements import task, add_extra_arguments_to
 
 
 class DefaultValues(enum.Enum):
+    RENAMED_IMAGES_DIR_NAME = 'RENAMED_IMAGES'
+    RESERVE_RENAMED_IMAGES_DIR_NAME_PREFIX = 'RESERVE'
+
     PREFIX = ''
     SUFFIX = ''
 
@@ -92,6 +96,14 @@ class Rename:
         self.__renamed_image_name: str = self.original_image_name
         self.zero_padding_string: str = '{{0:0{}d}}'.format(self.zero_padding_digit)  # {0:03}
 
+    @cached_property
+    def renamed_images_dir_path(self):
+        _renamed_images_dir_path = f"{self.dir_path}/{DefaultValues.RENAMED_IMAGES_DIR_NAME.value}"
+        if os.path.exists(_renamed_images_dir_path):
+            _renamed_images_dir_path = f"{self.dir_path}/{DefaultValues.RESERVE_RENAMED_IMAGES_DIR_NAME_PREFIX}" \
+                                       f"_{DefaultValues.RENAMED_IMAGES_DIR_NAME.value}"
+        return _renamed_images_dir_path
+
     @property
     def renamed_image_name(self) -> str:
         pass
@@ -101,12 +113,16 @@ class Rename:
         self.__renamed_image_name = image_name
 
     @property
-    def renamed_image_name_with_ext(self):
+    def renamed_image_name_with_ext(self) -> str:
         return f'{self.renamed_image_name}{self.ext}'
 
-    @property
-    def renamed_image_path(self):
-        return os.path.join(self.dir_path, self.renamed_image_name_with_ext)
+    @cached_property
+    def renamed_image_path(self) -> str:
+        """
+        Create a new directory directly under the directory containing the images to be changed
+        and store the changed images there.
+        """
+        return os.path.join(self.renamed_images_dir_path, self.renamed_image_name_with_ext)
 
     @property
     def is_extension_valid(self) -> bool:
@@ -257,7 +273,6 @@ class Rename:
         self.add_prefix_suffix()
         self.add_serial_number()
 
-        # normalize full-width characters
         if self.run:
             os.rename(self.image_path, self.renamed_image_path)
 
