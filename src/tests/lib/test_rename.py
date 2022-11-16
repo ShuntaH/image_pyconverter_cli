@@ -55,12 +55,12 @@ def test_enable_to_replace_words():
     pass
 
 
-def test_enable_to_normalize_full_width_characters():
+def test_enable_to_replace_full_width_characters_half_width():
     # todo jacovモジュールの中身から全角を半角に直すところを取り出してそれをテストする
     pass
 
 
-def test_enable_to_delimiters_with_specified_separator():
+def test_enable_to_replace_delimiters_with_specified_separator():
     pass
 
 
