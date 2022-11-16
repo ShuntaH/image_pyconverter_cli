@@ -11,6 +11,7 @@ def get_image_paths(dir_path: str) -> list[str]:
     :return: list
     """
 
+    # ['./src/tests/images/food_protein_bar.png', './src/tests/images/food_udon_goboten.png' ...]
     image_paths = sorted(glob.glob(f'{dir_path}/*'))
 
     if not image_paths:

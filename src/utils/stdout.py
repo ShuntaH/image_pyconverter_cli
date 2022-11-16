@@ -16,13 +16,13 @@ class Bcolors(Enum):
 
 class Stdout:
     @staticmethod
-    def styled_stdout(style: Bcolors = '', sentence: str = ''):
+    def styled_stdout(style: Bcolors = '', sentence: str = '') -> None:
         """
         :param style: Bcolors.WARNING etc.
-        :param sentence:
-        :return:
+        :param sentence: message sentence
+        :return: None
         """
-        print(f"{style}"
+        print(f"\n{style}"
               f"{sentence}"
               )
 

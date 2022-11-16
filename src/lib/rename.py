@@ -15,7 +15,6 @@ from src.utils.with_statements import task, add_extra_arguments_to
 
 class DefaultValues(enum.Enum):
     RENAMED_IMAGES_DIR_NAME = 'RENAMED_IMAGES'
-    RESERVE_RENAMED_IMAGES_DIR_NAME_PREFIX = 'RESERVE'
 
     PREFIX = ''
     SUFFIX = ''
@@ -60,8 +59,8 @@ class DefaultValues(enum.Enum):
 class Rename:
 
     image_path: str
-    words_before_replacement: list[str] = dataclasses.field(default_factory=[])
-    words_after_replacement: list[str] = dataclasses.field(default_factory=[])
+    words_before_replacement: list[str] = dataclasses.field(default_factory=lambda: [])
+    words_after_replacement: list[str] = dataclasses.field(default_factory=lambda: [])
 
     prefix: str = DefaultValues.PREFIX.value
     suffix: str = DefaultValues.SUFFIX.value
@@ -95,14 +94,14 @@ class Rename:
         self.original_image_name, self.ext = os.path.splitext(self.original_image_name_with_ext)  # 'bar', '.jpg'
         self.__renamed_image_name: str = self.original_image_name
         self.zero_padding_string: str = '{{0:0{}d}}'.format(self.zero_padding_digit)  # {0:03}
-
-    @cached_property
-    def renamed_images_dir_path(self):
-        _renamed_images_dir_path = f"{self.dir_path}/{DefaultValues.RENAMED_IMAGES_DIR_NAME.value}"
-        if os.path.exists(_renamed_images_dir_path):
-            _renamed_images_dir_path = f"{self.dir_path}/{DefaultValues.RESERVE_RENAMED_IMAGES_DIR_NAME_PREFIX}" \
-                                       f"_{DefaultValues.RENAMED_IMAGES_DIR_NAME.value}"
-        return _renamed_images_dir_path
+        self.loop_counter = len(self.image_name_comparisons_for_file)
+        self.renamed_images_dir_path = f"{self.dir_path}/{DefaultValues.RENAMED_IMAGES_DIR_NAME.value}"
+        if not self.loop_counter and os.path.exists(self.renamed_images_dir_path):
+            Stdout.styled_stdout(
+                Bcolors.FAIL.value,
+                f'A directory for saving renamed images already exists. Change "{self.renamed_images_dir_path}" name.')
+            raise ValueError
+        os.makedirs(self.renamed_images_dir_path, exist_ok=True)
 
     @property
     def renamed_image_name(self) -> str:
@@ -275,6 +274,8 @@ class Rename:
 
         if self.run:
             os.rename(self.image_path, self.renamed_image_path)
+
+        self.append_image_name_comparison()
 
     @property
     def image_name_comparison_for_file(self) -> str:
