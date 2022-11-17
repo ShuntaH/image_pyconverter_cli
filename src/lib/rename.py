@@ -92,7 +92,7 @@ class Rename:
         self.dir_path = os.path.dirname(self.image_path)
         self.original_image_name_with_ext = os.path.basename(self.image_path)
         self.original_image_name, self.ext = os.path.splitext(self.original_image_name_with_ext)  # 'bar', '.jpg'
-        self.__renamed_image_name: str = self.original_image_name
+        self._renamed_image_name: str = self.original_image_name
         self.zero_padding_string: str = '{{0:0{}d}}'.format(self.zero_padding_digit)  # {0:03}
         self.loop_counter = len(self.image_name_comparisons_for_file)
         self.renamed_images_dir_path = f"{self.dir_path}/{DefaultValues.RENAMED_IMAGES_DIR_NAME.value}"
@@ -105,11 +105,11 @@ class Rename:
 
     @property
     def renamed_image_name(self) -> str:
-        pass
+        return self._renamed_image_name
 
     @renamed_image_name.setter
     def renamed_image_name(self, image_name: str):
-        self.__renamed_image_name = image_name
+        self._renamed_image_name = image_name
 
     @property
     def renamed_image_name_with_ext(self) -> str:
