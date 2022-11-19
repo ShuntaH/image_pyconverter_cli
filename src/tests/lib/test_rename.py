@@ -4,7 +4,6 @@ import subprocess
 
 from src.lib import get_image_paths
 from src.lib.rename import DefaultValues, Rename
-from src.utils import tests
 from src.utils.stdout import Stdout, Bcolors
 
 
@@ -29,7 +28,7 @@ class TestRename:
         assert os.path.exists(self.temp_renamed_images_dir_path) is True
         assert rename.renamed_images_dir_path == self.temp_renamed_images_dir_path
 
-    def test_enable_to_replace_words(self):
+    def test_replace_words(self):
         words_before_replacement: list[str] = ['bar', 'foo', 'fuga']
         words_after_replacement: list[str] = ['replaced-bar', 'replaced-foo', 'replaced-fuga']
 
@@ -47,7 +46,7 @@ class TestRename:
 
         # subprocess.run(['ic_rename', abs_image_paths])
 
-    def test_enable_to_replace_the_number_of_missing_words_before_replacement(self):
+    def test_replace_the_number_of_missing_words_before_replacement(self):
         # short of words_before_replacement
         words_before_replacement: list[str] = ['bar']
         words_after_replacement: list[str] = ['replaced-bar', 'replaced-foo', 'replaced-fuga']
@@ -63,7 +62,7 @@ class TestRename:
         rename.replace_words()
         assert expected == rename.renamed_image_name
 
-    def test_enable_to_replace_the_number_of_missing_words_after_replacement(self):
+    def test_replace_the_number_of_missing_words_after_replacement(self):
         # short of words_after_replacement
         words_before_replacement: list[str] = ['bar', 'foo', 'fuga']
         words_after_replacement: list[str] = ['replaced-bar']
@@ -79,30 +78,32 @@ class TestRename:
         rename.replace_words()
         assert expected == rename.renamed_image_name
 
-        def test_enable_to_replace_full_width_characters_with_half_width():
-            # todo jacovモジュールの中身から全角を半角に直すところを取り出してそれをテストする
-            pass
+    def test_replace_full_width_characters_with_half_width(self):
+        """
+        name００１.png => name001.png
+        """
+        pass
 
-        def test_enable_to_replace_delimiters_with_specified_separator():
-            pass
+    def test_replace_delimiters_with_specified_separator():
+        pass
 
-        def test_enable_to_replace_unavailable_characters():
-            pass
+    def test_replace_unavailable_characters():
+        pass
 
-        def test_enable_to_replace_invalid_url_characters():
-            pass
+    def test_replace_invalid_url_characters():
+        pass
 
-        def test_enable_to_add_prefix_and_suffix():
-            pass
+    def test_add_prefix_and_suffix():
+        pass
 
-        def test_enable_to_add_serial_number():
-            pass
+    def test_enable_to_add_serial_number():
+        pass
 
-        def test_is_extensions_valid():
-            pass
+    def test_is_extensions_valid():
+        pass
 
-        def test_enable_to_rename():
-            pass
+    def test_enable_to_rename():
+        pass
 
-        def test_enable_to_make_name_files():
-            pass
+    def test_enable_to_make_name_files():
+        pass

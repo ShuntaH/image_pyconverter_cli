@@ -1,3 +1,9 @@
+from dotenv import load_dotenv
+
+# load env variables to os.environ from env
+load_dotenv()
+
+
 VALID_EXTENSIONS = [
     '.jpg',
     '.jpeg',
@@ -15,3 +21,8 @@ VALID_EXTENSIONS = [
     '.svg',
     '.svgz'
 ]
+
+########
+# test #
+########
+TEST_IMAGE_DIR_PATH = "./src/tests/images"
