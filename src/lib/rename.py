@@ -99,7 +99,9 @@ class Rename:
         if not self.loop_counter and os.path.exists(self.renamed_images_dir_path):
             Stdout.styled_stdout(
                 Bcolors.FAIL.value,
-                f'A directory for saving renamed images already exists. Change "{self.renamed_images_dir_path}" name.')
+                'A directory for saving renamed images already exists. '
+                f'Change or delete "{self.renamed_images_dir_path}"'
+            )
             raise ValueError
         os.makedirs(self.renamed_images_dir_path, exist_ok=True)
 

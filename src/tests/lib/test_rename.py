@@ -16,11 +16,13 @@ class TestRename:
         cls.images_dir_path = tests.get_images_dir_path()
         cls.image_path = get_image_paths(dir_path=cls.images_dir_path)[0]  # './src/tests/images/bar_foo_fuga.png
 
-    def teardown_method(self):
+    def teardown_method(self, method):
         """Directories created during testing are deleted after the test is completed."""
         shutil.rmtree(self.temp_renamed_images_dir_path)
         Stdout.styled_stdout(
-            Bcolors.OKCYAN.value, 'removed the temp directory. \nteardown_method done.')
+            Bcolors.OKCYAN.value,
+            f'removed the temp directory {self.temp_renamed_images_dir_path}. \nteardown_method done.'
+        )
 
     def test_renamed_images_dir_path_exist(self):
         rename = Rename(image_path=self.image_path)
@@ -45,7 +47,7 @@ class TestRename:
 
         # subprocess.run(['ic_rename', abs_image_paths])
 
-    def test_replace_different_number_words(self):
+    def test_enable_to_replace_the_number_of_missing_words_before_replacement(self):
         # short of words_before_replacement
         words_before_replacement: list[str] = ['bar']
         words_after_replacement: list[str] = ['replaced-bar', 'replaced-foo', 'replaced-fuga']
@@ -61,6 +63,7 @@ class TestRename:
         rename.replace_words()
         assert expected == rename.renamed_image_name
 
+    def test_enable_to_replace_the_number_of_missing_words_after_replacement(self):
         # short of words_after_replacement
         words_before_replacement: list[str] = ['bar', 'foo', 'fuga']
         words_after_replacement: list[str] = ['replaced-bar']
