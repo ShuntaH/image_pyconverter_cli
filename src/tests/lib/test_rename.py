@@ -2,17 +2,24 @@ import os
 import shutil
 import subprocess
 
-from src.lib import get_image_paths
-from src.lib.rename import DefaultValues, Rename
-from src.utils.stdout import Stdout, Bcolors
+import pytest
+
+from lib import get_image_paths
+from lib.rename import DefaultValues, Rename
+from utils.stdout import Stdout, Bcolors
+from utils.tests import TEST_IMAGE_DIR_PATH
 
 
+@pytest.fixture
+def temp_dir_path_for_renamed_images(temp_image_dir_path):
+    return f"{temp_image_dir_path}/RENAMED_IMAGES"
 class TestRename:
-    temp_renamed_images_dir_path = f"{tests.get_images_dir_path()}/{DefaultValues.RENAMED_IMAGES_DIR_NAME.value}"
+
 
     @classmethod
     def setup_class(cls):
-        cls.images_dir_path = tests.get_images_dir_path()
+        Stdout.styled_stdout(Bcolors.HEADER.value, f'Setup {cls.__name__} class.')
+        cls.images_dir_path = TEST_IMAGE_DIR_PATH
         cls.image_path = get_image_paths(dir_path=cls.images_dir_path)[0]  # './src/tests/images/bar_foo_fuga.png
 
     def teardown_method(self, method):
@@ -23,6 +30,7 @@ class TestRename:
             f'removed the temp directory {self.temp_renamed_images_dir_path}. \nteardown_method done.'
         )
 
+    def
     def test_renamed_images_dir_path_exist(self):
         rename = Rename(image_path=self.image_path)
         assert os.path.exists(self.temp_renamed_images_dir_path) is True

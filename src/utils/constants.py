@@ -21,8 +21,3 @@ VALID_EXTENSIONS = [
     '.svg',
     '.svgz'
 ]
-
-########
-# test #
-########
-TEST_IMAGE_DIR_PATH = "./src/tests/images"
