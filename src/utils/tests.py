@@ -5,4 +5,5 @@ load_dotenv()
 
 
 def get_images_dir_path() -> str:
+    """dir contains images for tests"""
     return "./src/tests/images"

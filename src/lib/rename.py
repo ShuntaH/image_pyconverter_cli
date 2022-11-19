@@ -77,7 +77,7 @@ class Rename:
 
     is_serial_number_added: bool = DefaultValues.IS_SERIAL_NUMBER_ADDED.value
     current_index: Optional[int] = None
-    zero_padding_digit: int = DefaultValues.ZERO_PADDING_DIGIT.value  # 001 002
+    zero_padding_digit: int = DefaultValues.ZERO_PADDING_DIGIT.value  # => 001 0001 ?
     valid_extensions: list[str] = dataclasses.field(
         default_factory=lambda: DefaultValues.VALID_EXTENSIONS.value)
 
@@ -91,9 +91,9 @@ class Rename:
     def __post_init__(self):
         self.dir_path = os.path.dirname(self.image_path)
         self.original_image_name_with_ext = os.path.basename(self.image_path)
-        self.original_image_name, self.ext = os.path.splitext(self.original_image_name_with_ext)  # 'bar', '.jpg'
+        self.original_image_name, self.ext = os.path.splitext(self.original_image_name_with_ext)  # => 'bar', '.jpg'
         self._renamed_image_name: str = self.original_image_name
-        self.zero_padding_string: str = '{{0:0{}d}}'.format(self.zero_padding_digit)  # {0:03}
+        self.zero_padding_string: str = '{{0:0{}d}}'.format(self.zero_padding_digit)  # => {0:03}
         self.loop_counter = len(self.image_name_comparisons_for_file)
         self.renamed_images_dir_path = f"{self.dir_path}/{DefaultValues.RENAMED_IMAGES_DIR_NAME.value}"
         if not self.loop_counter and os.path.exists(self.renamed_images_dir_path):
