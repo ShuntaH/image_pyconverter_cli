@@ -10,7 +10,7 @@ from jaconv import jaconv
 
 from src.utils.stdout import Stdout, Bcolors
 from src.utils.with_statements import task, add_extra_arguments_to
-from utils import get_image_paths
+from utils import get_image_paths_from_within_dir
 
 
 class DefaultValues(enum.Enum):
@@ -95,6 +95,8 @@ class Rename:
         self._renamed_image_name: str = self.original_image_name
         self.zero_padding_string: str = '{{0:0{}d}}'.format(self.zero_padding_digit)  # => {0:03}
         self.loop_counter = len(self.image_name_comparisons_for_file)
+
+        # todo ネストしたフォルダの画像も構成を変更せず、そのまま変換できるようにしたいのでこの場所はかえる
         self.renamed_images_dir_path = f"{self.dir_path}/{DefaultValues.RENAMED_IMAGES_DIR_NAME.value}"
         if not self.loop_counter and os.path.exists(self.renamed_images_dir_path):
             Stdout.styled_stdout(
@@ -412,7 +414,7 @@ def main():
             args=get_args(),
             task_name='rename'  # function name
     ) as args:
-        image_paths = get_image_paths(dir_path=args.dir_path)
+        image_paths = get_image_paths_from_within_dir(dir_path=args.dir_path)
 
         for index, image_path in enumerate(image_paths):
             # file '/User/macbook/a.jpg'
