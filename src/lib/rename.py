@@ -1,6 +1,7 @@
 import argparse
 import enum
 import os
+import pathlib
 import re
 import dataclasses
 from functools import cached_property
@@ -14,7 +15,8 @@ from utils import get_image_paths_from_within_dir
 
 
 class DefaultValues(enum.Enum):
-    RENAMED_IMAGES_DIR_NAME = 'RENAMED_IMAGES'
+    DEST_NAME = 'RENAMED_IMAGES'
+    DEST = pathlib.Path.cwd()
 
     PREFIX = ''
     SUFFIX = ''
@@ -58,7 +60,9 @@ class DefaultValues(enum.Enum):
 @dataclasses.dataclass
 class Rename:
 
-    image_path: str
+    image_path: pathlib.PosixPath
+
+    dest: pathlib.Path
     words_before_replacement: list[str] = dataclasses.field(default_factory=lambda: [])
     words_after_replacement: list[str] = dataclasses.field(default_factory=lambda: [])
 
@@ -89,23 +93,24 @@ class Rename:
     image_name_comparisons_for_file: ClassVar[list] = []
 
     def __post_init__(self):
-        self.dir_path = os.path.dirname(self.image_path)
-        self.original_image_name_with_ext = os.path.basename(self.image_path)
-        self.original_image_name, self.ext = os.path.splitext(self.original_image_name_with_ext)  # => 'bar', '.jpg'
+        self.dir_path = self.image_path.parent
+        self.original_image_name_with_ext = self.image_path.name
+        self.ext = self.image_path.suffix
+        self.original_image_name = self.image_path.stem
         self._renamed_image_name: str = self.original_image_name
         self.zero_padding_string: str = '{{0:0{}d}}'.format(self.zero_padding_digit)  # => {0:03}
         self.loop_counter = len(self.image_name_comparisons_for_file)
 
         # todo ネストしたフォルダの画像も構成を変更せず、そのまま変換できるようにしたいのでこの場所はかえる
-        self.renamed_images_dir_path = f"{self.dir_path}/{DefaultValues.RENAMED_IMAGES_DIR_NAME.value}"
-        if not self.loop_counter and os.path.exists(self.renamed_images_dir_path):
+        self.dest = f"{self.dir_path}/{DefaultValues.DEST_NAME.value}"
+        if not self.loop_counter and os.path.exists(self.dest):
             Stdout.styled_stdout(
                 Bcolors.FAIL.value,
                 'A directory for saving renamed images already exists. '
-                f'Change or delete "{self.renamed_images_dir_path}"'
+                f'Change or delete "{self.dest}"'
             )
             raise ValueError
-        os.makedirs(self.renamed_images_dir_path, exist_ok=True)
+        os.makedirs(self.dest, exist_ok=True)
 
     @property
     def renamed_image_name(self) -> str:
@@ -125,7 +130,7 @@ class Rename:
         Create a new directory directly under the directory containing the images to be changed
         and store the changed images there.
         """
-        return os.path.join(self.renamed_images_dir_path, self.renamed_image_name_with_ext)
+        return os.path.join(self.dest, self.renamed_image_name_with_ext)
 
     @property
     def is_extension_valid(self) -> bool:

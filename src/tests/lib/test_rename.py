@@ -1,17 +1,13 @@
 import os
-import shutil
-import subprocess
 
-import pytest
-from lib.rename import DefaultValues, Rename
-from utils.stdout import Stdout, Bcolors
+from lib.rename import Rename
 
 
 class TestRename:
     def test_renamed_images_dir_path_exist(self, temp_dir, temp_image_file):
         rename = Rename(image_path=temp_image_file('test.png'))
         assert os.path.exists(self.temp_renamed_images_dir_path) is True
-        assert rename.renamed_images_dir_path == temp_dir
+        assert rename.dest == temp_dir
 
     # def test_replace_words(self):
     #     words_before_replacement: list[str] = ['bar', 'foo', 'fuga']
