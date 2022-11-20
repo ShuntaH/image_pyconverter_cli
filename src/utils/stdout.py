@@ -13,6 +13,14 @@ class Bcolors(Enum):
     BOLD = '\033[1m'
     UNDERLINE = '\033[4m'
 
+    @classmethod
+    def names(cls) -> list[str]:
+        return [var.name for var in cls]
+
+    @classmethod
+    def values(cls) -> list[str]:
+        return [var.value for var in cls]
+
 
 class Stdout:
     @staticmethod
