@@ -20,9 +20,7 @@ def get_image_paths_from_within_dir(
     dir_p_string: str = dir_p.as_posix()
     if not dir_p.exists():
         raise ValueError(f'"{dir_p_string} does not exists."')
-
-    ext_pattern: Pattern = re.compile("/*(" + '|'.join(valid_extensions) + ")$")  # => /*(.jpg|.jpeg|.png)$
-
+    ext_pattern: Pattern = get_extension_pattern(valid_extensions=valid_extensions)
     g = valid_image_paths_generator(dir_path=dir_p, pattern=ext_pattern)
 
     try:
@@ -31,6 +29,10 @@ def get_image_paths_from_within_dir(
         raise ValueError(f'No images within "{dir_p_string}".')
 
     return g
+
+
+def get_extension_pattern(valid_extensions:list[str]=VALID_EXTENSIONS) -> Pattern:
+    return re.compile("/*(" + '|'.join(valid_extensions) + ")$")  # => /*(.jpg|.jpeg|.png)$
 
 
 def valid_image_paths_generator(
