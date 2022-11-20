@@ -8,9 +8,9 @@ from typing import Optional, Pattern, ClassVar
 
 from jaconv import jaconv
 
-from src.lib import get_image_paths
 from src.utils.stdout import Stdout, Bcolors
 from src.utils.with_statements import task, add_extra_arguments_to
+from utils import get_image_paths
 
 
 class DefaultValues(enum.Enum):
