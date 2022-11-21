@@ -1,7 +1,7 @@
 import datetime
 import pathlib
 import re
-from typing import Pattern, Union, Iterator
+from typing import Pattern, Union, Iterator, Optional
 
 from src.utils.stdout import Stdout, Bcolors
 from utils.constants import VALID_EXTENSIONS
@@ -18,7 +18,7 @@ def get_image_paths_from_within(
     """
 
     dir_p = pathlib.Path(dir_path)
-    dir_p_string: str = dir_p.as_posix()
+    dir_p_string: str = dir_p.__str__()
     if not dir_p.exists():
         raise ValueError(f'"{dir_p_string} does not exists."')
     ext_pattern: Pattern = create_valid_extension_pattern_from(valid_extensions=valid_extensions)
@@ -56,9 +56,9 @@ def valid_image_paths_generator(
         yield p
 
 
-def datetime2str(dt: datetime.datetime = None):
+def datetime2str(dt: Optional[datetime.datetime] = None):
     if dt is None:
         dt = datetime.datetime.now()
     if type(dt) is not datetime.datetime:
-        raise ValueError('dt argument type is datetime.datetime.')
+        raise ValueError('dt argument type is not datetime.datetime type.')
     return dt.strftime('%Y-%m-%d_%H-%M-%S')

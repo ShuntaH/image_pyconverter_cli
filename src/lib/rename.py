@@ -11,11 +11,11 @@ from jaconv import jaconv
 
 from src.utils.stdout import Stdout, Bcolors
 from src.utils.with_statements import task, add_extra_arguments_to
-from utils import get_image_paths_from_within
+from utils import get_image_paths_from_within, datetime2str
 
 
 class DefaultValues(enum.Enum):
-    DEST_NAME = f"RENAMED_IMAGES{}"
+    DEST_NAME = f"RENAMED_IMAGES_{datetime2str()}"
     DEST = pathlib.Path.cwd()
 
     PREFIX = ''
@@ -62,7 +62,7 @@ class Rename:
 
     image_path: Union[str, pathlib.Path]
 
-    dest: Union[str, pathlib.Path]
+    dest: Union[str, pathlib.Path] = DefaultValues.DEST.value
     dest_name: str = DefaultValues.DEST_NAME.value
 
     words_before_replacement: list[str] = dataclasses.field(default_factory=lambda: [])
@@ -99,15 +99,126 @@ class Rename:
             self.image_path = pathlib.Path(self.image_path)
         if type(self.dest) is str:
             self.dest = pathlib.Path(self.dest)
-
         self.dir_path: pathlib.Path = self.image_path.parent
+        self.relative_dir_path = self.dir_path.relative_to(self.dir_path)
+        self.relative_image_path = self.image_path.relative_to(self.relative_dir_path)
         self.original_image_name_with_ext = self.image_path.name
         self.ext = self.image_path.suffix
         self.original_image_name = self.image_path.stem
         self._renamed_image_name: str = self.original_image_name
         self.zero_padding_string: str = '{{0:0{}d}}'.format(self.zero_padding_digit)  # => {0:03}
         self.loop_counter = len(self.image_name_comparisons_for_file)
-        os.makedirs(self.dest / self.dest_name, exist_ok=True)
+        self.root_dest = self.dest / pathlib.Path(self.dest_name)
+        self.root_dest.mkdir(exist_ok=True)
+
+    @staticmethod
+    def get_args():
+        arg_parser = argparse.ArgumentParser()
+        with add_extra_arguments_to(arg_parser) as arg_parser:
+            arg_parser.add_argument(
+                '-before', '--words_before_replacement',
+                nargs="*", type=str,
+                help='you can replace a new name.'
+            )
+            arg_parser.add_argument(
+                '-after', '--words_after_replacement',
+                nargs="*", type=str,
+                help='you can replace a new name.'
+            )
+
+            arg_parser.add_argument(
+                '-p', '--prefix',
+                type=str,
+                help='you can add an extra word as prefix.',
+                default=DefaultValues.PREFIX.value
+            )
+            arg_parser.add_argument(
+                '-s', '--suffix',
+                type=str,
+                help='you can add an extra word as suffix.',
+                default=DefaultValues.SUFFIX.value
+            )
+
+            arg_parser.add_argument(
+                '-sep',
+                '--separator',
+                type=str,
+                help='you can specify word separator.',
+                default=DefaultValues.SEPARATOR.value
+            )
+            arg_parser.add_argument(
+                '-rwsp',
+                '--replacement_with_separator_pattern',
+                help='you can specify word separator.',
+                type=re.Pattern,
+                default=DefaultValues.REPLACEMENT_WITH_SEPARATOR_PATTERN.value
+            )
+
+            arg_parser.add_argument(
+                '-alt_ufnc',
+                '--alternative_unavailable_file_name_char',
+                help='',
+                type=str,
+                default=DefaultValues.ALTERNATIVE_UNAVAILABLE_FILE_NAME_CHAR.value
+            )
+            arg_parser.add_argument(
+                '-ufncp',
+                '--unavailable_file_name_char_pattern',
+                help='',
+                type=re.Pattern,
+                default=DefaultValues.UNAVAILABLE_FILE_NAME_CHAR_PATTERN.value
+            )
+
+            arg_parser.add_argument(
+                '-keep_unavailable_url_chars',
+                '--is_unavailable_url_chars_kept',
+                help='whether to replace an unavailable characters in url.',
+                action='store_true'
+            )
+            arg_parser.add_argument(
+                '-alt_uuc',
+                '--alternative_unavailable_url_char',
+                help='you can specify a word with which unavailable characters is replaced.',
+                default=DefaultValues.ALTERNATIVE_UNAVAILABLE_URL_CHAR.value
+            )
+            arg_parser.add_argument(
+                '-uccp',
+                '--unavailable_url_char_pattern',
+                help='compiled unavailable url character pattern.',
+                type=re.Pattern,
+                default=DefaultValues.UNAVAILABLE_URL_CHAR_PATTERN.value
+            )
+
+            arg_parser.add_argument(
+                '-add_serial_number',
+                '--is_serial_number_added',
+                help='add serial number to last position of file name?',
+                action='store_true'
+            )
+            arg_parser.add_argument(
+                '-snzpd',
+                '--serial_number_zero_padding_digit',
+                help='zero_padding_digit of serial number?',
+                type=int,
+                default=DefaultValues.ZERO_PADDING_DIGIT.value
+            )
+
+            arg_parser.add_argument(
+                '-ext', '--valid_extensions',
+                nargs="*", type=str,
+                help='.png .jpg ...',
+                default=DefaultValues.VALID_EXTENSIONS.value
+            )
+
+            arg_parser.add_argument(
+                '-make_image_name_file',
+                '--is_image_name_file_made',
+                help='whether to write the list of file names to a text file.',
+                action='store_true'
+            )
+
+            args = arg_parser.parse_args()
+        return args
 
     @property
     def renamed_image_name(self) -> str:
@@ -267,9 +378,6 @@ class Rename:
         bar.png => bar002.png
         """
 
-        if not self.is_extension_valid:
-            return
-
         self.replace_words()
         self.zen2han()
         self.replace_with_separator()
@@ -302,118 +410,9 @@ class Rename:
         cls.image_name_comparisons_for_file = list()
 
 
-def get_args():
-    arg_parser = argparse.ArgumentParser()
-    with add_extra_arguments_to(arg_parser) as arg_parser:
-        arg_parser.add_argument(
-            '-before', '--words_before_replacement',
-            nargs="*", type=str,
-            help='you can replace a new name.'
-        )
-        arg_parser.add_argument(
-            '-after', '--words_after_replacement',
-            nargs="*", type=str,
-            help='you can replace a new name.'
-        )
-
-        arg_parser.add_argument(
-            '-p', '--prefix',
-            type=str,
-            help='you can add an extra word as prefix.',
-            default=DefaultValues.PREFIX.value
-        )
-        arg_parser.add_argument(
-            '-s', '--suffix',
-            type=str,
-            help='you can add an extra word as suffix.',
-            default=DefaultValues.SUFFIX.value
-        )
-
-        arg_parser.add_argument(
-            '-sep',
-            '--separator',
-            type=str,
-            help='you can specify word separator.',
-            default=DefaultValues.SEPARATOR.value
-        )
-        arg_parser.add_argument(
-            '-rwsp',
-            '--replacement_with_separator_pattern',
-            help='you can specify word separator.',
-            type=re.Pattern,
-            default=DefaultValues.REPLACEMENT_WITH_SEPARATOR_PATTERN.value
-        )
-
-        arg_parser.add_argument(
-            '-alt_ufnc',
-            '--alternative_unavailable_file_name_char',
-            help='',
-            type=str,
-            default=DefaultValues.ALTERNATIVE_UNAVAILABLE_FILE_NAME_CHAR.value
-        )
-        arg_parser.add_argument(
-            '-ufncp',
-            '--unavailable_file_name_char_pattern',
-            help='',
-            type=re.Pattern,
-            default=DefaultValues.UNAVAILABLE_FILE_NAME_CHAR_PATTERN.value
-        )
-
-        arg_parser.add_argument(
-            '-keep_unavailable_url_chars',
-            '--is_unavailable_url_chars_kept',
-            help='whether to replace an unavailable characters in url.',
-            action='store_true'
-        )
-        arg_parser.add_argument(
-            '-alt_uuc',
-            '--alternative_unavailable_url_char',
-            help='you can specify a word with which unavailable characters is replaced.',
-            default=DefaultValues.ALTERNATIVE_UNAVAILABLE_URL_CHAR.value
-        )
-        arg_parser.add_argument(
-            '-uccp',
-            '--unavailable_url_char_pattern',
-            help='compiled unavailable url character pattern.',
-            type=re.Pattern,
-            default=DefaultValues.UNAVAILABLE_URL_CHAR_PATTERN.value
-        )
-
-        arg_parser.add_argument(
-            '-add_serial_number',
-            '--is_serial_number_added',
-            help='add serial number to last position of file name?',
-            action='store_true'
-        )
-        arg_parser.add_argument(
-            '-snzpd',
-            '--serial_number_zero_padding_digit',
-            help='zero_padding_digit of serial number?',
-            type=int,
-            default=DefaultValues.ZERO_PADDING_DIGIT.value
-        )
-
-        arg_parser.add_argument(
-            '-ext', '--valid_extensions',
-            nargs="*", type=str,
-            help='.png .jpg ...',
-            default=DefaultValues.VALID_EXTENSIONS.value
-        )
-
-        arg_parser.add_argument(
-            '-make_image_name_file',
-            '--is_image_name_file_made',
-            help='whether to write the list of file names to a text file.',
-            action='store_true'
-        )
-
-        args = arg_parser.parse_args()
-    return args
-
-
 def main():
     with task(
-            args=get_args(),
+            args=Rename.get_args(),
             task_name='rename'  # function name
     ) as args:
         image_paths = get_image_paths_from_within(dir_path=args.dir_path)
