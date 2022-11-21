@@ -450,6 +450,8 @@ def main():
             # file '/User/macbook/a.jpg'
             rename = Rename(
                 image_path=image_path,
+                dest=args.dest,
+                dest_dir_name=args.dest_dir_name,
                 words_before_replacement=args.words_before_replacement,
                 words_after_replacement=args.words_after_replacement,
                 prefix=args.prefix,
