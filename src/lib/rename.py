@@ -5,17 +5,17 @@ import pathlib
 import re
 import dataclasses
 from functools import cached_property
-from typing import Optional, Pattern, ClassVar
+from typing import Optional, Pattern, ClassVar, Union
 
 from jaconv import jaconv
 
 from src.utils.stdout import Stdout, Bcolors
 from src.utils.with_statements import task, add_extra_arguments_to
-from utils import get_image_paths_from_within_dir
+from utils import get_image_paths_from_within
 
 
 class DefaultValues(enum.Enum):
-    DEST_NAME = 'RENAMED_IMAGES'
+    DEST_NAME = f"RENAMED_IMAGES{}"
     DEST = pathlib.Path.cwd()
 
     PREFIX = ''
@@ -60,9 +60,11 @@ class DefaultValues(enum.Enum):
 @dataclasses.dataclass
 class Rename:
 
-    image_path: pathlib.PosixPath
+    image_path: Union[str, pathlib.Path]
 
-    dest: pathlib.Path
+    dest: Union[str, pathlib.Path]
+    dest_name: str = DefaultValues.DEST_NAME.value
+
     words_before_replacement: list[str] = dataclasses.field(default_factory=lambda: [])
     words_after_replacement: list[str] = dataclasses.field(default_factory=lambda: [])
 
@@ -93,24 +95,19 @@ class Rename:
     image_name_comparisons_for_file: ClassVar[list] = []
 
     def __post_init__(self):
-        self.dir_path = self.image_path.parent
+        if type(self.image_path) is str:
+            self.image_path = pathlib.Path(self.image_path)
+        if type(self.dest) is str:
+            self.dest = pathlib.Path(self.dest)
+
+        self.dir_path: pathlib.Path = self.image_path.parent
         self.original_image_name_with_ext = self.image_path.name
         self.ext = self.image_path.suffix
         self.original_image_name = self.image_path.stem
         self._renamed_image_name: str = self.original_image_name
         self.zero_padding_string: str = '{{0:0{}d}}'.format(self.zero_padding_digit)  # => {0:03}
         self.loop_counter = len(self.image_name_comparisons_for_file)
-
-        # todo ネストしたフォルダの画像も構成を変更せず、そのまま変換できるようにしたいのでこの場所はかえる
-        self.dest = f"{self.dir_path}/{DefaultValues.DEST_NAME.value}"
-        if not self.loop_counter and os.path.exists(self.dest):
-            Stdout.styled_stdout(
-                Bcolors.FAIL.value,
-                'A directory for saving renamed images already exists. '
-                f'Change or delete "{self.dest}"'
-            )
-            raise ValueError
-        os.makedirs(self.dest, exist_ok=True)
+        os.makedirs(self.dest / self.dest_name, exist_ok=True)
 
     @property
     def renamed_image_name(self) -> str:
@@ -419,7 +416,7 @@ def main():
             args=get_args(),
             task_name='rename'  # function name
     ) as args:
-        image_paths = get_image_paths_from_within_dir(dir_path=args.dir_path)
+        image_paths = get_image_paths_from_within(dir_path=args.dir_path)
 
         for index, image_path in enumerate(image_paths):
             # file '/User/macbook/a.jpg'
