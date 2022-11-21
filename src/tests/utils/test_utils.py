@@ -19,11 +19,6 @@ def test_get_image_paths_from_within(
 ):
 
     _dir_path_not_existed = '/not/exist'
-    _temp_dir_path: pathlib.Path = temp_dir_path()
-    valid_ext_image_png = temp_image_file(image_name='valid_ext_png.png', temp_dir_path=_temp_dir_path)
-    valid_ext_image_jpg = temp_image_file(image_name='valid_ext_jpg.jpg', temp_dir_path=_temp_dir_path)
-    invalid_ext_image = temp_text_file(temp_dir_path=_temp_dir_path)
-
     with pytest.raises(ValueError) as excinfo:
         get_image_paths_from_within(dir_path=_dir_path_not_existed)
     print(excinfo.value)
@@ -34,3 +29,8 @@ def test_get_image_paths_from_within(
         get_image_paths_from_within(dir_path=_empty_dir_path.__str__())
     print(excinfo.value)
     assert f'No images within "{_empty_dir_path.__str__()}".' == excinfo.value.args[0]
+
+    _temp_dir_path: pathlib.Path = temp_dir_path()
+    valid_ext_image_png = temp_image_file(image_name='valid_ext_png.png', temp_dir_path=_temp_dir_path)
+    valid_ext_image_jpg = temp_image_file(image_name='valid_ext_jpg.jpg', temp_dir_path=_temp_dir_path)
+    invalid_ext_image = temp_text_file(temp_dir_path=_temp_dir_path)
