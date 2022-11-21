@@ -41,3 +41,21 @@ def temp_image_file(tmp_path_factory) -> Callable:
         return fn
 
     return _temp_image_file
+
+
+@pytest.fixture(scope="session")
+def temp_text_file(tmp_path_factory) -> Callable:
+    """
+    :param tmp_path_factory: provided by pytest.
+    """
+    def _temp_text_file(
+            temp_dir_path: pathlib.Path,
+            text_name: str = 'temp.txt',
+            content: str = 'content',
+    ) -> pathlib.Path:
+        """Since the temp_dir_path function returns a new path each time it is called,
+        pass the path created, not the function, as the argument."""
+        p = temp_dir_path / text_name
+        p.write_text(content)
+
+    return _temp_text_file
