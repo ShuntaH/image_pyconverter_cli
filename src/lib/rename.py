@@ -87,29 +87,34 @@ class Rename:
     valid_extensions: list[str] = dataclasses.field(
         default_factory=lambda: DefaultValues.VALID_EXTENSIONS.value)
 
-    is_image_name_file_made: bool = False
+    is_log_file_made: bool = False
 
     # To create a list of names of converted images,
     # each time an instance is created from this class,
     # this list is not initialized and the same list is used.
-    image_name_comparisons_for_file: ClassVar[list] = []
+    rename_log: ClassVar[list] = []
 
     def __post_init__(self):
         if type(self.image_path) is str:
-            self.image_path = pathlib.Path(self.image_path)
+            self.image_path: pathlib.Path = pathlib.Path(self.image_path)
         if type(self.dest) is str:
             self.dest = pathlib.Path(self.dest)
+
         self.dir_path: pathlib.Path = self.image_path.parent
-        self.relative_dir_path = self.dir_path.relative_to(self.dir_path)
-        self.relative_image_path = self.image_path.relative_to(self.relative_dir_path)
-        self.original_image_name_with_ext = self.image_path.name
-        self.ext = self.image_path.suffix
-        self.original_image_name = self.image_path.stem
-        self._renamed_image_name: str = self.original_image_name
+
+        self.relative_dir_path = self.dir_path.relative_to(self.dir_path)  # => '.'
+        self.relative_image_path = self.image_path.relative_to(self.relative_dir_path)  # => './temp/img.png'
+        self.relative_image_parent_path = self.relative_image_path[0]  # => './temp/
+
+        self.original_image_name = self.image_path.name
+        self.ext = ''.join(self.image_path.suffixes)  # './test.tar.gz' => ['.tar', '.gz']
+        self.original_image_stem = self.image_path.stem
+
+        self._renamed_image_stem: str = self.original_image_stem
         self.zero_padding_string: str = '{{0:0{}d}}'.format(self.zero_padding_digit)  # => {0:03}
-        self.loop_counter = len(self.image_name_comparisons_for_file)
-        self.root_dest = self.dest / pathlib.Path(self.dest_dir_name)
-        self.root_dest.mkdir(exist_ok=True)
+
+        self.dest_root = self.dest / pathlib.Path(self.dest_dir_name)
+        self.dest_root.mkdir(exist_ok=True)
 
     @staticmethod
     def get_args():
@@ -234,24 +239,24 @@ class Rename:
         return args
 
     @property
-    def renamed_image_name(self) -> str:
-        return self._renamed_image_name
+    def renamed_image_stem(self) -> str:
+        return self._renamed_image_stem
 
-    @renamed_image_name.setter
-    def renamed_image_name(self, image_name: str):
-        self._renamed_image_name = image_name
+    @renamed_image_stem.setter
+    def renamed_image_stem(self, image_stem: str):
+        self._renamed_image_stem = image_stem
 
     @property
-    def renamed_image_name_with_ext(self) -> str:
-        return f'{self.renamed_image_name}{self.ext}'
+    def renamed_image_name(self) -> str:
+        return f'{self.renamed_image_stem}{self.ext}'
 
-    @cached_property
-    def renamed_image_path(self) -> str:
-        """
-        Create a new directory directly under the directory containing the images to be changed
-        and store the changed images there.
-        """
-        return os.path.join(self.dest, self.renamed_image_name_with_ext)
+    @property
+    def renamed_parent_image_path(self) -> pathlib.Path:
+        return self.dest_root / self.relative_image_parent_path
+
+    @property
+    def renamed_image_path(self) -> pathlib.Path:
+        return self.renamed_parent_image_path / self.renamed_image_name
 
     @property
     def is_extension_valid(self) -> bool:
@@ -281,7 +286,7 @@ class Rename:
         >>> rt2 = t.replace('b', 'c')
         'acc'
         """
-        self.renamed_image_name = self.renamed_image_name.replace(before, after)
+        self.renamed_image_stem = self.renamed_image_stem.replace(before, after)
 
     def replace_words(self) -> None:
         if not self.words_before_replacement:
@@ -300,14 +305,14 @@ class Rename:
         _suffix = f'{self.separator}{self.suffix}' \
             if self.suffix and type(self.suffix) is str \
             else DefaultValues.SUFFIX.value
-        self.renamed_image_name = f'{_prefix}{self.renamed_image_name}{_suffix}'
+        self.renamed_image_stem = f'{_prefix}{self.renamed_image_stem}{_suffix}'
 
     def add_serial_number(self) -> None:
         if not self.is_serial_number_added or type(self.current_index) is not int:
             return
         current_serial_number = self.current_index + 1  # normally index starts from 0 so do +1
-        self.renamed_image_name = self.renamed_image_name \
-            + self.zero_padding_string.format(current_serial_number)
+        self.renamed_image_stem = self.renamed_image_stem \
+                                  + self.zero_padding_string.format(current_serial_number)
 
     def zen2han(self) -> None:
         """
@@ -315,8 +320,8 @@ class Rename:
         change illegal characters that can be fixed from full-width to half-width.
         >>> name００１.png => name001.png
         """
-        self.renamed_image_name = jaconv.z2h(
-            self.renamed_image_name,
+        self.renamed_image_stem = jaconv.z2h(
+            self.renamed_image_stem,
             kana=False, ascii=True, digit=True
         )
 
@@ -326,9 +331,9 @@ class Rename:
         >>> p.sub('X', '-_,!(/:*?"<>|¥)あabc')
         '-_,!(XXXXXXXXX)あabc'
         """
-        self.renamed_image_name = self.unavailable_file_name_char_pattern.sub(
+        self.renamed_image_stem = self.unavailable_file_name_char_pattern.sub(
             self.alternative_unavailable_file_name_char,
-            self.renamed_image_name
+            self.renamed_image_stem
         )
 
     def replace_unavailable_url_chars(self) -> None:
@@ -340,9 +345,9 @@ class Rename:
         """
         if self.is_unavailable_url_chars_kept:
             return
-        self.renamed_image_name = self.unavailable_url_char_pattern.sub(
+        self.renamed_image_stem = self.unavailable_url_char_pattern.sub(
             self.alternative_unavailable_url_char,
-            self.renamed_image_name
+            self.renamed_image_stem
         )
 
     def replace_with_separator(self) -> None:
@@ -353,9 +358,9 @@ class Rename:
         p.sub('_', ' bar　foo　')
         >>> '_bar_foo_'
         """
-        self.renamed_image_name = self.replacement_with_separator_pattern.sub(
+        self.renamed_image_stem = self.replacement_with_separator_pattern.sub(
             self.separator,
-            self.renamed_image_name
+            self.renamed_image_stem
         )
 
     def rename(self):
@@ -400,27 +405,38 @@ class Rename:
         self.add_serial_number()
 
         if self.run:
-            os.rename(self.image_path, self.renamed_image_path)
+            pathlib.Path.mkdir(
+                self.renamed_parent_image_path,
+                parents=True,
+                exist_ok=True
+            )
+            # use Path.replace instead of Path.rename.
+            # so FileExistsError will not be raised.
+            self.image_path.replace(self.renamed_image_path)
 
-        self.append_image_name_comparison()
+        self.append_comparison()
 
     @property
-    def image_name_comparison_for_file(self) -> str:
-        return f'{self.original_image_name_with_ext} => {self.renamed_image_name_with_ext}'
+    def loop_counter(self) -> int:
+        return len(self.rename_log)
 
-    def append_image_name_comparison(self) -> None:
-        if not self.is_image_name_file_made:
+    @property
+    def comparison(self) -> str:
+        return f'{self.original_image_name} => {self.renamed_image_name}'
+
+    def append_comparison(self) -> None:
+        if not self.is_log_file_made:
             return
-        self.image_name_comparisons_for_file.append(self.image_name_comparison_for_file)
+        self.rename_log.append(self.comparison)
 
     @classmethod
-    def make_image_name_file(cls, dir_path: str):
-        text_file_path = os.path.join(dir_path, 'image_names.txt')
-        with open(text_file_path, mode='w') as f:
-            f.write('\n\n'.join(cls.image_name_comparisons_for_file))
-
+    def make_image_name_file(cls, dest_dir: Union[str, pathlib.Path]):
+        if type(dest_dir) is str:
+            dest_dir: pathlib.Path = pathlib.Path(dest_dir)
+        file_path = dest_dir / pathlib.Path('log.txt')
+        file_path.write_text('\n\n'.join(cls.rename_log))
         # clear image_comparisons
-        cls.image_name_comparisons_for_file = list()
+        cls.rename_log = list()
 
 
 def main():
