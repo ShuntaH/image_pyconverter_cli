@@ -1,24 +1,22 @@
+import pathlib
+from typing import Callable
+
 import pytest
 from PIL import Image
 
 
 @pytest.fixture(scope='session')
-def temp_dir():
-    return 'temp'
+def temp_dest(tmp_path_factory) -> Callable:
+    def _temp_dest_root(dest: str = 'dest'):
+        return tmp_path_factory.mktemp(pathlib.Path(dest))
+
+    return _temp_dest_root
 
 
 @pytest.fixture(scope="session")
-def temp_image_file(
-        tmp_path_factory,
-        temp_dir
-):
+def temp_image_file(tmp_path_factory) -> Callable:
     """
-    :param request:
-    :param temp_dir:
     :param tmp_path_factory:
-    :param size: (width, height)
-    :param rgb_color: ()
-    :return:
     """
     def _temp_image_file(
             image_name: str,
@@ -26,7 +24,7 @@ def temp_image_file(
             rgb_color: tuple = (0, 128, 255)
     ):
         img = Image.new("RGB", size, rgb_color)
-        fn = tmp_path_factory.mktemp(temp_dir) / image_name
+        fn = tmp_path_factory.mktemp(pathlib.Path('temp')) / image_name
         img.save(fn)
         return fn
 

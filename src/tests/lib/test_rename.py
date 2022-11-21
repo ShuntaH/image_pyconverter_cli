@@ -1,13 +1,15 @@
-import os
-
 from lib.rename import Rename
 
 
 class TestRename:
-    def test_renamed_images_dir_path_exist(self, temp_dir, temp_image_file):
-        rename = Rename(image_path=temp_image_file('test.png'))
-        assert os.path.exists(self.temp_renamed_images_dir_path) is True
-        assert rename.dest == temp_dir
+    def test_values_created_on_init_exist(self, temp_image_file, temp_dest):
+
+        rename = Rename(
+            image_path=temp_image_file('test.png'),
+            dest=temp_dest()
+        )
+        assert rename.dest_root.exists() is True
+
 
     # def test_replace_words(self):
     #     words_before_replacement: list[str] = ['bar', 'foo', 'fuga']

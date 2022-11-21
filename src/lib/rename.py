@@ -1,10 +1,8 @@
 import argparse
 import enum
-import os
 import pathlib
 import re
 import dataclasses
-from functools import cached_property
 from typing import Optional, Pattern, ClassVar, Union
 
 from jaconv import jaconv
@@ -103,8 +101,8 @@ class Rename:
         self.dir_path: pathlib.Path = self.image_path.parent
 
         self.relative_dir_path = self.dir_path.relative_to(self.dir_path)  # => '.'
-        self.relative_image_path = self.image_path.relative_to(self.relative_dir_path)  # => './temp/img.png'
-        self.relative_image_parent_path = self.relative_image_path[0]  # => './temp/
+        self.relative_image_path = self.image_path.relative_to(self.dir_path)  # => './temp/img.png'
+        self.relative_image_parent_path = self.relative_image_path.parents[0]  # => './temp/
 
         self.original_image_name = self.image_path.name
         self.ext = ''.join(self.image_path.suffixes)  # './test.tar.gz' => ['.tar', '.gz']
