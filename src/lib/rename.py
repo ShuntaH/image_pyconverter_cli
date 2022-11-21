@@ -420,7 +420,7 @@ class Rename:
 
     @property
     def comparison(self) -> str:
-        return f'{self.original_image_name} => {self.renamed_image_name}'
+        return f'{self.image_path} => {self.renamed_image_path}'
 
     def append_comparison(self) -> None:
         if not self.is_log_file_made:
