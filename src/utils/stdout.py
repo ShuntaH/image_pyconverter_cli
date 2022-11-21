@@ -13,16 +13,22 @@ class Bcolors(Enum):
     BOLD = '\033[1m'
     UNDERLINE = '\033[4m'
 
+    @classmethod
+    def names(cls) -> list[str]:
+        return [var.name for var in cls]
+
+    @classmethod
+    def values(cls) -> list[str]:
+        return [var.value for var in cls]
+
 
 class Stdout:
     @staticmethod
-    def styled_stdout(style: Bcolors = '', sentence: str = ''):
+    def styled_stdout(style: Bcolors = '', sentence: str = '') -> None:
         """
         :param style: Bcolors.WARNING etc.
-        :param sentence:
-        :return:
+        :param sentence: message sentence
+        :return: None
         """
-        print(f"{style}"
-              f"{sentence}"
-              )
-
+        print(f"\n{style}"
+              f"{sentence}")

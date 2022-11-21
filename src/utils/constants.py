@@ -1,3 +1,9 @@
+from dotenv import load_dotenv
+
+# load env variables to os.environ from env
+load_dotenv()
+
+
 VALID_EXTENSIONS = [
     '.jpg',
     '.jpeg',
