@@ -15,7 +15,7 @@ from utils import get_image_paths_from_within, datetime2str
 
 
 class DefaultValues(enum.Enum):
-    DEST_NAME = f"RENAMED_IMAGES_{datetime2str()}"
+    DEST_DIR_NAME = f"RENAMED_IMAGES_{datetime2str()}"
     DEST = pathlib.Path.cwd()
 
     PREFIX = ''
@@ -63,7 +63,7 @@ class Rename:
     image_path: Union[str, pathlib.Path]
 
     dest: Union[str, pathlib.Path] = DefaultValues.DEST.value
-    dest_name: str = DefaultValues.DEST_NAME.value
+    dest_dir_name: str = DefaultValues.DEST_DIR_NAME.value
 
     words_before_replacement: list[str] = dataclasses.field(default_factory=lambda: [])
     words_after_replacement: list[str] = dataclasses.field(default_factory=lambda: [])
@@ -108,13 +108,26 @@ class Rename:
         self._renamed_image_name: str = self.original_image_name
         self.zero_padding_string: str = '{{0:0{}d}}'.format(self.zero_padding_digit)  # => {0:03}
         self.loop_counter = len(self.image_name_comparisons_for_file)
-        self.root_dest = self.dest / pathlib.Path(self.dest_name)
+        self.root_dest = self.dest / pathlib.Path(self.dest_dir_name)
         self.root_dest.mkdir(exist_ok=True)
 
     @staticmethod
     def get_args():
         arg_parser = argparse.ArgumentParser()
         with add_extra_arguments_to(arg_parser) as arg_parser:
+            arg_parser.add_argument(
+                '-d', '--dest',
+                type=str,
+                help='a directory path containing renamed images',
+                default=DefaultValues.DEST.value
+            )
+            arg_parser.add_argument(
+                '-ddn', '--dest_dir_name',
+                type=str,
+                help='name of a directory containing renamed images',
+                default=DefaultValues.DEST_DIR_NAME.value
+            )
+
             arg_parser.add_argument(
                 '-before', '--words_before_replacement',
                 nargs="*", type=str,
