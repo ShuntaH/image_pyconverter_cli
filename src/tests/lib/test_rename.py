@@ -1,13 +1,30 @@
+import pathlib
+
 from lib.rename import Rename
 
 
 class TestRename:
-    def test_values_created_on_init_exist(self, temp_image_file, temp_dest):
-
-        rename = Rename(
-            image_path=temp_image_file('test.png'),
-            dest=temp_dest()
+    def test_post_init(self, temp_dir_path, temp_image_file, temp_dest):
+        _temp_dir_path: pathlib.Path = temp_dir_path()
+        _temp_image_file: pathlib.Path = temp_image_file(
+            image_name='test.png',
+            temp_dir_path=_temp_dir_path
         )
+        _temp_dest: pathlib.Path = temp_dest()
+
+        rename = Rename(image_path=_temp_image_file, dest=_temp_dest)
+
+        assert rename.dir_path == _temp_dir_path
+        assert rename.relative_dir_path == _temp_dir_path.relative_to(_temp_dir_path)
+        assert rename.relative_image_path == _temp_image_file.relative_to(_temp_dir_path)
+        assert rename.relative_image_parent_path == rename.relative_image_path.parents[0]
+        assert rename.original_image_name == _temp_image_file.name
+        assert rename.ext == ''.join(_temp_image_file.suffixes)
+        assert rename.original_image_stem == _temp_image_file.stem
+        assert rename.renamed_image_stem == _temp_image_file.stem
+        assert rename.zero_padding_string == '{{0:0{}d}}'.format(rename.zero_padding_digit)
+        assert rename.dest == _temp_dest
+        assert rename.dest_root == _temp_dest / rename.dest_dir_name
         assert rename.dest_root.exists() is True
 
 
