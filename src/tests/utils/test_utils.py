@@ -3,7 +3,11 @@ from re import Pattern
 
 import pytest
 
-from utils import create_valid_extension_pattern_from, get_image_paths_from_within, cleanup_temp, Stdout, Bcolors
+from src.utils import (
+    create_valid_extension_pattern_from,
+    get_image_paths_from_within,
+    )
+from src.utils.stdout import Stdout, Bcolors
 
 
 def test_create_valid_extension_pattern_from():

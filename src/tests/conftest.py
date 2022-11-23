@@ -4,13 +4,13 @@ from typing import Callable
 import pytest
 from PIL import Image
 
-from utils import cleanup_temp, Stdout, Bcolors
+from src.utils import Stdout, Bcolors
 
 
-@pytest.fixture(scope='function', autouse=True)
+@pytest.fixture(scope='function', autouse=False)
 def cleanup():
     yield
-    cleanup_temp()
+    # cleanup_temp()
     Stdout.styled_stdout(Bcolors.OKBLUE.value, 'cleanup done.')
 
 

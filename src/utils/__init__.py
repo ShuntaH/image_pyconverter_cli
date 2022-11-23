@@ -85,7 +85,9 @@ def get_temp_root_path() -> pathlib.Path:
     return temp_root.joinpath(f"pytest-of-{user}")
 
 
-def cleanup_temp():
+def force_cleanup_temp():
+    """A function to force pytest to erase temporary files
+    because sometimes pytest does not erase them automatically."""
     from _pytest import pathlib
     root_path = get_temp_root_path()
     Stdout.styled_stdout(

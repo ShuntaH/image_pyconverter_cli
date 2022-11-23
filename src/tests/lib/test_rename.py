@@ -8,7 +8,7 @@ class TestRename:
         _temp_dir: pathlib.Path = temp_dir_path()
         _temp_image_file: pathlib.Path = temp_image_file(
             image_name='post_init_test.png',
-            temp_dir=_temp_dir
+            temp_dir_path=_temp_dir
         )
         _temp_dest: pathlib.Path = temp_dest()
 
