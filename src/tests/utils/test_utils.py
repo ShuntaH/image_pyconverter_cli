@@ -25,17 +25,17 @@ def test_get_image_paths_from_within(
         get_image_paths_from_within(dir_path=_non_existent_dir)
     assert f'"{_non_existent_dir} does not exists."' == excinfo.value.args[0]
 
-    # _empty_dir_path: pathlib.Path = temp_dir_path()
-    # with pytest.raises(ValueError) as excinfo:
-    #     get_image_paths_from_within(dir_path=_empty_dir_path.__str__())
-    # assert f'No images within "{_empty_dir_path.__str__()}".' == excinfo.value.args[0]
+    _empty_dir_path: pathlib.Path = temp_dir_path()
+    with pytest.raises(ValueError) as excinfo:
+        get_image_paths_from_within(dir_path=str(_empty_dir_path))
+    assert f'No images within "{_empty_dir_path}".' == excinfo.value.args[0]
 
     _temp_dir_path: pathlib.Path = temp_dir_path()
     valid_ext_image_png = temp_image_file(image_name='valid_ext_png.png', temp_dir_path=_temp_dir_path)
     valid_ext_image_jpg = temp_image_file(image_name='valid_ext_jpg.jpg', temp_dir_path=_temp_dir_path)
     invalid_ext_image = temp_text_file(temp_dir_path=_temp_dir_path)
 
-    paths = get_image_paths_from_within(dir_path=_temp_dir_path)
+    paths = get_image_paths_from_within(dir_path=str(_temp_dir_path))
     # total count is 3. there is 1 invalid extension file.
     assert 2 == sum(1 for p in paths)
 

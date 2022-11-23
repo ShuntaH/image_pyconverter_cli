@@ -20,18 +20,17 @@ def get_image_paths_from_within(
     """
 
     dir_p = pathlib.Path(dir_path)
-    dir_p_string: str = dir_p.__str__()
     if not dir_p.exists():
-        raise ValueError(f'"{dir_p_string} does not exists."')
+        raise ValueError(f'"{dir_path} does not exists."')
     ext_pattern: Pattern = create_valid_extension_pattern_from(valid_extensions=valid_extensions)
     g = valid_image_paths_generator(dir_path=dir_p, pattern=ext_pattern)
 
-    # try:
-    #     g.__next__()
-    # except StopIteration:
-    #     raise ValueError(f'No images within "{dir_p_string}".')
+    try:
+        g.__next__()
+    except StopIteration:
+        raise ValueError(f'No images within "{dir_path}".')
 
-    return g
+    return valid_image_paths_generator(dir_path=dir_p, pattern=ext_pattern)
 
 
 def create_valid_extension_pattern_from(
