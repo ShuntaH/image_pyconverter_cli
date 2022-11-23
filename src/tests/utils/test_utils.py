@@ -38,6 +38,5 @@ def test_get_image_paths_from_within(
 
     paths = get_image_paths_from_within(dir_path=_temp_dir_path)
     # total count is 3. there is 1 invalid extension file.
-    [print(p) for p in paths]
     assert 2 == sum(1 for p in paths)
 

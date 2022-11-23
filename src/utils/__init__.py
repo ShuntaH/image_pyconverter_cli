@@ -48,13 +48,17 @@ def valid_image_paths_generator(
         dir_path: pathlib.Path = pathlib.Path(dir_path)
 
     for p in dir_path.glob('**/*'):
-        p_string = p.__str__()
+        p_string = str(p)
         if not pattern.search(p_string):
             Stdout.styled_stdout(
                 Bcolors.WARNING.value,
                 f"'{p_string}' is invalid extension."
             )
             continue
+        Stdout.styled_stdout(
+            Bcolors.OKBLUE.value,
+            f"yield '{p_string}.'"
+        )
         yield p
 
 
