@@ -7,7 +7,7 @@ class TestRename:
     def test_post_init(self, temp_dir_path, temp_image_file, temp_dest):
         _temp_dir_path: pathlib.Path = temp_dir_path()
         _temp_image_file: pathlib.Path = temp_image_file(
-            image_name='test.png',
+            image_name='post_init_test.png',
             temp_dir_path=_temp_dir_path
         )
         _temp_dest: pathlib.Path = temp_dest()

@@ -1,6 +1,8 @@
 import datetime
+import os
 import pathlib
 import re
+import tempfile
 from typing import Pattern, Union, Iterator, Optional
 
 from src.utils.stdout import Stdout, Bcolors
@@ -24,10 +26,10 @@ def get_image_paths_from_within(
     ext_pattern: Pattern = create_valid_extension_pattern_from(valid_extensions=valid_extensions)
     g = valid_image_paths_generator(dir_path=dir_p, pattern=ext_pattern)
 
-    try:
-        g.__next__()
-    except StopIteration:
-        raise ValueError(f'No images within "{dir_p_string}".')
+    # try:
+    #     g.__next__()
+    # except StopIteration:
+    #     raise ValueError(f'No images within "{dir_p_string}".')
 
     return g
 
@@ -41,11 +43,11 @@ def valid_image_paths_generator(
         dir_path: Union[str, pathlib.Path],
         pattern: Pattern
 ) -> Iterator[pathlib.Path]:
-    _dir_path = dir_path
-    if type(dir_path) is str:
-        _dir_path = pathlib.Path(_dir_path)
 
-    for p in _dir_path.glob('**/*'):
+    if type(dir_path) is str:
+        dir_path: pathlib.Path = pathlib.Path(dir_path)
+
+    for p in dir_path.glob('**/*'):
         p_string = p.__str__()
         if not pattern.search(p_string):
             Stdout.styled_stdout(
@@ -62,3 +64,33 @@ def datetime2str(dt: Optional[datetime.datetime] = None):
     if type(dt) is not datetime.datetime:
         raise ValueError('dt argument type is not datetime.datetime type.')
     return dt.strftime('%Y-%m-%d_%H-%M-%S')
+
+
+def get_user() -> str:
+    """Return the current user name, or default value if getuser() does not work
+    in the current environment (see #1010)."""
+    try:
+        # In some exotic environments, getpass may not be importable.
+        import getpass
+
+        return getpass.getuser()
+    except (ImportError, KeyError):
+        return 'unknown'
+
+
+def get_temp_root_path() -> pathlib.Path:
+    from_env = os.environ.get("PYTEST_DEBUG_TEMPROOT")
+    temp_root = pathlib.Path(from_env or tempfile.gettempdir()).resolve()
+    user = get_user()
+    return temp_root.joinpath(f"pytest-of-{user}")
+
+
+def cleanup_temp():
+    from _pytest import pathlib
+    root_path = get_temp_root_path()
+    Stdout.styled_stdout(
+        style=Bcolors.OKBLUE.value,
+        sentence=f"cleanup {root_path}."
+    )
+    return pathlib.rm_rf(path=root_path)
+
