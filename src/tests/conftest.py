@@ -57,5 +57,6 @@ def temp_text_file(tmp_path_factory) -> Callable:
         pass the path created, not the function, as the argument."""
         p = temp_dir_path / text_name
         p.write_text(content)
-
+        assert p.read_text() == content
+        return p
     return _temp_text_file
