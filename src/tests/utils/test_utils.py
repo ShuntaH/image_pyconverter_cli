@@ -7,7 +7,6 @@ from src.utils import (
     create_valid_extension_pattern_from,
     get_image_paths_from_within,
     )
-from src.utils.stdout import Stdout, Bcolors
 
 
 def test_create_valid_extension_pattern_from():
