@@ -17,10 +17,10 @@ def test_get_image_paths_from_within(
         temp_image_file,
         temp_text_file,
 ):
-    _non_existent_dir_path = '/not/exist'
+    _non_existent_dir = '/not/exist'
     with pytest.raises(ValueError) as excinfo:
-        get_image_paths_from_within(dir_path=_non_existent_dir_path)
-    assert f'"{_non_existent_dir_path} does not exists."' == excinfo.value.args[0]
+        get_image_paths_from_within(dir_path=_non_existent_dir)
+    assert f'"{_non_existent_dir} does not exists."' == excinfo.value.args[0]
 
     # _empty_dir_path: pathlib.Path = temp_dir_path()
     # with pytest.raises(ValueError) as excinfo:
@@ -35,7 +35,5 @@ def test_get_image_paths_from_within(
     paths = get_image_paths_from_within(dir_path=_temp_dir_path)
     # total count is 3. there is 1 invalid extension file.
     [print(p) for p in paths]
-    # assert 2 == sum(1 for p in paths)
-    # cleanup_temp()
-    # Stdout.styled_stdout(Bcolors.OKBLUE.value, 'cleanup done.')
+    assert 2 == sum(1 for p in paths)
 

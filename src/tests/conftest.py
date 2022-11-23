@@ -17,17 +17,19 @@ def cleanup():
 @pytest.fixture(scope='function')
 def temp_dest(tmp_path) -> Callable:
     def _temp_dest(dest: str = 'dest'):
-        return tmp_path / pathlib.Path(dest)
-
+        d = tmp_path / pathlib.Path(dest)
+        d.mkdir(parents=True, exist_ok=True)
+        return d
     yield _temp_dest
 
 
 @pytest.fixture(scope='function')
 def temp_dir_path(tmp_path) -> Callable:
-    def _temp_dir_path(temp: str = 'temp') -> pathlib.Path:
-        return tmp_path / pathlib.Path(temp)
-
-    yield _temp_dir_path
+    def _temp_dir(temp: str = 'temp') -> pathlib.Path:
+        p = tmp_path / pathlib.Path(temp)
+        p.mkdir(parents=True, exist_ok=True)
+        return p
+    yield _temp_dir
 
 
 @pytest.fixture(scope='function')
@@ -49,11 +51,8 @@ def temp_image_file() -> Callable:
     yield _temp_image_file
 
 
-@pytest.fixture(scope="function", autouse=True)
-def temp_text_file(tmp_path_factory) -> Callable:
-    """
-    :param tmp_path_factory: provided by pytest.
-    """
+@pytest.fixture(scope="function")
+def temp_text_file() -> Callable:
     def _temp_text_file(
             temp_dir_path: pathlib.Path,
             text_name: str = 'temp.txt',

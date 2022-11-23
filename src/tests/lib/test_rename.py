@@ -5,18 +5,18 @@ from lib.rename import Rename
 
 class TestRename:
     def test_post_init(self, temp_dir_path, temp_image_file, temp_dest):
-        _temp_dir_path: pathlib.Path = temp_dir_path()
+        _temp_dir: pathlib.Path = temp_dir_path()
         _temp_image_file: pathlib.Path = temp_image_file(
             image_name='post_init_test.png',
-            temp_dir_path=_temp_dir_path
+            temp_dir=_temp_dir
         )
         _temp_dest: pathlib.Path = temp_dest()
 
         rename = Rename(image_path=_temp_image_file, dest=_temp_dest)
 
-        assert rename.dir_path == _temp_dir_path
-        assert rename.relative_dir_path == _temp_dir_path.relative_to(_temp_dir_path)
-        assert rename.relative_image_path == _temp_image_file.relative_to(_temp_dir_path)
+        assert rename.dir_path == _temp_dir
+        assert rename.relative_dir_path == _temp_dir.relative_to(_temp_dir)
+        assert rename.relative_image_path == _temp_image_file.relative_to(_temp_dir)
         assert rename.relative_image_parent_path == rename.relative_image_path.parents[0]
         assert rename.original_image_name == _temp_image_file.name
         assert rename.ext == ''.join(_temp_image_file.suffixes)
