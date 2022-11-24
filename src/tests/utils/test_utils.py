@@ -6,7 +6,7 @@ import pytest
 from src.utils import (
     create_valid_extension_pattern_from,
     get_image_paths_from_within,
-    )
+)
 
 
 def test_create_valid_extension_pattern_from():
@@ -33,9 +33,15 @@ def test_get_image_paths_from_within(
     _temp_dir_path: pathlib.Path = temp_dir_path()
     valid_ext_image_png = temp_image_file(image_name='valid_ext_png.png', temp_dir_path=_temp_dir_path)
     valid_ext_image_jpg = temp_image_file(image_name='valid_ext_jpg.jpg', temp_dir_path=_temp_dir_path)
-    invalid_ext_image = temp_text_file(temp_dir_path=_temp_dir_path)
+    temp_text_file(temp_dir_path=_temp_dir_path)
 
     paths = get_image_paths_from_within(dir_path=str(_temp_dir_path))
     # total count is 3. there is 1 invalid extension file.
     assert 2 == sum(1 for p in paths)
 
+    paths = get_image_paths_from_within(dir_path=str(_temp_dir_path))
+    for p in paths:
+        assert str(p) in [
+            str(valid_ext_image_jpg),
+            str(valid_ext_image_png)
+        ]
