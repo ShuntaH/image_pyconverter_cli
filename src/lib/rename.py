@@ -318,11 +318,15 @@ class Rename:
         self.renamed_image_stem = f'{_prefix}{self.renamed_image_stem}{_suffix}'
 
     def add_serial_number(self) -> None:
-        if not self.is_serial_number_added or type(self.current_index) is not int:
+        if not self.is_serial_number_added:
             return
+
+        if type(self.current_index) is not int:
+            raise ValueError('serial number index is not provided.')
+
         current_serial_number = self.current_index + 1  # normally index starts from 0 so do +1
         self.renamed_image_stem = self.renamed_image_stem \
-                                  + self.zero_padding_string.format(current_serial_number)
+            + self.zero_padding_string.format(current_serial_number)
 
     def zen2han(self) -> None:
         """

@@ -1,5 +1,7 @@
 import pathlib
 
+import pytest
+
 from lib.rename import Rename
 
 
@@ -340,15 +342,34 @@ class TestRename:
         rename.add_prefix_suffix()
         assert rename.renamed_image_name == _after
 
+    def test_add_serial_number(self, temp_dir_path, temp_image_file):
+        _temp_dir: pathlib.Path = temp_dir_path()
+
+        _before = 'image.png'
+        _after = 'image001.png'
+        _temp_image_file: pathlib.Path = temp_image_file(
+            image_name=_before,
+            temp_dir_path=_temp_dir,)
+
+        rename = Rename(
+            image_path=_temp_image_file,
+            is_serial_number_added=True,
+            current_index=0)
+        rename.add_serial_number()
+        assert rename.renamed_image_name == _after
+
+        # missing current_index argument
+        rename = Rename(
+            image_path=_temp_image_file,
+            is_serial_number_added=True,)
+        with pytest.raises(ValueError) as excinfo:
+            rename.add_serial_number()
+        assert excinfo.value.args[0] == 'serial number index is not provided.'
+
     def test_replace_unavailable_characters(self):
         pass
 
     def test_replace_invalid_url_characters(self):
-        pass
-
-
-
-    def test_enable_to_add_serial_number(self):
         pass
 
     def test_is_extensions_valid(self):
