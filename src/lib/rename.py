@@ -458,7 +458,9 @@ def main():
             args=Rename.get_args(),
             task_name='rename'  # function name
     ) as args:
-        image_paths = get_image_paths_from_within(dir_path=args.dir_path)
+        image_paths = get_image_paths_from_within(
+            dir_path=args.dir_path,
+            valid_extensions=DefaultValues.VALID_EXTENSIONS.value)
 
         for index, image_path in enumerate(image_paths):
             # file '/User/macbook/a.jpg'

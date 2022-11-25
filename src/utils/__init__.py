@@ -11,7 +11,7 @@ from utils.constants import VALID_EXTENSIONS
 
 def get_image_paths_from_within(
         dir_path: str,
-        valid_extensions: list[str] = VALID_EXTENSIONS
+        valid_extensions: list[str]
 ) -> Iterator[pathlib.Path]:
     """
     >>> get_image_paths_from_within(dir_path='/Users/macbook')

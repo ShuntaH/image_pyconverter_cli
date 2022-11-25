@@ -372,9 +372,6 @@ class TestRename:
     def test_replace_invalid_url_characters(self):
         pass
 
-    def test_is_extensions_valid(self):
-        pass
-
     def test_enable_to_rename(self):
         pass
 
