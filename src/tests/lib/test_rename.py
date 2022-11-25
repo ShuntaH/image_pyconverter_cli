@@ -27,9 +27,8 @@ class TestRename:
         assert rename.dest_dir_path == _temp_dest / rename.dest_dir_name
         assert rename.dest_dir_path.exists() is True
 
-    def test_replace_words(self, temp_dir_path, temp_image_file, temp_dest_path):
+    def test_replace_words(self, temp_dir_path, temp_image_file):
         _temp_dir: pathlib.Path = temp_dir_path()
-        _temp_dest: pathlib.Path = temp_dest_path()
 
         _before = 'bar_foo_fuga.png'
         _temp_image_file: pathlib.Path = temp_image_file(
@@ -74,7 +73,6 @@ class TestRename:
         assert rename.renamed_image_name == _after
 
         # words_before_replacement is empty
-        _after = 'bar_foo_fuga.png'
         words_before_replacement: list[str] = list()
         words_after_replacement: list[str] = ['replaced-bar']
         rename = Rename(
@@ -83,10 +81,9 @@ class TestRename:
             words_after_replacement=words_after_replacement
         )
         rename.replace_words()
-        assert rename.renamed_image_name == _after
+        assert rename.renamed_image_name == _before
 
         # words_after_replacement is empty
-        _after = 'bar_foo_fuga.png'
         words_before_replacement: list[str] = ['bar', 'foo']
         words_after_replacement: list[str] = list()
         rename = Rename(
@@ -95,15 +92,88 @@ class TestRename:
             words_after_replacement=words_after_replacement
         )
         rename.replace_words()
-        assert rename.renamed_image_name == _after
+        assert rename.renamed_image_name == _before
 
         # subprocess.run(['ic_rename', abs_image_paths])
 
-    def test_replace_full_width_characters_with_half_width(self):
+    def test_replace_full_width_characters_with_half_width(
+            self,
+            temp_dir_path,
+            temp_image_file
+    ):
         """
         name００１.png => name001.png
         """
-        pass
+        _temp_dir: pathlib.Path = temp_dir_path()
+
+        # half-width ASCII characters don't change.
+        _before = 'half_width.png'
+        _temp_image_file: pathlib.Path = temp_image_file(
+            image_name=_before,
+            temp_dir_path=_temp_dir
+        )
+
+        rename = Rename(image_path=_temp_image_file)
+        rename.zen2han()
+        assert rename.renamed_image_name == _before
+
+        # full-width ASCII characters to half-width
+        _before = 'ｆｕｌｌｗｉｄｔｈ.png'
+        _after = 'fullwidth.png'
+        _temp_image_file: pathlib.Path = temp_image_file(
+            image_name=_before,
+            temp_dir_path=_temp_dir
+        )
+
+        rename = Rename(image_path=_temp_image_file)
+        rename.zen2han()
+        assert rename.renamed_image_name == _after
+
+        # Non-ASCII characters are not converted to half-width characters.
+        _before = '全角.png'
+        _temp_image_file: pathlib.Path = temp_image_file(
+            image_name=_before,
+            temp_dir_path=_temp_dir
+        )
+
+        rename = Rename(image_path=_temp_image_file)
+        rename.zen2han()
+        assert rename.renamed_image_name == _before
+
+        # half-width numbers don't change.
+        _before = '123.png'
+        _temp_image_file: pathlib.Path = temp_image_file(
+            image_name=_before,
+            temp_dir_path=_temp_dir
+        )
+
+        rename = Rename(image_path=_temp_image_file)
+        rename.zen2han()
+        assert rename.renamed_image_name == _before
+
+        # full-width numbers to half-width
+        _before = '１２３.png'
+        _after = '123.png'
+        _temp_image_file: pathlib.Path = temp_image_file(
+            image_name=_before,
+            temp_dir_path=_temp_dir
+        )
+
+        rename = Rename(image_path=_temp_image_file)
+        rename.zen2han()
+        assert rename.renamed_image_name == _after
+
+        # full width space to half width space.
+        _before = 'ｓｐａｃｅ　ｓｐａｃｅ.png'
+        _after = 'space space.png'
+        _temp_image_file: pathlib.Path = temp_image_file(
+            image_name=_before,
+            temp_dir_path=_temp_dir
+        )
+
+        rename = Rename(image_path=_temp_image_file)
+        rename.zen2han()
+        assert rename.renamed_image_name == _after
 
     def test_replace_delimiters_with_specified_separator(self):
         pass
