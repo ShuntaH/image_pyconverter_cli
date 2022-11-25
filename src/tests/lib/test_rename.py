@@ -7,7 +7,7 @@ class TestRename:
     def test_post_init(self, temp_dir_path, temp_image_file, temp_dest_path):
         _temp_dir: pathlib.Path = temp_dir_path()
         _temp_image_file: pathlib.Path = temp_image_file(
-            image_name='post_init_test.png',
+            image_name='post_init_test.vol1.png',
             temp_dir_path=_temp_dir
         )
         _temp_dest: pathlib.Path = temp_dest_path()
@@ -19,9 +19,9 @@ class TestRename:
         assert rename.relative_image_path == _temp_image_file.relative_to(_temp_dir)
         assert rename.relative_image_parent_path == rename.relative_image_path.parents[0]
         assert rename.original_image_name == _temp_image_file.name
-        assert rename.ext == ''.join(_temp_image_file.suffixes)
-        assert rename.original_image_stem == _temp_image_file.stem
-        assert rename.renamed_image_stem == _temp_image_file.stem
+        assert rename.ext == '.png'
+        assert rename.original_image_stem == 'post_init_test.vol1'
+        assert rename.renamed_image_stem == 'post_init_test.vol1'
         assert rename.zero_padding_string == '{{0:0{}d}}'.format(rename.zero_padding_digit)
         assert rename.dest == _temp_dest
         assert rename.dest_dir_path == _temp_dest / rename.dest_dir_name
