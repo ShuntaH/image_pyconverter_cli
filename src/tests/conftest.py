@@ -8,7 +8,7 @@ from src.utils import Stdout, Bcolors
 
 
 @pytest.fixture(scope='function', autouse=False)
-def cleanup():
+def force_cleanup():
     yield
     # cleanup_temp()
     Stdout.styled_stdout(Bcolors.OKBLUE.value, 'cleanup done.')

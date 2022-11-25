@@ -301,7 +301,44 @@ class TestRename:
         rename.replace_with_separator()
         assert rename.renamed_image_name == _after
 
+    def test_add_prefix_and_suffix(self, temp_dir_path, temp_image_file):
+        _temp_dir: pathlib.Path = temp_dir_path()
 
+        # add prefix
+        _before = 'image.png'
+        _after = 'prefix_image.png'
+        _temp_image_file: pathlib.Path = temp_image_file(
+            image_name=_before,
+            temp_dir_path=_temp_dir
+        )
+
+        rename = Rename(image_path=_temp_image_file, prefix='prefix')
+        rename.add_prefix_suffix()
+        assert rename.renamed_image_name == _after
+
+        # add suffix
+        _before = 'image.png'
+        _after = 'image_suffix.png'
+        _temp_image_file: pathlib.Path = temp_image_file(
+            image_name=_before,
+            temp_dir_path=_temp_dir
+        )
+
+        rename = Rename(image_path=_temp_image_file, suffix='suffix')
+        rename.add_prefix_suffix()
+        assert rename.renamed_image_name == _after
+
+        # add both prefix and suffix
+        _before = 'image.png'
+        _after = 'prefix_image_suffix.png'
+        _temp_image_file: pathlib.Path = temp_image_file(
+            image_name=_before,
+            temp_dir_path=_temp_dir
+        )
+
+        rename = Rename(image_path=_temp_image_file, prefix='prefix', suffix='suffix')
+        rename.add_prefix_suffix()
+        assert rename.renamed_image_name == _after
 
     def test_replace_unavailable_characters(self):
         pass
@@ -309,8 +346,7 @@ class TestRename:
     def test_replace_invalid_url_characters(self):
         pass
 
-    def test_add_prefix_and_suffix(self):
-        pass
+
 
     def test_enable_to_add_serial_number(self):
         pass
