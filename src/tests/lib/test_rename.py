@@ -277,6 +277,30 @@ class TestRename:
         rename.replace_with_separator()
         assert rename.renamed_image_name == _after
 
+        # replace '_' with not a default separator
+        _before = 'space_space.png'
+        _after = 'space-space.png'
+        _temp_image_file: pathlib.Path = temp_image_file(
+            image_name=_before,
+            temp_dir_path=_temp_dir
+        )
+
+        rename = Rename(image_path=_temp_image_file, separator='-')
+        rename.replace_with_separator()
+        assert rename.renamed_image_name == _after
+
+        # replace '＿' with not a default separator
+        _before = 'space＿space.png'
+        _after = 'space-space.png'
+        _temp_image_file: pathlib.Path = temp_image_file(
+            image_name=_before,
+            temp_dir_path=_temp_dir
+        )
+
+        rename = Rename(image_path=_temp_image_file, separator='-')
+        rename.replace_with_separator()
+        assert rename.renamed_image_name == _after
+
 
 
     def test_replace_unavailable_characters(self):
