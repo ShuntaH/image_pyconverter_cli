@@ -19,7 +19,7 @@ class DefaultValues(enum.Enum):
     PREFIX = ''
     SUFFIX = ''
 
-    REPLACEMENT_WITH_SEPARATOR_PATTERN = re.compile(r'[ 　\t\n.,\-_]')
+    REPLACEMENT_WITH_SEPARATOR_PATTERN = re.compile(r'[ 　\t\n.,\-ー_＿]')
     SEPARATOR = '_'
 
     UNAVAILABLE_FILE_NAME_CHAR_PATTERN = re.compile(r'[/:*?"<>|¥]')  # ファイル名に使えない文字
@@ -107,8 +107,22 @@ class Rename:
         self.relative_image_parent_path = self.relative_image_path.parents[0]  # => './temp/
 
         self.original_image_name = self.image_path.name
-        self.ext = ''.join(self.image_path.suffixes)  # './test.tar.gz' => ['.tar', '.gz']
         self.original_image_stem = self.image_path.stem
+
+        _suffixes = self.image_path.suffixes
+        _should_be_stem = []
+        _should_be_ext = []
+
+        for s in _suffixes:
+            if s not in self.valid_extensions:
+                _should_be_stem.append(s)
+                continue
+            _should_be_ext.append(s)
+
+        self.ext = ''.join(_should_be_ext)  # './test.tar.gz' => ['.tar', '.gz']
+
+        if _should_be_stem:
+            self.original_image_stem = self.original_image_stem + ''.join(_should_be_stem)
 
         self._renamed_image_stem: str = self.original_image_stem
         self.zero_padding_string: str = '{{0:0{}d}}'.format(self.zero_padding_digit)  # => {0:03}

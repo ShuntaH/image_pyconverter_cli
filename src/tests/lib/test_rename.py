@@ -175,8 +175,109 @@ class TestRename:
         rename.zen2han()
         assert rename.renamed_image_name == _after
 
-    def test_replace_delimiters_with_specified_separator(self):
-        pass
+    def test_replace_delimiters_with_specified_separator(
+            self, temp_dir_path, temp_image_file
+    ):
+        _temp_dir: pathlib.Path = temp_dir_path()
+
+        # replace half width space with a separator
+        _before = 'space space.png'
+        _after = 'space_space.png'
+        _temp_image_file: pathlib.Path = temp_image_file(
+            image_name=_before,
+            temp_dir_path=_temp_dir
+        )
+
+        rename = Rename(image_path=_temp_image_file)
+        rename.replace_with_separator()
+        assert rename.renamed_image_name == _after
+
+        # replace full width space with a separator
+        _before = 'space　space.png'
+        _after = 'space_space.png'
+        _temp_image_file: pathlib.Path = temp_image_file(
+            image_name=_before,
+            temp_dir_path=_temp_dir
+        )
+
+        rename = Rename(image_path=_temp_image_file)
+        rename.replace_with_separator()
+        assert rename.renamed_image_name == _after
+
+        # replace tab space with a separator
+        _before = 'space    space.png'
+        _after = 'space____space.png'
+        _temp_image_file: pathlib.Path = temp_image_file(
+            image_name=_before,
+            temp_dir_path=_temp_dir
+        )
+
+        rename = Rename(image_path=_temp_image_file)
+        rename.replace_with_separator()
+        assert rename.renamed_image_name == _after
+
+        # replace '.' with a separator
+        # '.' looks some file extension.
+        _before = 'space.space.png'
+        _after = 'space_space.png'
+        _temp_image_file: pathlib.Path = temp_image_file(
+            image_name=_before,
+            temp_dir_path=_temp_dir
+        )
+
+        rename = Rename(image_path=_temp_image_file)
+        rename.replace_with_separator()
+        assert rename.renamed_image_name == _after
+
+        # replace ',' with a separator
+        _before = 'space,space.png'
+        _after = 'space_space.png'
+        _temp_image_file: pathlib.Path = temp_image_file(
+            image_name=_before,
+            temp_dir_path=_temp_dir
+        )
+
+        rename = Rename(image_path=_temp_image_file)
+        rename.replace_with_separator()
+        assert rename.renamed_image_name == _after
+
+        # replace '-' with a separator
+        _before = 'space,space.png'
+        _after = 'space_space.png'
+        _temp_image_file: pathlib.Path = temp_image_file(
+            image_name=_before,
+            temp_dir_path=_temp_dir
+        )
+
+        rename = Rename(image_path=_temp_image_file)
+        rename.replace_with_separator()
+        assert rename.renamed_image_name == _after
+
+        # replace ',' with a separator
+        _before = 'space,space.png'
+        _after = 'space_space.png'
+        _temp_image_file: pathlib.Path = temp_image_file(
+            image_name=_before,
+            temp_dir_path=_temp_dir
+        )
+
+        rename = Rename(image_path=_temp_image_file)
+        rename.replace_with_separator()
+        assert rename.renamed_image_name == _after
+
+        # replace 'ー' with a separator
+        _before = 'spaceーspace.png'
+        _after = 'space_space.png'
+        _temp_image_file: pathlib.Path = temp_image_file(
+            image_name=_before,
+            temp_dir_path=_temp_dir
+        )
+
+        rename = Rename(image_path=_temp_image_file)
+        rename.replace_with_separator()
+        assert rename.renamed_image_name == _after
+
+
 
     def test_replace_unavailable_characters(self):
         pass
