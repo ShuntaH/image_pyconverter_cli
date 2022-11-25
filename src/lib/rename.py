@@ -92,6 +92,8 @@ class Rename:
     # this list is not initialized and the same list is used.
     rename_log: ClassVar[list] = []
 
+    run: bool = False
+
     def __post_init__(self):
         if type(self.image_path) is str:
             self.image_path: pathlib.Path = pathlib.Path(self.image_path)
@@ -111,8 +113,8 @@ class Rename:
         self._renamed_image_stem: str = self.original_image_stem
         self.zero_padding_string: str = '{{0:0{}d}}'.format(self.zero_padding_digit)  # => {0:03}
 
-        self.dest_root = self.dest / pathlib.Path(self.dest_dir_name)
-        self.dest_root.mkdir(exist_ok=True)
+        self.dest_dir_path: pathlib.Path = self.dest / pathlib.Path(self.dest_dir_name)
+        self.dest_dir_path.mkdir(exist_ok=True)
 
     @staticmethod
     def get_args():
@@ -250,7 +252,7 @@ class Rename:
 
     @property
     def renamed_parent_image_path(self) -> pathlib.Path:
-        return self.dest_root / self.relative_image_parent_path
+        return self.dest_dir_path / self.relative_image_parent_path
 
     @property
     def renamed_image_path(self) -> pathlib.Path:
@@ -290,6 +292,8 @@ class Rename:
         if not self.words_before_replacement:
             return
 
+        # If the number of contents in the two arrays do not match,
+        # the larger portion of the array is not processed.
         for before, after in zip(
             self.words_before_replacement,
             self.words_after_replacement
@@ -464,7 +468,8 @@ def main():
                 is_serial_number_added=args.is_serial_number_added,
                 current_index=index,
                 zero_padding_digit=args.serial_number_zero_padding_digit,
-                valid_extensions=args.valid_extensions
+                valid_extensions=args.valid_extensions,
+                run=args.run
             )
 
             rename.rename()

@@ -4,13 +4,13 @@ from lib.rename import Rename
 
 
 class TestRename:
-    def test_post_init(self, temp_dir_path, temp_image_file, temp_dest):
+    def test_post_init(self, temp_dir_path, temp_image_file, temp_dest_path):
         _temp_dir: pathlib.Path = temp_dir_path()
         _temp_image_file: pathlib.Path = temp_image_file(
             image_name='post_init_test.png',
             temp_dir_path=_temp_dir
         )
-        _temp_dest: pathlib.Path = temp_dest()
+        _temp_dest: pathlib.Path = temp_dest_path()
 
         rename = Rename(image_path=_temp_image_file, dest=_temp_dest)
 
@@ -24,59 +24,80 @@ class TestRename:
         assert rename.renamed_image_stem == _temp_image_file.stem
         assert rename.zero_padding_string == '{{0:0{}d}}'.format(rename.zero_padding_digit)
         assert rename.dest == _temp_dest
-        assert rename.dest_root == _temp_dest / rename.dest_dir_name
-        assert rename.dest_root.exists() is True
+        assert rename.dest_dir_path == _temp_dest / rename.dest_dir_name
+        assert rename.dest_dir_path.exists() is True
 
+    def test_replace_words(self, temp_dir_path, temp_image_file, temp_dest_path):
+        _temp_dir: pathlib.Path = temp_dir_path()
+        _temp_dest: pathlib.Path = temp_dest_path()
 
-    # def test_replace_words(self):
-    #     words_before_replacement: list[str] = ['bar', 'foo', 'fuga']
-    #     words_after_replacement: list[str] = ['replaced-bar', 'replaced-foo', 'replaced-fuga']
-    #
-    #     orig = 'bar_foo_fuga'
-    #     rename = Rename(
-    #         image_path=self.image_path,
-    #         words_before_replacement=words_before_replacement,
-    #         words_after_replacement=words_after_replacement
-    #     )
-    #     assert orig == rename.renamed_image_name
-    #
-    #     rename.replace_words()
-    #     expected = 'replaced-bar_replaced-foo_replaced-fuga'
-    #     assert expected == rename.renamed_image_name
-    #
-    #     # subprocess.run(['ic_rename', abs_image_paths])
-    #
-    # def test_replace_the_number_of_missing_words_before_replacement(self):
-    #     # short of words_before_replacement
-    #     words_before_replacement: list[str] = ['bar']
-    #     words_after_replacement: list[str] = ['replaced-bar', 'replaced-foo', 'replaced-fuga']
-    #
-    #     orig = 'bar_foo_fuga'
-    #     expected = 'replaced-bar_foo_fuga'
-    #     rename = Rename(
-    #         image_path=self.image_path,
-    #         words_before_replacement=words_before_replacement,
-    #         words_after_replacement=words_after_replacement
-    #     )
-    #     assert rename.renamed_image_name == orig
-    #     rename.replace_words()
-    #     assert expected == rename.renamed_image_name
-    #
-    # def test_replace_the_number_of_missing_words_after_replacement(self):
-    #     # short of words_after_replacement
-    #     words_before_replacement: list[str] = ['bar', 'foo', 'fuga']
-    #     words_after_replacement: list[str] = ['replaced-bar']
-    #
-    #     orig = 'bar_foo_fuga'
-    #     expected = 'replaced-bar_foo_fuga'
-    #     rename = Rename(
-    #         image_path=self.image_path,
-    #         words_before_replacement=words_before_replacement,
-    #         words_after_replacement=words_after_replacement
-    #     )
-    #     assert rename.renamed_image_name == orig
-    #     rename.replace_words()
-    #     assert expected == rename.renamed_image_name
+        _before = 'bar_foo_fuga.png'
+        _temp_image_file: pathlib.Path = temp_image_file(
+            image_name=_before,
+            temp_dir_path=_temp_dir
+        )
+
+        _after = 'replaced-bar_replaced-foo_replaced-fuga.png'
+        words_before_replacement: list[str] = ['bar', 'foo', 'fuga']
+        words_after_replacement: list[str] = ['replaced-bar', 'replaced-foo', 'replaced-fuga']
+
+        rename = Rename(
+            image_path=_temp_image_file,
+            words_before_replacement=words_before_replacement,
+            words_after_replacement=words_after_replacement
+        )
+        rename.replace_words()
+        assert rename.renamed_image_name == _after
+
+        # short of words_before_replacement
+        _after = 'replaced-bar_foo_fuga.png'
+        words_before_replacement: list[str] = ['bar']
+        words_after_replacement: list[str] = ['replaced-bar', 'replaced-foo', 'replaced-fuga']
+        rename = Rename(
+            image_path=_temp_image_file,
+            words_before_replacement=words_before_replacement,
+            words_after_replacement=words_after_replacement
+        )
+        rename.replace_words()
+        assert rename.renamed_image_name == _after
+
+        # short of words_after_replacement
+        _after = 'replaced-bar_foo_fuga.png'
+        words_before_replacement: list[str] = ['bar', 'foo', 'fuga']
+        words_after_replacement: list[str] = ['replaced-bar']
+        rename = Rename(
+            image_path=_temp_image_file,
+            words_before_replacement=words_before_replacement,
+            words_after_replacement=words_after_replacement
+        )
+        rename.replace_words()
+        assert rename.renamed_image_name == _after
+
+        # words_before_replacement is empty
+        _after = 'bar_foo_fuga.png'
+        words_before_replacement: list[str] = list()
+        words_after_replacement: list[str] = ['replaced-bar']
+        rename = Rename(
+            image_path=_temp_image_file,
+            words_before_replacement=words_before_replacement,
+            words_after_replacement=words_after_replacement
+        )
+        rename.replace_words()
+        assert rename.renamed_image_name == _after
+
+        # words_after_replacement is empty
+        _after = 'bar_foo_fuga.png'
+        words_before_replacement: list[str] = ['bar', 'foo']
+        words_after_replacement: list[str] = list()
+        rename = Rename(
+            image_path=_temp_image_file,
+            words_before_replacement=words_before_replacement,
+            words_after_replacement=words_after_replacement
+        )
+        rename.replace_words()
+        assert rename.renamed_image_name == _after
+
+        # subprocess.run(['ic_rename', abs_image_paths])
 
     def test_replace_full_width_characters_with_half_width(self):
         """

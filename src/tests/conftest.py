@@ -15,7 +15,7 @@ def cleanup():
 
 
 @pytest.fixture(scope='function')
-def temp_dest(tmp_path) -> Callable:
+def temp_dest_path(tmp_path) -> Callable:
     def _temp_dest(dest: str = 'dest'):
         d = tmp_path / pathlib.Path(dest)
         d.mkdir(parents=True, exist_ok=True)
