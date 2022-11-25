@@ -366,8 +366,18 @@ class TestRename:
             rename.add_serial_number()
         assert excinfo.value.args[0] == 'serial number index is not provided.'
 
-    def test_replace_unavailable_characters(self):
-        pass
+    def test_replace_unavailable_characters(self, temp_dir_path, temp_image_file):
+        _temp_dir: pathlib.Path = temp_dir_path()
+
+        _before = '[/:*?"<>|¥].png'
+        _after = '-----------.png'
+        _temp_image_file: pathlib.Path = temp_image_file(
+            image_name=_before,
+            temp_dir_path=_temp_dir, )
+
+        rename = Rename(image_path=_temp_image_file)
+        rename.replace_unavailable_file_name_chars()
+        assert rename.renamed_image_name == _after
 
     def test_replace_invalid_url_characters(self):
         pass

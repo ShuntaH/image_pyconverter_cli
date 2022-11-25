@@ -69,7 +69,8 @@ class Rename:
     prefix: str = DefaultValues.PREFIX.value
     suffix: str = DefaultValues.SUFFIX.value
 
-    unavailable_file_name_char_pattern: Pattern = DefaultValues.UNAVAILABLE_FILE_NAME_CHAR_PATTERN.value
+    # not to be option.
+    unavailable_file_name_char_pattern: ClassVar[Pattern] = DefaultValues.UNAVAILABLE_FILE_NAME_CHAR_PATTERN.value
     alternative_unavailable_file_name_char: str = DefaultValues.ALTERNATIVE_UNAVAILABLE_FILE_NAME_CHAR.value
 
     replacement_with_separator_pattern: Pattern = DefaultValues.REPLACEMENT_WITH_SEPARATOR_PATTERN.value
@@ -122,7 +123,7 @@ class Rename:
         self.zero_padding_string: str = '{{0:0{}d}}'.format(self.zero_padding_digit)  # => {0:03}
 
         self.dest_dir_path: pathlib.Path = self.dest / pathlib.Path(self.dest_dir_name)
-        self.dest_dir_path.mkdir(exist_ok=True)
+        # self.dest_dir_path.mkdir(exist_ok=True)
 
     @staticmethod
     def get_args():
@@ -186,13 +187,6 @@ class Rename:
                 help='',
                 type=str,
                 default=DefaultValues.ALTERNATIVE_UNAVAILABLE_FILE_NAME_CHAR.value
-            )
-            arg_parser.add_argument(
-                '-ufncp',
-                '--unavailable_file_name_char_pattern',
-                help='',
-                type=re.Pattern,
-                default=DefaultValues.UNAVAILABLE_FILE_NAME_CHAR_PATTERN.value
             )
 
             arg_parser.add_argument(

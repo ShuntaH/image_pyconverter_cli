@@ -97,5 +97,5 @@ def force_cleanup_temp():
         style=Bcolors.OKBLUE.value,
         sentence=f"cleanup {root_path}."
     )
-    return pathlib.rm_rf(path=root_path)
+    # return pathlib.rm_rf(path=root_path)
 
