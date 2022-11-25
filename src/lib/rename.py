@@ -111,15 +111,12 @@ class Rename:
 
         # The name of the file to be converted may contain characters that are mistaken for file extensions.
         # In that case, the confusing name is not the file extension, so remove from image_path.suffixes
-        _suffixes = self.image_path.suffixes
-        _should_be_ext = []
-
-        for s in _suffixes:
-            if s not in self.valid_extensions:
-                continue
-            _should_be_ext.append(s)
-
-        self.ext = ''.join(_should_be_ext)  # './test.tar.gz' => ['.tar', '.gz']
+        self.ext = ''.join((
+            s
+            for s in self.image_path.suffixes
+            if s in self.valid_extensions
+        ))
+        # './test.tar.gz' => ['.tar', '.gz']
 
         self._renamed_image_stem: str = self.original_image_stem
         self.zero_padding_string: str = '{{0:0{}d}}'.format(self.zero_padding_digit)  # => {0:03}
