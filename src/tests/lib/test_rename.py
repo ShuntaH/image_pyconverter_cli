@@ -1,5 +1,6 @@
 import dataclasses
 import pathlib
+from typing import Union
 
 import pytest
 
@@ -10,7 +11,7 @@ from lib.rename import Rename as OrigRename
 def rename_class_mock(temp_dest_path):
     @dataclasses.dataclass
     class RenameMock(OrigRename):
-        dest = temp_dest_path()
+        dest: Union[str, pathlib.Path] = temp_dest_path()
     klass: RenameMock = RenameMock
     return klass
 
@@ -412,11 +413,14 @@ class TestRename:
     ):
         _temp_dir: pathlib.Path = temp_dir_path()
 
-        _before = '[/:*?"<>|¥].png'
-        _after = '-----------.png'
+        # exclude '/' because on Unix based-on OS
+        # a temp image file which name contains '/' can not be created.
+        _before = ':*?"<>|¥.png'
+        _after = '--------.png'
         _temp_image_file: pathlib.Path = temp_image_file(
             image_name=_before,
-            temp_dir_path=_temp_dir, )
+            temp_dir_path=_temp_dir
+        )
 
         rename = rename_class_mock(image_path=_temp_image_file)
         rename.replace_unavailable_file_name_chars()

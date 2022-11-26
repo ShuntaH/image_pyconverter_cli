@@ -22,12 +22,16 @@ class DefaultValues(enum.Enum):
     REPLACEMENT_WITH_SEPARATOR_PATTERN = re.compile(r'[ 　\t\n.,\-ー_＿]')
     SEPARATOR = '_'
 
-    UNAVAILABLE_FILE_NAME_CHAR_PATTERN = re.compile(r'[/:*?"<>|¥]')  # ファイル名に使えない文字
+    ###########################################################
+    # Characters that cannot be used in file names.
     # windows /:*?"<>|¥
     # mac /
     # On mac, "/" cannot be used in filenames because it is a path separator.
     # finder can use "/", but if you look at the filename in a shell,
     # you will see ":".
+    ###########################################################
+    UNAVAILABLE_FILE_NAME_CHAR_PATTERN = re.compile(r'[\/:*?"<>|¥]')
+
     ALTERNATIVE_UNAVAILABLE_FILE_NAME_CHAR = '-'
 
     UNAVAILABLE_URL_CHAR_PATTERN = re.compile(r'[^-_a-zA-Z0-9]')
