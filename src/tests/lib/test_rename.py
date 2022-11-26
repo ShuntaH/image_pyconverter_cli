@@ -8,7 +8,7 @@ from lib.rename import Rename as OrigRename
 
 
 @pytest.fixture()
-def rename_class_mock(temp_dest_path):
+def rename_class_mock(temp_dest_path) -> 'RenameMock':
     @dataclasses.dataclass
     class RenameMock(OrigRename):
         dest: Union[str, pathlib.Path] = temp_dest_path()
@@ -426,8 +426,33 @@ class TestRename:
         rename.replace_unavailable_file_name_chars()
         assert rename.renamed_image_name == _after
 
-    def test_replace_invalid_url_characters(self):
-        pass
+    def test_replace_unavailable_url_characters(
+            self,
+            temp_dir_path,
+            temp_image_file,
+            rename_class_mock
+    ):
+        _temp_dir: pathlib.Path = temp_dir_path()
+        _before = ',!()abc123-_あ* &^%.png'
+        _after = 'XXXXabc123-_XXXXXX.png'
+        _temp_image_file: pathlib.Path = temp_image_file(
+            image_name=_before,
+            temp_dir_path=_temp_dir
+        )
+
+        rename = rename_class_mock(
+            image_path=_temp_image_file,
+            is_unavailable_url_chars_kept=False
+        )
+        rename.replace_unavailable_url_chars()
+        assert rename.renamed_image_name == _after
+
+        rename = rename_class_mock(
+            image_path=_temp_image_file,
+            is_unavailable_url_chars_kept=True
+        )
+        rename.replace_unavailable_url_chars()
+        assert rename.renamed_image_name == _before
 
     def test_enable_to_rename(self):
         pass

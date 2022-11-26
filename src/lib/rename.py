@@ -31,11 +31,10 @@ class DefaultValues(enum.Enum):
     # you will see ":".
     ###########################################################
     UNAVAILABLE_FILE_NAME_CHAR_PATTERN = re.compile(r'[\/:*?"<>|¥]')
-
     ALTERNATIVE_UNAVAILABLE_FILE_NAME_CHAR = '-'
 
     UNAVAILABLE_URL_CHAR_PATTERN = re.compile(r'[^-_a-zA-Z0-9]')
-    ALTERNATIVE_UNAVAILABLE_URL_CHAR = 'x'
+    ALTERNATIVE_UNAVAILABLE_URL_CHAR = 'X'
 
     IS_SERIAL_NUMBER_ADDED = False
     ZERO_PADDING_DIGIT = 3
@@ -80,7 +79,7 @@ class Rename:
     replacement_with_separator_pattern: Pattern = DefaultValues.REPLACEMENT_WITH_SEPARATOR_PATTERN.value
     separator: str = DefaultValues.SEPARATOR.value
 
-    is_unavailable_url_chars_kept: bool = False
+    is_unavailable_url_chars_kept: bool = True
     alternative_unavailable_url_char: str = DefaultValues.ALTERNATIVE_UNAVAILABLE_URL_CHAR.value
     unavailable_url_char_pattern: Pattern = DefaultValues.UNAVAILABLE_URL_CHAR_PATTERN.value
 
