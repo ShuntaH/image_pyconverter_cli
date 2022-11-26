@@ -7,7 +7,7 @@ from PIL import Image
 from src.utils import Stdout, Bcolors, force_cleanup_temp
 
 
-@pytest.fixture(scope='function', autouse=True)
+@pytest.fixture(scope='function', autouse=False)
 def force_cleanup():
     yield
     force_cleanup_temp()

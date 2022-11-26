@@ -123,7 +123,7 @@ class Rename:
         self.zero_padding_string: str = '{{0:0{}d}}'.format(self.zero_padding_digit)  # => {0:03}
 
         self.dest_dir_path: pathlib.Path = self.dest / pathlib.Path(self.dest_dir_name)
-        # self.dest_dir_path.mkdir(exist_ok=True)
+        self.dest_dir_path.mkdir(exist_ok=True)
 
     @staticmethod
     def get_args():
