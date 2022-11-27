@@ -59,6 +59,8 @@ class DefaultValues(enum.Enum):
         '.svgz'
     ]
 
+    COMPARISON_FILE_NAME = 'comparison.txt'
+
 
 @dataclasses.dataclass
 class Rename:
@@ -92,12 +94,12 @@ class Rename:
     valid_extensions: list[str] = dataclasses.field(
         default_factory=lambda: DefaultValues.VALID_EXTENSIONS.value)
 
-    is_log_file_made: bool = False
+    is_comparison_file_made: bool = True
 
     # To create a list of names of converted images,
     # each time an instance is created from this class,
     # this list is not initialized and the same list is used.
-    rename_log: ClassVar[list] = []
+    comparison_log: ClassVar[list] = []
 
     run: bool = False
 
@@ -433,7 +435,7 @@ class Rename:
                 # Changing the name and location of an image will cause the image
                 # to disappear from its original location, so to keep the original image intact,
                 # evacuate the original image, including metadata, to a temporary directory and
-                # return the evacuated image to its original location once the image is renamed."""
+                # return the evacuated image to its original location once the image is renamed.
                 td = pathlib.Path(td)
                 shutil.copy2(str(self.image_path), str(td))
                 copy_image: pathlib.Path = td / self.original_image_name
@@ -441,31 +443,55 @@ class Rename:
                 # use Path.replace instead of Path.rename.
                 # so FileExistsError will not be raised.
                 self.image_path.replace(self.renamed_image_path)
+
+                # bring original image back to original location.
                 shutil.move(copy_image, self.image_path)
 
-        self.append_comparison()
+            self.append_comparison()
 
     @property
-    def loop_counter(self) -> int:
-        return len(self.rename_log)
+    def loop_count(self) -> int:
+        """The loop count is increased after the rename method is called."""
+        return len(self.comparison_log)
 
     @property
     def comparison(self) -> str:
         return f'{self.image_path} => {self.renamed_image_path}'
 
     def append_comparison(self) -> None:
-        if not self.is_log_file_made:
+        if not self.is_comparison_file_made:
             return
-        self.rename_log.append(self.comparison)
+        self.comparison_log.append(self.comparison)
+
+    @staticmethod
+    def get_dest_dir_path(
+            dest: Union[str, pathlib.Path] = DefaultValues.DEST.value,
+            dest_dir_name: str = DefaultValues.DEST_DIR_NAME.value
+    ) -> pathlib:
+        """The directory to which images are output is automatically generated
+        after instantiation of Rename class, but this method is used to obtain
+        the directory before instantiation. For example, use this when calling
+        the make_comparison_file method.
+        """
+        if type(dest) is str:
+            dest = pathlib.Path(dest)
+        return dest / pathlib.Path(dest_dir_name)
 
     @classmethod
-    def make_image_name_file(cls, dest_dir: Union[str, pathlib.Path]):
-        if type(dest_dir) is str:
-            dest_dir: pathlib.Path = pathlib.Path(dest_dir)
-        file_path = dest_dir / pathlib.Path('log.txt')
-        file_path.write_text('\n\n'.join(cls.rename_log))
-        # clear image_comparisons
-        cls.rename_log = list()
+    def make_comparison_file(
+            cls,
+            dest_dir_path: Union[str, pathlib.Path],
+            is_comparison_file_made=True
+    ):
+        if not is_comparison_file_made:
+            return
+        if type(dest_dir_path) is str:
+            dest_dir_path: pathlib.Path = pathlib.Path(dest_dir_path)
+        file_path = dest_dir_path / pathlib.Path(DefaultValues.COMPARISON_FILE_NAME.value)
+        file_path.write_text('\n\n'.join(cls.comparison_log))
+
+        # init image_comparisons.
+        cls.comparison_log = list()
 
 
 def main():
@@ -503,4 +529,4 @@ def main():
 
             rename.rename()
 
-        Rename.make_image_name_file(dir_path=args.dir_path)
+        Rename.make_comparison_file(dir_path=args.dir_path)

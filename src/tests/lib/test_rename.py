@@ -4,7 +4,7 @@ from typing import Union
 
 import pytest
 
-from lib.rename import Rename as OrigRename
+from lib.rename import Rename as OrigRename, DefaultValues
 
 
 @pytest.fixture()
@@ -553,6 +553,45 @@ class TestRename:
         assert rename.image_path.is_file() is True
         assert rename.image_path.as_posix() == _dir2_img_path.as_posix()
 
+    def test_make_comparison_files(
+            self,
+            temp_image_file,
+            rename_class_mock
+    ):
+        _count: int = 10
+        for index in range(1, _count + 1):
+            _temp_dir: pathlib.Path = rename_class_mock.dir_path
+            _image_path = f'{index}.png'
+            _temp_image_file: pathlib.Path = temp_image_file(
+                image_path=_image_path,
+                temp_dir_path=_temp_dir
+            )
+            rename: OrigRename = rename_class_mock(
+                image_path=_temp_image_file,
+                run=True)
+            rename.rename()
+            assert rename.loop_count == index
+            assert rename.comparison_log[-1] == rename.comparison
+        else:
+            assert len(rename_class_mock.comparison_log) == _count
 
-    def test_enable_to_make_name_files(self):
-        pass
+            # comparison_log will be clear after make_comparison_file is called.
+            _text = '\n\n'.join(rename_class_mock.comparison_log)
+
+            # make file.
+            _dest_dir = rename_class_mock.get_dest_dir_path(
+                dest=rename_class_mock.dest,
+                dest_dir_name=rename_class_mock.dest
+            )
+
+            rename_class_mock.make_comparison_file(
+                dest_dir_path=_dest_dir,
+                is_comparison_file_made=True)
+
+            comparison_file_path = _dest_dir / DefaultValues.COMPARISON_FILE_NAME.value
+            assert comparison_file_path.exists() is True
+            assert comparison_file_path.read_text() == _text
+
+            # ensure that comparison log is initialized.
+            assert type(rename_class_mock.comparison_log) is list
+            assert len(rename_class_mock.comparison_log) == 0
