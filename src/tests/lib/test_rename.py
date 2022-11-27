@@ -214,7 +214,7 @@ class TestRename:
 
         rename = rename_class_mock(
             image_path=_temp_image_file,
-            is_separator_and_delimiter_kept=False
+            is_separator_and_delimiter_replaced=True
         )
         rename.replace_with_separator()
         assert rename.renamed_image_name == _after
@@ -229,7 +229,7 @@ class TestRename:
 
         rename = rename_class_mock(
             image_path=_temp_image_file,
-            is_separator_and_delimiter_kept=False
+            is_separator_and_delimiter_replaced=True
         )
         rename.replace_with_separator()
         assert rename.renamed_image_name == _after
@@ -244,7 +244,7 @@ class TestRename:
 
         rename = rename_class_mock(
             image_path=_temp_image_file,
-            is_separator_and_delimiter_kept=False
+            is_separator_and_delimiter_replaced=True
         )
         rename.replace_with_separator()
         assert rename.renamed_image_name == _after
@@ -260,7 +260,7 @@ class TestRename:
 
         rename = rename_class_mock(
             image_path=_temp_image_file,
-            is_separator_and_delimiter_kept=False
+            is_separator_and_delimiter_replaced=True
         )
         rename.replace_with_separator()
         assert rename.renamed_image_name == _after
@@ -275,7 +275,7 @@ class TestRename:
 
         rename = rename_class_mock(
             image_path=_temp_image_file,
-            is_separator_and_delimiter_kept=False
+            is_separator_and_delimiter_replaced=True
         )
         rename.replace_with_separator()
         assert rename.renamed_image_name == _after
@@ -290,7 +290,7 @@ class TestRename:
 
         rename = rename_class_mock(
             image_path=_temp_image_file,
-            is_separator_and_delimiter_kept=False
+            is_separator_and_delimiter_replaced=True
         )
         rename.replace_with_separator()
         assert rename.renamed_image_name == _after
@@ -305,7 +305,7 @@ class TestRename:
 
         rename = rename_class_mock(
             image_path=_temp_image_file,
-            is_separator_and_delimiter_kept=False
+            is_separator_and_delimiter_replaced=True
         )
         rename.replace_with_separator()
         assert rename.renamed_image_name == _after
@@ -320,7 +320,7 @@ class TestRename:
 
         rename = rename_class_mock(
             image_path=_temp_image_file,
-            is_separator_and_delimiter_kept=False
+            is_separator_and_delimiter_replaced=True
         )
         rename.replace_with_separator()
         assert rename.renamed_image_name == _after
@@ -336,7 +336,7 @@ class TestRename:
         rename = rename_class_mock(
             image_path=_temp_image_file,
             separator='-',
-            is_separator_and_delimiter_kept=False
+            is_separator_and_delimiter_replaced=True
         )
         rename.replace_with_separator()
         assert rename.renamed_image_name == _after
@@ -352,7 +352,7 @@ class TestRename:
         rename = rename_class_mock(
             image_path=_temp_image_file,
             separator='-',
-            is_separator_and_delimiter_kept=False
+            is_separator_and_delimiter_replaced=True
         )
         rename.replace_with_separator()
         assert rename.renamed_image_name == _after
@@ -469,18 +469,18 @@ class TestRename:
         # not replace
         rename = rename_class_mock(
             image_path=_temp_image_file,
-            is_url_encoded_char_kept=False
+            is_url_encoded_char_replaced=False
         )
         rename.replace_url_encoded_chars()
-        assert rename.renamed_image_name == _after
+        assert rename.renamed_image_name == _before
 
         # replace
         rename = rename_class_mock(
             image_path=_temp_image_file,
-            is_url_encoded_char_kept=True
+            is_url_encoded_char_replaced=True
         )
         rename.replace_url_encoded_chars()
-        assert rename.renamed_image_name == _before
+        assert rename.renamed_image_name == _after
 
     def test_rename(
             self,
