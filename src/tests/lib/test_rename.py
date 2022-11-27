@@ -8,9 +8,10 @@ from lib.rename import Rename as OrigRename
 
 
 @pytest.fixture()
-def rename_class_mock(temp_dest_path) -> 'RenameMock':
+def rename_class_mock(temp_dest_path, temp_dir_path) -> 'RenameMock':
     @dataclasses.dataclass
     class RenameMock(OrigRename):
+        dir_path: pathlib.Path = temp_dir_path()
         dest: Union[str, pathlib.Path] = temp_dest_path()
     klass: RenameMock = RenameMock
     return klass
@@ -19,17 +20,16 @@ def rename_class_mock(temp_dest_path) -> 'RenameMock':
 class TestRename:
     def test_post_init(
             self,
-            temp_dir_path,
             temp_image_file,
             rename_class_mock
     ):
-        _temp_dir: pathlib.Path = temp_dir_path()
+        _temp_dir: pathlib.Path = rename_class_mock.dir_path
+        _temp_dest: pathlib.Path = rename_class_mock.dest
         _temp_image_file: pathlib.Path = temp_image_file(
             image_path='post_init_test.vol1.png',
-            temp_dir_path=_temp_dir
-        )
-        _temp_dest: pathlib.Path = rename_class_mock.dest
-        rename = rename_class_mock(image_path=_temp_image_file, dest=_temp_dest)
+            temp_dir_path=_temp_dir)
+
+        rename = rename_class_mock(image_path=_temp_image_file)
 
         assert rename.dir_path == _temp_dir
         assert rename.relative_dir_path == _temp_dir.relative_to(_temp_dir)
@@ -46,12 +46,10 @@ class TestRename:
 
     def test_replace_words(
             self,
-            temp_dir_path,
             temp_image_file,
             rename_class_mock
     ):
-        _temp_dir: pathlib.Path = temp_dir_path()
-
+        _temp_dir: pathlib.Path = rename_class_mock.dir_path
         _before = 'bar_foo_fuga.png'
         _temp_image_file: pathlib.Path = temp_image_file(
             image_path=_before,
@@ -120,14 +118,13 @@ class TestRename:
 
     def test_replace_full_width_characters_with_half_width(
             self,
-            temp_dir_path,
             temp_image_file,
             rename_class_mock
     ):
         """
         name００１.png => name001.png
         """
-        _temp_dir: pathlib.Path = temp_dir_path()
+        _temp_dir: pathlib.Path = rename_class_mock.dir_path
 
         # half-width ASCII characters don't change.
         _before = 'half_width.png'
@@ -200,11 +197,10 @@ class TestRename:
 
     def test_replace_delimiters_with_specified_separator(
             self,
-            temp_dir_path,
             temp_image_file,
             rename_class_mock
     ):
-        _temp_dir: pathlib.Path = temp_dir_path()
+        _temp_dir: pathlib.Path = rename_class_mock.dir_path
 
         # replace half width space with a separator
         _before = 'space space.png'
@@ -329,11 +325,10 @@ class TestRename:
 
     def test_add_prefix_and_suffix(
             self,
-            temp_dir_path,
             temp_image_file,
             rename_class_mock
     ):
-        _temp_dir: pathlib.Path = temp_dir_path()
+        _temp_dir: pathlib.Path = rename_class_mock.dir_path
 
         # add prefix
         _before = 'image.png'
@@ -377,17 +372,16 @@ class TestRename:
 
     def test_add_serial_number(
             self,
-            temp_dir_path,
             temp_image_file,
             rename_class_mock
     ):
-        _temp_dir: pathlib.Path = temp_dir_path()
+        _temp_dir: pathlib.Path = rename_class_mock.dir_path
 
         _before = 'image.png'
         _after = 'image001.png'
         _temp_image_file: pathlib.Path = temp_image_file(
             image_path=_before,
-            temp_dir_path=_temp_dir, )
+            temp_dir_path=_temp_dir)
 
         rename = rename_class_mock(
             image_path=_temp_image_file,
@@ -407,11 +401,10 @@ class TestRename:
 
     def test_replace_unavailable_characters(
             self,
-            temp_dir_path,
             temp_image_file,
             rename_class_mock
     ):
-        _temp_dir: pathlib.Path = temp_dir_path()
+        _temp_dir: pathlib.Path = rename_class_mock.dir_path
 
         # exclude '/' because on Unix based-on OS
         # a temp image file which name contains '/' can not be created.
@@ -428,11 +421,10 @@ class TestRename:
 
     def test_replace_unavailable_url_characters(
             self,
-            temp_dir_path,
             temp_image_file,
             rename_class_mock
     ):
-        _temp_dir: pathlib.Path = temp_dir_path()
+        _temp_dir: pathlib.Path = rename_class_mock.dir_path
         _before = ',!()abc123-_あ* &^%.png'
         _after = 'XXXXabc123-_XXXXXX.png'
         _temp_image_file: pathlib.Path = temp_image_file(
@@ -454,20 +446,21 @@ class TestRename:
         rename.replace_unavailable_url_chars()
         assert rename.renamed_image_name == _before
 
-    def test_enable_to_rename(
+    def test_rename(
             self,
-            temp_dir_path,
             temp_image_file,
             rename_class_mock
     ):
-        _temp_dir: pathlib.Path = temp_dir_path()
+        _temp_dir: pathlib.Path = rename_class_mock.dir_path
         _before = 'abc.png'
         _after = 'abc.png'
         _temp_image_file: pathlib.Path = temp_image_file(
             image_path=_before,
             temp_dir_path=_temp_dir
         )
-        rename: OrigRename = rename_class_mock(image_path=_temp_image_file, run=True)
+        rename: OrigRename = rename_class_mock(
+            image_path=_temp_image_file,
+            run=True)
         rename.rename()
         assert rename.renamed_image_name == _after
         assert rename.renamed_image_path.exists() is True
@@ -478,33 +471,87 @@ class TestRename:
 
     def test_recursively_create_directories(
             self,
-            temp_dir_path,
             temp_image_file,
             rename_class_mock
     ):
         ######################################
         # root
-        #  |-- root_img1.png
+        #  |-- root_img.png
         #  |-- dir1
-        #       | -- dir1_img1.png
+        #       | -- dir1_img.png
         #       | -- dir2
-        #             |-- dir2.img1.png
+        #             |-- dir2.img.png
         ######################################
-        _temp_dir: pathlib.Path = temp_dir_path()
-        _before = 'abc.png'
-        _after = 'abc.png'
-        _temp_image_file: pathlib.Path = temp_image_file(
-            image_path=_before,
+        _temp_dir: pathlib.Path = rename_class_mock.dir_path
+        _root_img = 'root_img.png'
+        _dir1_img = 'dir1/dir1_img.png'
+        _dir2_img = 'dir1/dir2/dir2_img.png'
+        _root_img_path: pathlib.Path = temp_image_file(
+            image_path=_root_img,
             temp_dir_path=_temp_dir
         )
-        rename: OrigRename = rename_class_mock(image_path=_temp_image_file, run=True)
+        _dir1_img_path: pathlib.Path = temp_image_file(
+            image_path=_dir1_img,
+            temp_dir_path=_temp_dir
+        )
+        _dir2_img_path: pathlib.Path = temp_image_file(
+            image_path=_dir2_img,
+            temp_dir_path=_temp_dir
+        )
+
+        # root dir exists.
+        rename: OrigRename = rename_class_mock(
+            image_path=_root_img_path,
+            run=True)
         rename.rename()
-        assert rename.renamed_image_name == _after
+        assert rename.renamed_image_name == _root_img_path.name
+        assert rename.renamed_parent_image_path.exists() is True
+        assert rename.renamed_parent_image_path.is_dir() is True
+        assert rename.renamed_parent_image_path.as_posix() == rename.dest_dir_path.as_posix()
         assert rename.renamed_image_path.exists() is True
         assert rename.renamed_image_path.is_file() is True
-        assert rename.original_image_name == _before
+        assert rename.original_image_name == _root_img_path.name
         assert rename.image_path.exists() is True
         assert rename.image_path.is_file() is True
+        assert rename.image_path.as_posix() == _root_img_path.as_posix()
+
+        # dir1 exists.
+        rename: OrigRename = rename_class_mock(
+            image_path=_dir1_img_path,
+            run=True)
+        rename.rename()
+        assert rename.renamed_image_name == _dir1_img_path.name
+
+        _dir1_img_parent: pathlib.Path = pathlib.Path(rename.dest_dir_path / _dir1_img).parent
+        assert rename.renamed_parent_image_path.as_posix() == _dir1_img_parent.as_posix()
+        assert rename.renamed_parent_image_path.exists() is True
+        assert rename.renamed_parent_image_path.is_dir() is True
+
+        assert rename.renamed_image_path.exists() is True
+        assert rename.renamed_image_path.is_file() is True
+        assert rename.original_image_name == _dir1_img_path.name
+        assert rename.image_path.exists() is True
+        assert rename.image_path.is_file() is True
+        assert rename.image_path.as_posix() == _dir1_img_path.as_posix()
+
+        # dir2 exists.
+        rename: OrigRename = rename_class_mock(
+            image_path=_dir2_img_path,
+            run=True)
+        rename.rename()
+        assert rename.renamed_image_name == _dir2_img_path.name
+
+        _dir2_img_parent: pathlib.Path = pathlib.Path(rename.dest_dir_path / _dir2_img).parent
+        assert rename.renamed_parent_image_path.as_posix() == _dir2_img_parent.as_posix()
+        assert rename.renamed_parent_image_path.exists() is True
+        assert rename.renamed_parent_image_path.is_dir() is True
+
+        assert rename.renamed_image_path.exists() is True
+        assert rename.renamed_image_path.is_file() is True
+        assert rename.original_image_name == _dir2_img_path.name
+        assert rename.image_path.exists() is True
+        assert rename.image_path.is_file() is True
+        assert rename.image_path.as_posix() == _dir2_img_path.as_posix()
 
 
     def test_enable_to_make_name_files(self):

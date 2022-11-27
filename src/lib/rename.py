@@ -64,6 +64,7 @@ class DefaultValues(enum.Enum):
 class Rename:
 
     image_path: Union[str, pathlib.Path]
+    dir_path: str
 
     dest: Union[str, pathlib.Path] = DefaultValues.DEST.value
     dest_dir_name: str = DefaultValues.DEST_DIR_NAME.value
@@ -106,11 +107,11 @@ class Rename:
         if type(self.dest) is str:
             self.dest = pathlib.Path(self.dest)
 
-        self.dir_path: pathlib.Path = self.image_path.parent
+        self.dir_path: pathlib.Path = pathlib.Path(self.dir_path)
 
         self.relative_dir_path = self.dir_path.relative_to(self.dir_path)  # => '.'
         self.relative_image_path = self.image_path.relative_to(self.dir_path)  # => './temp/img.png'
-        self.relative_image_parent_path = self.relative_image_path.parents[0]  # => './temp/
+        self.relative_image_parent_path = self.relative_image_path.parent  # => './temp/
 
         self.original_image_name = self.image_path.name
         self.original_image_stem = self.image_path.stem
