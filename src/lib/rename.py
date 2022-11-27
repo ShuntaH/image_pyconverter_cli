@@ -35,8 +35,8 @@ class DefaultValues(enum.Enum):
     UNAVAILABLE_FILE_NAME_CHAR_PATTERN = re.compile(r'[\/:*?"<>|¥]')
     ALTERNATIVE_UNAVAILABLE_FILE_NAME_CHAR = '-'
 
-    UNAVAILABLE_URL_CHAR_PATTERN = re.compile(r'[^-_a-zA-Z0-9]')
-    ALTERNATIVE_UNAVAILABLE_URL_CHAR = 'X'
+    URL_ENCODED_CHAR_PATTERN = re.compile(r'[^-_a-zA-Z0-9]')
+    ALTERNATIVE_URL_ENCODED_CHAR = 'X'
 
     IS_SERIAL_NUMBER_ADDED = False
     ZERO_PADDING_DIGIT = 3
@@ -71,8 +71,8 @@ class Rename:
     dest: Union[str, pathlib.Path] = DefaultValues.DEST.value
     dest_dir_name: str = DefaultValues.DEST_DIR_NAME.value
 
-    words_before_replacement: list[str] = dataclasses.field(default_factory=lambda: [])
-    words_after_replacement: list[str] = dataclasses.field(default_factory=lambda: [])
+    chars_before_replacement: list[str] = dataclasses.field(default_factory=lambda: [])
+    chars_after_replacement: list[str] = dataclasses.field(default_factory=lambda: [])
 
     prefix: str = DefaultValues.PREFIX.value
     suffix: str = DefaultValues.SUFFIX.value
@@ -81,12 +81,14 @@ class Rename:
     unavailable_file_name_char_pattern: ClassVar[Pattern] = DefaultValues.UNAVAILABLE_FILE_NAME_CHAR_PATTERN.value
     alternative_unavailable_file_name_char: str = DefaultValues.ALTERNATIVE_UNAVAILABLE_FILE_NAME_CHAR.value
 
+    is_separator_and_delimiter_kept: bool = True
     replacement_with_separator_pattern: Pattern = DefaultValues.REPLACEMENT_WITH_SEPARATOR_PATTERN.value
     separator: str = DefaultValues.SEPARATOR.value
 
-    is_unavailable_url_chars_kept: bool = True
-    alternative_unavailable_url_char: str = DefaultValues.ALTERNATIVE_UNAVAILABLE_URL_CHAR.value
-    unavailable_url_char_pattern: Pattern = DefaultValues.UNAVAILABLE_URL_CHAR_PATTERN.value
+    is_url_encoded_char_kept: bool = True
+    alternative_url_encoded_char: str = DefaultValues.ALTERNATIVE_URL_ENCODED_CHAR.value
+    # not to be classVar
+    url_encoded_char_pattern: ClassVar[Pattern] = DefaultValues.URL_ENCODED_CHAR_PATTERN.value
 
     is_serial_number_added: bool = DefaultValues.IS_SERIAL_NUMBER_ADDED.value
     current_index: Optional[int] = None
@@ -140,93 +142,94 @@ class Rename:
             arg_parser.add_argument(
                 '-d', '--dest',
                 type=str,
-                help='a directory path containing renamed images',
+                help='The path where the directory containing the renamed images will be created.',
                 default=DefaultValues.DEST.value
             )
             arg_parser.add_argument(
                 '-ddn', '--dest_dir_name',
                 type=str,
-                help='name of a directory containing renamed images',
+                help='The directory to which the renamed images will be output.',
                 default=DefaultValues.DEST_DIR_NAME.value
             )
 
             arg_parser.add_argument(
-                '-before', '--words_before_replacement',
+                '-before', '--chars_before_replacement',
                 nargs="*", type=str,
-                help='you can replace a new name.'
+                default=[],
+                help='The part of the image that will be renamed.'
             )
             arg_parser.add_argument(
-                '-after', '--words_after_replacement',
+                '-after', '--chars_before_replacement',
                 nargs="*", type=str,
-                help='you can replace a new name.'
+                default=[],
+                help='The part of the image after being changed'
             )
 
             arg_parser.add_argument(
                 '-p', '--prefix',
                 type=str,
-                help='you can add an extra word as prefix.',
+                help='image name prefix.',
                 default=DefaultValues.PREFIX.value
             )
             arg_parser.add_argument(
                 '-s', '--suffix',
                 type=str,
-                help='you can add an extra word as suffix.',
+                help='image name suffix.',
                 default=DefaultValues.SUFFIX.value
             )
 
             arg_parser.add_argument(
+                '-keep_separator_and_delimiter',
+                '--is_separator_and_delimiter_kept',
+                help='Whether to unify the delimiters and separators contained in the names of images.',
+                action='store_true'
+            )
+            arg_parser.add_argument(
                 '-sep',
                 '--separator',
                 type=str,
-                help='you can specify word separator.',
+                help='image name separator.',
                 default=DefaultValues.SEPARATOR.value
             )
             arg_parser.add_argument(
                 '-rwsp',
                 '--replacement_with_separator_pattern',
-                help='you can specify word separator.',
-                type=re.Pattern,
-                default=DefaultValues.REPLACEMENT_WITH_SEPARATOR_PATTERN.value
+                help='Regular expression pattern of characters to be replaced by separators. e.g. [^-_a-zA-Z0-9]',
+                type=str,
+                default='[^-_a-zA-Z0-9]'
             )
 
             arg_parser.add_argument(
                 '-alt_ufnc',
                 '--alternative_unavailable_file_name_char',
-                help='',
+                help='A character that replaces a character that cannot be used in the name of the image.',
                 type=str,
                 default=DefaultValues.ALTERNATIVE_UNAVAILABLE_FILE_NAME_CHAR.value
             )
 
             arg_parser.add_argument(
-                '-keep_unavailable_url_chars',
-                '--is_unavailable_url_chars_kept',
-                help='whether to replace an unavailable characters in url.',
+                '-keep_url_encoded_char',
+                '--is_url_encoded_char_kept',
+                help='Whether to unify the characters that are percent-encoded in the URLs contained in the image.',
                 action='store_true'
             )
             arg_parser.add_argument(
                 '-alt_uuc',
-                '--alternative_unavailable_url_char',
-                help='you can specify a word with which unavailable characters is replaced.',
-                default=DefaultValues.ALTERNATIVE_UNAVAILABLE_URL_CHAR.value
-            )
-            arg_parser.add_argument(
-                '-uccp',
-                '--unavailable_url_char_pattern',
-                help='compiled unavailable url character pattern.',
-                type=re.Pattern,
-                default=DefaultValues.UNAVAILABLE_URL_CHAR_PATTERN.value
+                '--alternative_url_encoded_char',
+                help='Alternatives to characters that cannot be percent-encoded in the URL.',
+                default=DefaultValues.ALTERNATIVE_URL_ENCODED_CHAR.value
             )
 
             arg_parser.add_argument(
                 '-add_serial_number',
                 '--is_serial_number_added',
-                help='add serial number to last position of file name?',
+                help='Whether to add the sequential number to the end of the image name.',
                 action='store_true'
             )
             arg_parser.add_argument(
                 '-snzpd',
                 '--serial_number_zero_padding_digit',
-                help='zero_padding_digit of serial number?',
+                help='Zero padding digit of serial number.',
                 type=int,
                 default=DefaultValues.ZERO_PADDING_DIGIT.value
             )
@@ -239,10 +242,10 @@ class Rename:
             )
 
             arg_parser.add_argument(
-                '-make_comparison_file',
-                '--is_comparison_file_made',
-                help='whether to write comparison of file name changes to a text file.',
-                action='store_true'
+                '-ncf',
+                '--no_comparison_file',
+                help='whether to write comparisons of file name changes to a text file.',
+                action='store_false'
             )
 
             args = arg_parser.parse_args()
@@ -299,14 +302,14 @@ class Rename:
         self.renamed_image_stem = self.renamed_image_stem.replace(before, after)
 
     def replace_words(self) -> None:
-        if not self.words_before_replacement:
+        if not self.chars_before_replacement:
             return
 
         # If the number of contents in the two arrays do not match,
         # the larger portion of the array is not processed.
         for before, after in zip(
-            self.words_before_replacement,
-            self.words_after_replacement
+            self.chars_before_replacement,
+            self.chars_after_replacement
         ):
             self.replace_word(before=before, after=after)
 
@@ -352,17 +355,17 @@ class Rename:
             self.renamed_image_stem
         )
 
-    def replace_unavailable_url_chars(self) -> None:
+    def replace_url_encoded_chars(self) -> None:
         """
         to remove unavailable characters in url.
         >>> p = re.compile(r'[^-_a-zA-Z0-9]')
         >>> p.sub('X', '-_,!()abcあ* &^%')
         '-_XXXXabcXXXXXX''
         """
-        if self.is_unavailable_url_chars_kept:
+        if self.is_url_encoded_char_kept:
             return
-        self.renamed_image_stem = self.unavailable_url_char_pattern.sub(
-            self.alternative_unavailable_url_char,
+        self.renamed_image_stem = self.url_encoded_char_pattern.sub(
+            self.alternative_url_encoded_char,
             self.renamed_image_stem
         )
 
@@ -374,6 +377,9 @@ class Rename:
         p.sub('_', ' bar　foo　')
         >>> '_bar_foo_'
         """
+        if self.is_separator_and_delimiter_kept:
+            return
+
         self.renamed_image_stem = self.replacement_with_separator_pattern.sub(
             self.separator,
             self.renamed_image_stem
@@ -416,7 +422,7 @@ class Rename:
         self.zen2han()
         self.replace_with_separator()
         self.replace_unavailable_file_name_chars()
-        self.replace_unavailable_url_chars()
+        self.replace_url_encoded_chars()
         self.add_prefix_suffix()
         self.add_serial_number()
 
@@ -501,7 +507,10 @@ def main():
     ) as args:
         image_paths = get_image_paths_from_within(
             dir_path=args.dir_path,
-            valid_extensions=DefaultValues.VALID_EXTENSIONS.value)
+            valid_extensions=DefaultValues.VALID_EXTENSIONS.value
+        )
+
+
 
         for index, image_path in enumerate(image_paths):
             # file '/User/macbook/a.jpg'
@@ -510,21 +519,20 @@ def main():
                 dir_path=args.dir_path,
                 dest=args.dest,
                 dest_dir_name=args.dest_dir_name,
-                words_before_replacement=args.words_before_replacement,
-                words_after_replacement=args.words_after_replacement,
+                chars_before_replacement=args.chars_before_replacement,
+                chars_after_replacement=args.chars_after_replacement,
                 prefix=args.prefix,
                 suffix=args.suffix,
-                replacement_with_separator_pattern=args.replacement_with_separator_pattern,
+                replacement_with_separator_pattern=replacement_with_separator_pattern,
                 separator=args.separator,
                 alternative_unavailable_file_name_char=args.unavailable_file_name_char,
-                is_unavailable_url_chars_kept=args.is_unavailable_url_chars_kept,
-                alternative_unavailable_url_char=args.alternative_unavailable_url_char,
-                unavailable_url_char_pattern=args.unavailable_url_char_pattern,
+                is_url_encoded_chars_kept=args.is_url_encoded_char_kept,
+                alternative_url_encoded_char=args.alternative_url_encoded_char,
                 is_serial_number_added=args.is_serial_number_added,
                 current_index=index,
                 zero_padding_digit=args.serial_number_zero_padding_digit,
                 valid_extensions=args.valid_extensions,
-                is_comparison_file_made=args.is_comparison_file_made,
+                is_comparison_file_made=args.no_comparison_file,
                 run=args.run
             )
 
@@ -536,5 +544,5 @@ def main():
         )
         Rename.make_comparison_file(
             dest_dir_path=_dest_dir_path,
-            is_comparison_file_made=args.is_comparison_file_made
+            is_comparison_file_made=args.no_comparison_file
         )

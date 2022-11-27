@@ -7,14 +7,17 @@ import pytest
 from lib.rename import Rename as OrigRename, DefaultValues
 
 
-@pytest.fixture()
+@pytest.fixture(scope='function')
 def rename_class_mock(temp_dest_path, temp_dir_path) -> 'RenameMock':
     @dataclasses.dataclass
     class RenameMock(OrigRename):
         dir_path: pathlib.Path = temp_dir_path()
         dest: Union[str, pathlib.Path] = temp_dest_path()
     klass: RenameMock = RenameMock
-    return klass
+
+    # init class variable of list.
+    klass.comparison_log = []
+    yield klass
 
 
 class TestRename:
@@ -57,59 +60,58 @@ class TestRename:
         )
 
         _after = 'replaced-bar_replaced-foo_replaced-fuga.png'
-        words_before_replacement: list[str] = ['bar', 'foo', 'fuga']
-        words_after_replacement: list[str] = ['replaced-bar', 'replaced-foo', 'replaced-fuga']
+        chars_before_replacement: list[str] = ['bar', 'foo', 'fuga']
+        chars_after_replacement: list[str] = ['replaced-bar', 'replaced-foo', 'replaced-fuga']
 
         rename = rename_class_mock(
             image_path=_temp_image_file,
-            words_before_replacement=words_before_replacement,
-            words_after_replacement=words_after_replacement
-        )
+            chars_before_replacement=chars_before_replacement,
+            chars_after_replacement=chars_after_replacement)
         rename.replace_words()
         assert rename.renamed_image_name == _after
 
-        # short of words_before_replacement
+        # short of chars_before_replacement
         _after = 'replaced-bar_foo_fuga.png'
-        words_before_replacement: list[str] = ['bar']
-        words_after_replacement: list[str] = ['replaced-bar', 'replaced-foo', 'replaced-fuga']
+        chars_before_replacement: list[str] = ['bar']
+        chars_after_replacement: list[str] = ['replaced-bar', 'replaced-foo', 'replaced-fuga']
         rename = rename_class_mock(
             image_path=_temp_image_file,
-            words_before_replacement=words_before_replacement,
-            words_after_replacement=words_after_replacement
+            chars_before_replacement=chars_before_replacement,
+            chars_after_replacement=chars_after_replacement
         )
         rename.replace_words()
         assert rename.renamed_image_name == _after
 
-        # short of words_after_replacement
+        # short of chars_after_replacement
         _after = 'replaced-bar_foo_fuga.png'
-        words_before_replacement: list[str] = ['bar', 'foo', 'fuga']
-        words_after_replacement: list[str] = ['replaced-bar']
+        chars_before_replacement: list[str] = ['bar', 'foo', 'fuga']
+        chars_after_replacement: list[str] = ['replaced-bar']
         rename = rename_class_mock(
             image_path=_temp_image_file,
-            words_before_replacement=words_before_replacement,
-            words_after_replacement=words_after_replacement,
+            chars_before_replacement=chars_before_replacement,
+            chars_after_replacement=chars_after_replacement,
         )
         rename.replace_words()
         assert rename.renamed_image_name == _after
 
-        # words_before_replacement is empty
-        words_before_replacement: list[str] = list()
-        words_after_replacement: list[str] = ['replaced-bar']
+        # chars_before_replacement is empty
+        chars_before_replacement: list[str] = list()
+        chars_after_replacement: list[str] = ['replaced-bar']
         rename = rename_class_mock(
             image_path=_temp_image_file,
-            words_before_replacement=words_before_replacement,
-            words_after_replacement=words_after_replacement
+            chars_before_replacement=chars_before_replacement,
+            chars_after_replacement=chars_after_replacement
         )
         rename.replace_words()
         assert rename.renamed_image_name == _before
 
-        # words_after_replacement is empty
-        words_before_replacement: list[str] = ['bar', 'foo']
-        words_after_replacement: list[str] = list()
+        # chars_after_replacement is empty
+        chars_before_replacement: list[str] = ['bar', 'foo']
+        chars_after_replacement: list[str] = list()
         rename = rename_class_mock(
             image_path=_temp_image_file,
-            words_before_replacement=words_before_replacement,
-            words_after_replacement=words_after_replacement
+            chars_before_replacement=chars_before_replacement,
+            chars_after_replacement=chars_after_replacement
         )
         rename.replace_words()
         assert rename.renamed_image_name == _before
@@ -195,7 +197,7 @@ class TestRename:
         rename.zen2han()
         assert rename.renamed_image_name == _after
 
-    def test_replace_delimiters_with_specified_separator(
+    def test_replace_delimiters_and_separators_with_specified_separator(
             self,
             temp_image_file,
             rename_class_mock
@@ -210,7 +212,10 @@ class TestRename:
             temp_dir_path=_temp_dir
         )
 
-        rename = rename_class_mock(image_path=_temp_image_file)
+        rename = rename_class_mock(
+            image_path=_temp_image_file,
+            is_separator_and_delimiter_kept=False
+        )
         rename.replace_with_separator()
         assert rename.renamed_image_name == _after
 
@@ -222,7 +227,10 @@ class TestRename:
             temp_dir_path=_temp_dir
         )
 
-        rename = rename_class_mock(image_path=_temp_image_file)
+        rename = rename_class_mock(
+            image_path=_temp_image_file,
+            is_separator_and_delimiter_kept=False
+        )
         rename.replace_with_separator()
         assert rename.renamed_image_name == _after
 
@@ -234,7 +242,10 @@ class TestRename:
             temp_dir_path=_temp_dir
         )
 
-        rename = rename_class_mock(image_path=_temp_image_file)
+        rename = rename_class_mock(
+            image_path=_temp_image_file,
+            is_separator_and_delimiter_kept=False
+        )
         rename.replace_with_separator()
         assert rename.renamed_image_name == _after
 
@@ -247,7 +258,10 @@ class TestRename:
             temp_dir_path=_temp_dir
         )
 
-        rename = rename_class_mock(image_path=_temp_image_file)
+        rename = rename_class_mock(
+            image_path=_temp_image_file,
+            is_separator_and_delimiter_kept=False
+        )
         rename.replace_with_separator()
         assert rename.renamed_image_name == _after
 
@@ -259,7 +273,10 @@ class TestRename:
             temp_dir_path=_temp_dir
         )
 
-        rename = rename_class_mock(image_path=_temp_image_file)
+        rename = rename_class_mock(
+            image_path=_temp_image_file,
+            is_separator_and_delimiter_kept=False
+        )
         rename.replace_with_separator()
         assert rename.renamed_image_name == _after
 
@@ -271,7 +288,10 @@ class TestRename:
             temp_dir_path=_temp_dir
         )
 
-        rename = rename_class_mock(image_path=_temp_image_file)
+        rename = rename_class_mock(
+            image_path=_temp_image_file,
+            is_separator_and_delimiter_kept=False
+        )
         rename.replace_with_separator()
         assert rename.renamed_image_name == _after
 
@@ -283,7 +303,10 @@ class TestRename:
             temp_dir_path=_temp_dir
         )
 
-        rename = rename_class_mock(image_path=_temp_image_file)
+        rename = rename_class_mock(
+            image_path=_temp_image_file,
+            is_separator_and_delimiter_kept=False
+        )
         rename.replace_with_separator()
         assert rename.renamed_image_name == _after
 
@@ -295,7 +318,10 @@ class TestRename:
             temp_dir_path=_temp_dir
         )
 
-        rename = rename_class_mock(image_path=_temp_image_file)
+        rename = rename_class_mock(
+            image_path=_temp_image_file,
+            is_separator_and_delimiter_kept=False
+        )
         rename.replace_with_separator()
         assert rename.renamed_image_name == _after
 
@@ -307,7 +333,11 @@ class TestRename:
             temp_dir_path=_temp_dir
         )
 
-        rename = rename_class_mock(image_path=_temp_image_file, separator='-')
+        rename = rename_class_mock(
+            image_path=_temp_image_file,
+            separator='-',
+            is_separator_and_delimiter_kept=False
+        )
         rename.replace_with_separator()
         assert rename.renamed_image_name == _after
 
@@ -319,7 +349,11 @@ class TestRename:
             temp_dir_path=_temp_dir
         )
 
-        rename = rename_class_mock(image_path=_temp_image_file, separator='-')
+        rename = rename_class_mock(
+            image_path=_temp_image_file,
+            separator='-',
+            is_separator_and_delimiter_kept=False
+        )
         rename.replace_with_separator()
         assert rename.renamed_image_name == _after
 
@@ -399,7 +433,7 @@ class TestRename:
             rename.add_serial_number()
         assert excinfo.value.args[0] == 'serial number index is not provided.'
 
-    def test_replace_unavailable_characters(
+    def test_replace_unavailable_file_name_characters(
             self,
             temp_image_file,
             rename_class_mock
@@ -419,7 +453,7 @@ class TestRename:
         rename.replace_unavailable_file_name_chars()
         assert rename.renamed_image_name == _after
 
-    def test_replace_unavailable_url_characters(
+    def test_replace_url_encoded_characters(
             self,
             temp_image_file,
             rename_class_mock
@@ -432,18 +466,20 @@ class TestRename:
             temp_dir_path=_temp_dir
         )
 
+        # not replace
         rename = rename_class_mock(
             image_path=_temp_image_file,
-            is_unavailable_url_chars_kept=False
+            is_url_encoded_char_kept=False
         )
-        rename.replace_unavailable_url_chars()
+        rename.replace_url_encoded_chars()
         assert rename.renamed_image_name == _after
 
+        # replace
         rename = rename_class_mock(
             image_path=_temp_image_file,
-            is_unavailable_url_chars_kept=True
+            is_url_encoded_char_kept=True
         )
-        rename.replace_unavailable_url_chars()
+        rename.replace_url_encoded_chars()
         assert rename.renamed_image_name == _before
 
     def test_rename(
@@ -583,11 +619,11 @@ class TestRename:
                 dest=rename_class_mock.dest,
                 dest_dir_name=rename_class_mock.dest
             )
-
             rename_class_mock.make_comparison_file(
                 dest_dir_path=_dest_dir,
                 is_comparison_file_made=True)
 
+            # check created comparison file.
             comparison_file_path = _dest_dir / DefaultValues.COMPARISON_FILE_NAME.value
             assert comparison_file_path.exists() is True
             assert comparison_file_path.read_text() == _text
