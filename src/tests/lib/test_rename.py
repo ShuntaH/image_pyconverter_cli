@@ -454,8 +454,27 @@ class TestRename:
         rename.replace_unavailable_url_chars()
         assert rename.renamed_image_name == _before
 
-    def test_enable_to_rename(self):
-        pass
+    def test_enable_to_rename(
+            self,
+            temp_dir_path,
+            temp_image_file,
+            rename_class_mock
+    ):
+        _temp_dir: pathlib.Path = temp_dir_path()
+        _before = 'abc.png'
+        _after = 'abc.png'
+        _temp_image_file: pathlib.Path = temp_image_file(
+            image_name=_before,
+            temp_dir_path=_temp_dir
+        )
+        rename: OrigRename = rename_class_mock(image_path=_temp_image_file, run=True)
+        rename.rename()
+        assert rename.renamed_image_name == _after
+        assert rename.renamed_image_path.exists() is True
+        assert rename.renamed_image_path.is_file() is True
+        assert rename.image_path.exists() is True
+        assert rename.image_path.is_file() is True
+
 
     def test_enable_to_make_name_files(self):
         pass

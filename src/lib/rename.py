@@ -3,6 +3,8 @@ import enum
 import pathlib
 import re
 import dataclasses
+import shutil
+import tempfile
 from typing import Optional, Pattern, ClassVar, Union
 
 from jaconv import jaconv
@@ -415,15 +417,30 @@ class Rename:
         self.add_prefix_suffix()
         self.add_serial_number()
 
+        Stdout.styled_stdout(
+            Bcolors.OKGREEN.value,
+            self.comparison
+        )
         if self.run:
             pathlib.Path.mkdir(
                 self.renamed_parent_image_path,
                 parents=True,
                 exist_ok=True
             )
-            # use Path.replace instead of Path.rename.
-            # so FileExistsError will not be raised.
-            self.image_path.replace(self.renamed_image_path)
+
+            with tempfile.TemporaryDirectory() as td:
+                # Changing the name and location of an image will cause the image
+                # to disappear from its original location, so to keep the original image intact,
+                # evacuate the original image, including metadata, to a temporary directory and
+                # return the evacuated image to its original location once the image is renamed."""
+                td = pathlib.Path(td)
+                shutil.copy2(str(self.image_path), str(td))
+                copy_image: pathlib.Path = td / self.original_image_name
+
+                # use Path.replace instead of Path.rename.
+                # so FileExistsError will not be raised.
+                self.image_path.replace(self.renamed_image_path)
+                shutil.move(copy_image, self.image_path)
 
         self.append_comparison()
 
