@@ -12,6 +12,7 @@ from jaconv import jaconv
 from src.utils.stdout import Stdout, Bcolors
 from src.utils.with_statements import task, add_extra_arguments_to
 from utils import get_image_paths_from_within, datetime2str
+from utils.rename import validate_replacement_with_separator_pattern_arg
 
 
 class DefaultValues(enum.Enum):
@@ -38,7 +39,6 @@ class DefaultValues(enum.Enum):
     URL_ENCODED_CHAR_PATTERN = re.compile(r'[^-_a-zA-Z0-9]')
     ALTERNATIVE_URL_ENCODED_CHAR = 'X'
 
-    IS_SERIAL_NUMBER_ADDED = False
     ZERO_PADDING_DIGIT = 3
 
     VALID_EXTENSIONS = [
@@ -81,16 +81,16 @@ class Rename:
     unavailable_file_name_char_pattern: ClassVar[Pattern] = DefaultValues.UNAVAILABLE_FILE_NAME_CHAR_PATTERN.value
     alternative_unavailable_file_name_char: str = DefaultValues.ALTERNATIVE_UNAVAILABLE_FILE_NAME_CHAR.value
 
-    is_separator_and_delimiter_kept: bool = True
+    is_separator_and_delimiter_replaced: bool = False
     replacement_with_separator_pattern: Pattern = DefaultValues.REPLACEMENT_WITH_SEPARATOR_PATTERN.value
     separator: str = DefaultValues.SEPARATOR.value
 
-    is_url_encoded_char_kept: bool = True
+    is_url_encoded_char_replaced: bool = False
     alternative_url_encoded_char: str = DefaultValues.ALTERNATIVE_URL_ENCODED_CHAR.value
     # not to be classVar
     url_encoded_char_pattern: ClassVar[Pattern] = DefaultValues.URL_ENCODED_CHAR_PATTERN.value
 
-    is_serial_number_added: bool = DefaultValues.IS_SERIAL_NUMBER_ADDED.value
+    is_serial_number_added: bool = False
     current_index: Optional[int] = None
     zero_padding_digit: int = DefaultValues.ZERO_PADDING_DIGIT.value  # => 001 0001 ?
     valid_extensions: list[str] = dataclasses.field(
@@ -179,8 +179,8 @@ class Rename:
             )
 
             arg_parser.add_argument(
-                '-keep_separator_and_delimiter',
-                '--is_separator_and_delimiter_kept',
+                '-replaced_separator_and_delimiter',
+                '--is_separator_and_delimiter_replaced',
                 help='Whether to unify the delimiters and separators contained in the names of images.',
                 action='store_true'
             )
@@ -208,8 +208,8 @@ class Rename:
             )
 
             arg_parser.add_argument(
-                '-keep_url_encoded_char',
-                '--is_url_encoded_char_kept',
+                '-replace_url_encoded_char',
+                '--is_url_encoded_char_replaced',
                 help='Whether to unify the characters that are percent-encoded in the URLs contained in the image.',
                 action='store_true'
             )
@@ -362,7 +362,7 @@ class Rename:
         >>> p.sub('X', '-_,!()abcあ* &^%')
         '-_XXXXabcXXXXXX''
         """
-        if self.is_url_encoded_char_kept:
+        if not self.is_url_encoded_char_replaced:
             return
         self.renamed_image_stem = self.url_encoded_char_pattern.sub(
             self.alternative_url_encoded_char,
@@ -377,7 +377,7 @@ class Rename:
         p.sub('_', ' bar　foo　')
         >>> '_bar_foo_'
         """
-        if self.is_separator_and_delimiter_kept:
+        if not self.is_separator_and_delimiter_replaced:
             return
 
         self.renamed_image_stem = self.replacement_with_separator_pattern.sub(
@@ -510,7 +510,7 @@ def main():
             valid_extensions=DefaultValues.VALID_EXTENSIONS.value
         )
 
-
+        replacement_with_separator_pattern = validate_replacement_with_separator_pattern_arg(args=args)
 
         for index, image_path in enumerate(image_paths):
             # file '/User/macbook/a.jpg'
@@ -526,9 +526,9 @@ def main():
                 replacement_with_separator_pattern=replacement_with_separator_pattern,
                 separator=args.separator,
                 alternative_unavailable_file_name_char=args.unavailable_file_name_char,
-                is_url_encoded_chars_kept=args.is_url_encoded_char_kept,
+                is_url_encoded_char_replaced=args.is_url_encoded_char_replaced,
                 alternative_url_encoded_char=args.alternative_url_encoded_char,
-                is_serial_number_added=args.is_serial_number_added,
+                is_serial_number_added=args.no_serial_number,
                 current_index=index,
                 zero_padding_digit=args.serial_number_zero_padding_digit,
                 valid_extensions=args.valid_extensions,
