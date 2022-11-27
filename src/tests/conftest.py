@@ -1,5 +1,5 @@
 import pathlib
-from typing import Callable
+from typing import Callable, Union
 
 import pytest
 from PIL import Image
@@ -35,7 +35,7 @@ def temp_dir_path(tmp_path) -> Callable:
 @pytest.fixture(scope='function')
 def temp_image_file() -> Callable:
     def _temp_image_file(
-            image_name: str,
+            image_path: Union[str, pathlib.Path],
             temp_dir_path: pathlib.Path,
             size: tuple = (320, 240),
             rgb_color: tuple = (0, 128, 255)
@@ -43,8 +43,16 @@ def temp_image_file() -> Callable:
         """Since the temp_dir_path function returns a new path each time it is called,
         pass the path created, not the function, as the argument."""
 
+        if type(image_path) is str:
+            image_path = pathlib.Path(image_path)
+
+        if image_path.is_absolute():
+            raise ValueError(
+                '"image_path" should be relative pass because root path is temp_dir_path.')
+        parent_image_path = temp_dir_path / image_path.parent
+        pathlib.Path.mkdir(parent_image_path, parents=True, exist_ok=True)
         img = Image.new("RGB", size, rgb_color)
-        fn = temp_dir_path / image_name
+        fn = temp_dir_path / image_path
         img.save(fn)
         return fn
 

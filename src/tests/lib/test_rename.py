@@ -25,7 +25,7 @@ class TestRename:
     ):
         _temp_dir: pathlib.Path = temp_dir_path()
         _temp_image_file: pathlib.Path = temp_image_file(
-            image_name='post_init_test.vol1.png',
+            image_path='post_init_test.vol1.png',
             temp_dir_path=_temp_dir
         )
         _temp_dest: pathlib.Path = rename_class_mock.dest
@@ -54,7 +54,7 @@ class TestRename:
 
         _before = 'bar_foo_fuga.png'
         _temp_image_file: pathlib.Path = temp_image_file(
-            image_name=_before,
+            image_path=_before,
             temp_dir_path=_temp_dir
         )
 
@@ -132,7 +132,7 @@ class TestRename:
         # half-width ASCII characters don't change.
         _before = 'half_width.png'
         _temp_image_file: pathlib.Path = temp_image_file(
-            image_name=_before,
+            image_path=_before,
             temp_dir_path=_temp_dir
         )
 
@@ -144,7 +144,7 @@ class TestRename:
         _before = 'ｆｕｌｌｗｉｄｔｈ.png'
         _after = 'fullwidth.png'
         _temp_image_file: pathlib.Path = temp_image_file(
-            image_name=_before,
+            image_path=_before,
             temp_dir_path=_temp_dir
         )
 
@@ -155,7 +155,7 @@ class TestRename:
         # Non-ASCII characters are not converted to half-width characters.
         _before = '全角.png'
         _temp_image_file: pathlib.Path = temp_image_file(
-            image_name=_before,
+            image_path=_before,
             temp_dir_path=_temp_dir
         )
 
@@ -166,7 +166,7 @@ class TestRename:
         # half-width numbers don't change.
         _before = '123.png'
         _temp_image_file: pathlib.Path = temp_image_file(
-            image_name=_before,
+            image_path=_before,
             temp_dir_path=_temp_dir
         )
 
@@ -178,7 +178,7 @@ class TestRename:
         _before = '１２３.png'
         _after = '123.png'
         _temp_image_file: pathlib.Path = temp_image_file(
-            image_name=_before,
+            image_path=_before,
             temp_dir_path=_temp_dir
         )
 
@@ -190,7 +190,7 @@ class TestRename:
         _before = 'ｓｐａｃｅ　ｓｐａｃｅ.png'
         _after = 'space space.png'
         _temp_image_file: pathlib.Path = temp_image_file(
-            image_name=_before,
+            image_path=_before,
             temp_dir_path=_temp_dir
         )
 
@@ -210,7 +210,7 @@ class TestRename:
         _before = 'space space.png'
         _after = 'space_space.png'
         _temp_image_file: pathlib.Path = temp_image_file(
-            image_name=_before,
+            image_path=_before,
             temp_dir_path=_temp_dir
         )
 
@@ -222,7 +222,7 @@ class TestRename:
         _before = 'space　space.png'
         _after = 'space_space.png'
         _temp_image_file: pathlib.Path = temp_image_file(
-            image_name=_before,
+            image_path=_before,
             temp_dir_path=_temp_dir
         )
 
@@ -234,7 +234,7 @@ class TestRename:
         _before = 'space    space.png'
         _after = 'space____space.png'
         _temp_image_file: pathlib.Path = temp_image_file(
-            image_name=_before,
+            image_path=_before,
             temp_dir_path=_temp_dir
         )
 
@@ -247,7 +247,7 @@ class TestRename:
         _before = 'space.space.png'
         _after = 'space_space.png'
         _temp_image_file: pathlib.Path = temp_image_file(
-            image_name=_before,
+            image_path=_before,
             temp_dir_path=_temp_dir
         )
 
@@ -259,7 +259,7 @@ class TestRename:
         _before = 'space,space.png'
         _after = 'space_space.png'
         _temp_image_file: pathlib.Path = temp_image_file(
-            image_name=_before,
+            image_path=_before,
             temp_dir_path=_temp_dir
         )
 
@@ -271,7 +271,7 @@ class TestRename:
         _before = 'space,space.png'
         _after = 'space_space.png'
         _temp_image_file: pathlib.Path = temp_image_file(
-            image_name=_before,
+            image_path=_before,
             temp_dir_path=_temp_dir
         )
 
@@ -283,7 +283,7 @@ class TestRename:
         _before = 'space,space.png'
         _after = 'space_space.png'
         _temp_image_file: pathlib.Path = temp_image_file(
-            image_name=_before,
+            image_path=_before,
             temp_dir_path=_temp_dir
         )
 
@@ -295,7 +295,7 @@ class TestRename:
         _before = 'spaceーspace.png'
         _after = 'space_space.png'
         _temp_image_file: pathlib.Path = temp_image_file(
-            image_name=_before,
+            image_path=_before,
             temp_dir_path=_temp_dir
         )
 
@@ -307,7 +307,7 @@ class TestRename:
         _before = 'space_space.png'
         _after = 'space-space.png'
         _temp_image_file: pathlib.Path = temp_image_file(
-            image_name=_before,
+            image_path=_before,
             temp_dir_path=_temp_dir
         )
 
@@ -319,7 +319,7 @@ class TestRename:
         _before = 'space＿space.png'
         _after = 'space-space.png'
         _temp_image_file: pathlib.Path = temp_image_file(
-            image_name=_before,
+            image_path=_before,
             temp_dir_path=_temp_dir
         )
 
@@ -339,7 +339,7 @@ class TestRename:
         _before = 'image.png'
         _after = 'prefix_image.png'
         _temp_image_file: pathlib.Path = temp_image_file(
-            image_name=_before,
+            image_path=_before,
             temp_dir_path=_temp_dir
         )
 
@@ -351,7 +351,7 @@ class TestRename:
         _before = 'image.png'
         _after = 'image_suffix.png'
         _temp_image_file: pathlib.Path = temp_image_file(
-            image_name=_before,
+            image_path=_before,
             temp_dir_path=_temp_dir
         )
 
@@ -363,7 +363,7 @@ class TestRename:
         _before = 'image.png'
         _after = 'prefix_image_suffix.png'
         _temp_image_file: pathlib.Path = temp_image_file(
-            image_name=_before,
+            image_path=_before,
             temp_dir_path=_temp_dir
         )
 
@@ -386,7 +386,7 @@ class TestRename:
         _before = 'image.png'
         _after = 'image001.png'
         _temp_image_file: pathlib.Path = temp_image_file(
-            image_name=_before,
+            image_path=_before,
             temp_dir_path=_temp_dir, )
 
         rename = rename_class_mock(
@@ -418,7 +418,7 @@ class TestRename:
         _before = ':*?"<>|¥.png'
         _after = '--------.png'
         _temp_image_file: pathlib.Path = temp_image_file(
-            image_name=_before,
+            image_path=_before,
             temp_dir_path=_temp_dir
         )
 
@@ -436,7 +436,7 @@ class TestRename:
         _before = ',!()abc123-_あ* &^%.png'
         _after = 'XXXXabc123-_XXXXXX.png'
         _temp_image_file: pathlib.Path = temp_image_file(
-            image_name=_before,
+            image_path=_before,
             temp_dir_path=_temp_dir
         )
 
@@ -464,7 +464,7 @@ class TestRename:
         _before = 'abc.png'
         _after = 'abc.png'
         _temp_image_file: pathlib.Path = temp_image_file(
-            image_name=_before,
+            image_path=_before,
             temp_dir_path=_temp_dir
         )
         rename: OrigRename = rename_class_mock(image_path=_temp_image_file, run=True)
@@ -472,6 +472,37 @@ class TestRename:
         assert rename.renamed_image_name == _after
         assert rename.renamed_image_path.exists() is True
         assert rename.renamed_image_path.is_file() is True
+        assert rename.original_image_name == _before
+        assert rename.image_path.exists() is True
+        assert rename.image_path.is_file() is True
+
+    def test_recursively_create_directories(
+            self,
+            temp_dir_path,
+            temp_image_file,
+            rename_class_mock
+    ):
+        ######################################
+        # root
+        #  |-- root_img1.png
+        #  |-- dir1
+        #       | -- dir1_img1.png
+        #       | -- dir2
+        #             |-- dir2.img1.png
+        ######################################
+        _temp_dir: pathlib.Path = temp_dir_path()
+        _before = 'abc.png'
+        _after = 'abc.png'
+        _temp_image_file: pathlib.Path = temp_image_file(
+            image_path=_before,
+            temp_dir_path=_temp_dir
+        )
+        rename: OrigRename = rename_class_mock(image_path=_temp_image_file, run=True)
+        rename.rename()
+        assert rename.renamed_image_name == _after
+        assert rename.renamed_image_path.exists() is True
+        assert rename.renamed_image_path.is_file() is True
+        assert rename.original_image_name == _before
         assert rename.image_path.exists() is True
         assert rename.image_path.is_file() is True
 
