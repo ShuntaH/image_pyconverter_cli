@@ -239,9 +239,9 @@ class Rename:
             )
 
             arg_parser.add_argument(
-                '-make_image_name_file',
-                '--is_image_name_file_made',
-                help='whether to write the list of file names to a text file.',
+                '-make_comparison_file',
+                '--is_comparison_file_made',
+                help='whether to write comparison of file name changes to a text file.',
                 action='store_true'
             )
 
@@ -507,6 +507,7 @@ def main():
             # file '/User/macbook/a.jpg'
             rename = Rename(
                 image_path=image_path,
+                dir_path=args.dir_path,
                 dest=args.dest,
                 dest_dir_name=args.dest_dir_name,
                 words_before_replacement=args.words_before_replacement,
@@ -515,7 +516,6 @@ def main():
                 suffix=args.suffix,
                 replacement_with_separator_pattern=args.replacement_with_separator_pattern,
                 separator=args.separator,
-                unavailable_file_name_char_pattern=args.unavailable_file_name_char_pattern,
                 alternative_unavailable_file_name_char=args.unavailable_file_name_char,
                 is_unavailable_url_chars_kept=args.is_unavailable_url_chars_kept,
                 alternative_unavailable_url_char=args.alternative_unavailable_url_char,
@@ -524,9 +524,17 @@ def main():
                 current_index=index,
                 zero_padding_digit=args.serial_number_zero_padding_digit,
                 valid_extensions=args.valid_extensions,
+                is_comparison_file_made=args.is_comparison_file_made,
                 run=args.run
             )
 
             rename.rename()
 
-        Rename.make_comparison_file(dir_path=args.dir_path)
+        _dest_dir_path = Rename.get_dest_dir_path(
+            dest=args.dest,
+            dest_dir_name=args.dest_dir_name
+        )
+        Rename.make_comparison_file(
+            dest_dir_path=_dest_dir_path,
+            is_comparison_file_made=args.is_comparison_file_made
+        )
