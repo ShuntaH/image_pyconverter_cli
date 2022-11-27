@@ -523,6 +523,7 @@ def main():
                 chars_after_replacement=args.chars_after_replacement,
                 prefix=args.prefix,
                 suffix=args.suffix,
+                is_separator_and_delimiter_replaced=args.is_separator_and_delimiter_replaced,
                 replacement_with_separator_pattern=replacement_with_separator_pattern,
                 separator=args.separator,
                 alternative_unavailable_file_name_char=args.unavailable_file_name_char,
