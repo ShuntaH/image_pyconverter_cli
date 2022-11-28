@@ -620,8 +620,7 @@ class TestRename:
                 dest_dir_name=rename_class_mock.dest
             )
             rename_class_mock.make_comparison_file(
-                dest_dir_path=_dest_dir,
-                is_comparison_file_made=True)
+                dest_dir_path=_dest_dir)
 
             # check created comparison file.
             comparison_file_path = _dest_dir / DefaultValues.COMPARISON_FILE_NAME.value

@@ -96,8 +96,6 @@ class Rename:
     valid_extensions: list[str] = dataclasses.field(
         default_factory=lambda: DefaultValues.VALID_EXTENSIONS.value)
 
-    is_comparison_file_made: bool = True
-
     # To create a list of names of converted images,
     # each time an instance is created from this class,
     # this list is not initialized and the same list is used.
@@ -179,7 +177,7 @@ class Rename:
             )
 
             arg_parser.add_argument(
-                '-replaced_separator_and_delimiter',
+                '-replace_separator_and_delimiter',
                 '--is_separator_and_delimiter_replaced',
                 help='Whether to unify the delimiters and separators contained in the names of images.',
                 action='store_true'
@@ -239,13 +237,6 @@ class Rename:
                 nargs="*", type=str,
                 help='.png .jpg ...',
                 default=DefaultValues.VALID_EXTENSIONS.value
-            )
-
-            arg_parser.add_argument(
-                '-ncf',
-                '--no_comparison_file',
-                help='whether to write comparisons of file name changes to a text file.',
-                action='store_false'
             )
 
             args = arg_parser.parse_args()
@@ -465,8 +456,6 @@ class Rename:
         return f'{self.image_path} => {self.renamed_image_path}'
 
     def append_comparison(self) -> None:
-        if not self.is_comparison_file_made:
-            return
         self.comparison_log.append(self.comparison)
 
     @staticmethod
@@ -486,11 +475,8 @@ class Rename:
     @classmethod
     def make_comparison_file(
             cls,
-            dest_dir_path: Union[str, pathlib.Path],
-            is_comparison_file_made=True
+            dest_dir_path: Union[str, pathlib.Path]
     ):
-        if not is_comparison_file_made:
-            return
         if type(dest_dir_path) is str:
             dest_dir_path: pathlib.Path = pathlib.Path(dest_dir_path)
         file_path = dest_dir_path / pathlib.Path(DefaultValues.COMPARISON_FILE_NAME.value)
@@ -533,7 +519,6 @@ def main():
                 current_index=index,
                 zero_padding_digit=args.serial_number_zero_padding_digit,
                 valid_extensions=args.valid_extensions,
-                is_comparison_file_made=args.no_comparison_file,
                 run=args.run
             )
 
@@ -543,7 +528,4 @@ def main():
             dest=args.dest,
             dest_dir_name=args.dest_dir_name
         )
-        Rename.make_comparison_file(
-            dest_dir_path=_dest_dir_path,
-            is_comparison_file_made=args.no_comparison_file
-        )
+        Rename.make_comparison_file(dest_dir_path=_dest_dir_path)
