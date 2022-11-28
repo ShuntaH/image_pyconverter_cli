@@ -134,8 +134,10 @@ class Rename:
         self.dest_dir_path.mkdir(exist_ok=True)
 
         if self.loop_count == 1 and self.comparison_length > 0:
-            # When an error occurs during processing of multiple images,
-            # the list of class variables that store the names of images for log may not be empty.
+            # An error may occur during the processing of multiple
+            # images and the list of class variables that store the
+            # names of images for recording may not be empty the next
+            # time this command is executed.
             self.__class__.comparison_log = []
 
     @staticmethod
