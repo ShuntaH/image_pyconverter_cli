@@ -91,7 +91,7 @@ class Rename:
     url_encoded_char_pattern: ClassVar[Pattern] = DefaultValues.URL_ENCODED_CHAR_PATTERN.value
 
     is_serial_number_added: bool = False
-    current_index: Optional[int] = None
+    loop_count: Optional[int] = None
     zero_padding_digit: int = DefaultValues.ZERO_PADDING_DIGIT.value  # => 001 0001 ?
     valid_extensions: list[str] = dataclasses.field(
         default_factory=lambda: DefaultValues.VALID_EXTENSIONS.value)
@@ -132,6 +132,11 @@ class Rename:
 
         self.dest_dir_path: pathlib.Path = self.dest / pathlib.Path(self.dest_dir_name)
         self.dest_dir_path.mkdir(exist_ok=True)
+
+        if self.loop_count == 1 and self.comparison_length > 0:
+            # When an error occurs during processing of multiple images,
+            # the list of class variables that store the names of images for log may not be empty.
+            self.__class__.comparison_log = []
 
     @staticmethod
     def get_args():
@@ -314,15 +319,14 @@ class Rename:
         self.renamed_image_stem = f'{_prefix}{self.renamed_image_stem}{_suffix}'
 
     def add_serial_number(self) -> None:
+        if not self.loop_count:  # 0, None etc.
+            raise ValueError("'loop_count' should be start from 1.")
+
         if not self.is_serial_number_added:
             return
 
-        if type(self.current_index) is not int:
-            raise ValueError('serial number index is not provided.')
-
-        current_serial_number = self.current_index + 1  # normally index starts from 0 so do +1
         self.renamed_image_stem = self.renamed_image_stem \
-            + self.zero_padding_string.format(current_serial_number)
+            + self.zero_padding_string.format(self.loop_count)
 
     def zen2han(self) -> None:
         """
@@ -447,7 +451,7 @@ class Rename:
             self.append_comparison()
 
     @property
-    def loop_count(self) -> int:
+    def comparison_length(self) -> int:
         """The loop count is increased after the rename method is called."""
         return len(self.comparison_log)
 
@@ -498,8 +502,11 @@ def main():
 
         replacement_with_separator_pattern = validate_replacement_with_separator_pattern_arg(args=args)
 
-        for index, image_path in enumerate(image_paths):
+        for loop_count, image_path in enumerate(image_paths):
             # file '/User/macbook/a.jpg'
+
+            loop_count += 1
+
             rename = Rename(
                 image_path=image_path,
                 dir_path=args.dir_path,
@@ -516,7 +523,7 @@ def main():
                 is_url_encoded_char_replaced=args.is_url_encoded_char_replaced,
                 alternative_url_encoded_char=args.alternative_url_encoded_char,
                 is_serial_number_added=args.no_serial_number,
-                current_index=index,
+                loop_count=loop_count,
                 zero_padding_digit=args.serial_number_zero_padding_digit,
                 valid_extensions=args.valid_extensions,
                 run=args.run

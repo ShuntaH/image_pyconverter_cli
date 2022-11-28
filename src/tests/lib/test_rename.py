@@ -13,10 +13,8 @@ def rename_class_mock(temp_dest_path, temp_dir_path) -> 'RenameMock':
     class RenameMock(OrigRename):
         dir_path: pathlib.Path = temp_dir_path()
         dest: Union[str, pathlib.Path] = temp_dest_path()
+        loop_count: int = 1
     klass: RenameMock = RenameMock
-
-    # init class variable of list.
-    klass.comparison_log = []
     yield klass
 
 
@@ -417,21 +415,33 @@ class TestRename:
             image_path=_before,
             temp_dir_path=_temp_dir)
 
+        # ok
         rename = rename_class_mock(
             image_path=_temp_image_file,
             is_serial_number_added=True,
-            current_index=0)
+            loop_count=1
+        )
         rename.add_serial_number()
         assert rename.renamed_image_name == _after
 
-        # missing current_index argument
+        # invalid
         rename = rename_class_mock(
             image_path=_temp_image_file,
-            is_serial_number_added=True
+            is_serial_number_added=True,
+            loop_count=0)
+        with pytest.raises(ValueError) as excinfo:
+            rename.add_serial_number()
+        assert excinfo.value.args[0] == "'loop_count' should be start from 1."
+
+        # missing loop_count argument
+        rename = rename_class_mock(
+            image_path=_temp_image_file,
+            is_serial_number_added=True,
+            loop_count=None
         )
         with pytest.raises(ValueError) as excinfo:
             rename.add_serial_number()
-        assert excinfo.value.args[0] == 'serial number index is not provided.'
+        assert excinfo.value.args[0] == "'loop_count' should be start from 1."
 
     def test_replace_unavailable_file_name_characters(
             self,
@@ -481,29 +491,6 @@ class TestRename:
         )
         rename.replace_url_encoded_chars()
         assert rename.renamed_image_name == _after
-
-    def test_rename(
-            self,
-            temp_image_file,
-            rename_class_mock
-    ):
-        _temp_dir: pathlib.Path = rename_class_mock.dir_path
-        _before = 'abc.png'
-        _after = 'abc.png'
-        _temp_image_file: pathlib.Path = temp_image_file(
-            image_path=_before,
-            temp_dir_path=_temp_dir
-        )
-        rename: OrigRename = rename_class_mock(
-            image_path=_temp_image_file,
-            run=True)
-        rename.rename()
-        assert rename.renamed_image_name == _after
-        assert rename.renamed_image_path.exists() is True
-        assert rename.renamed_image_path.is_file() is True
-        assert rename.original_image_name == _before
-        assert rename.image_path.exists() is True
-        assert rename.image_path.is_file() is True
 
     def test_recursively_create_directories(
             self,
@@ -604,9 +591,11 @@ class TestRename:
             )
             rename: OrigRename = rename_class_mock(
                 image_path=_temp_image_file,
+                loop_count=index,
                 run=True)
-            rename.rename()
             assert rename.loop_count == index
+            rename.rename()
+            assert rename.comparison_length == index
             assert rename.comparison_log[-1] == rename.comparison
         else:
             assert len(rename_class_mock.comparison_log) == _count
