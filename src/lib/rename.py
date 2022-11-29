@@ -278,16 +278,18 @@ class Rename:
         return self.renamed_relative_image_parent_path / self.renamed_image_name
 
     @property
-    def renamed_image_path_in_same_dir(self) -> pathlib.Path:
-        """When outputting a renamed image to the same directory,
-        if the original image was in a directory nested from the root path,
-        the name of that directories are added to the image name as a prefix.
+    def dirs_prefix(self) -> str:
         """
-        def _parents_as_prefix() -> str:
-            return self.separator.join(
-            self.relative_image_parent_path._parts)
-        _new = f'{_parents_as_prefix()}_{self.renamed_image_name}'
-        return self.dest_dir_path / _new
+        e.g.
+        root/dir1/dir2/img.png => root_dir1_dir2_
+        :return:
+        """
+        return self.separator.join(
+            self.relative_image_parent_path._parts) + self.separator
+
+    @property
+    def renamed_image_path_in_same_dir(self) -> pathlib.Path:
+        return self.dest_dir_path / self.renamed_image_name
 
     @property
     def renamed_image_path(self) -> pathlib.Path:
@@ -408,6 +410,22 @@ class Rename:
             self.renamed_image_stem
         )
 
+    def add_dirs_prefix(self) -> None:
+        """When outputting a renamed image to the same directory,
+        if the original image was in a directory nested from the root path,
+        the name of that directories are added to the image name as a prefix.
+        """
+        if not self.is_output_to_same_dir:
+            return
+        self.renamed_image_stem = f'{self.dirs_prefix}{self.renamed_image_stem}'
+
+    def _make_recursive_dirs(self) -> None:
+        if not self.is_output_to_same_dir:
+            pathlib.Path.mkdir(
+                self.renamed_relative_image_parent_path,
+                parents=True,
+                exist_ok=True)
+
     def rename(self):
         """
         # replace a word
@@ -448,19 +466,14 @@ class Rename:
         self.replace_url_encoded_chars()
         self.add_prefix_suffix()
         self.add_serial_number()
+        self.add_dirs_prefix()
 
         Stdout.styled_stdout(
             Bcolors.OKGREEN.value,
             self.comparison
         )
         if self.run:
-            if not self.is_output_to_same_dir:
-                pathlib.Path.mkdir(
-                    self.renamed_relative_image_parent_path,
-                    parents=True,
-                    exist_ok=True
-                )
-
+            self._make_recursive_dirs()
             with tempfile.TemporaryDirectory() as td:
                 # Changing the name and location of an image will cause the image
                 # to disappear from its original location, so to keep the original image intact,
