@@ -270,20 +270,27 @@ class Rename:
         return f'{self.renamed_image_stem}{self.ext}'
 
     @property
-    def renamed_relative_image_path(self) -> pathlib.Path:
-        return self.renamed_relative_parent_image_path / self.renamed_image_name
-
-    @property
-    def renamed_relative_parent_image_path(self) -> pathlib.Path:
+    def renamed_relative_image_parent_path(self) -> pathlib.Path:
         return self.dest_dir_path / self.relative_image_parent_path
 
     @property
-    def renamed_image_path_in_same_dir(self) -> pathlib.Path:
-        # todo ネストされたディレクトリにある場合、それらをファイルのprefixに追加する。
-        return self.dest_dir_path / self.renamed_image_name
+    def renamed_relative_image_path(self) -> pathlib.Path:
+        return self.renamed_relative_image_parent_path / self.renamed_image_name
 
     @property
-    def renamed_image_path(self):
+    def renamed_image_path_in_same_dir(self) -> pathlib.Path:
+        """When outputting a renamed image to the same directory,
+        if the original image was in a directory nested from the root path,
+        the name of that directories are added to the image name as a prefix.
+        """
+        def _parents_as_prefix() -> str:
+            return self.separator.join(
+            self.relative_image_parent_path._parts)
+        _new = f'{_parents_as_prefix()}_{self.renamed_image_name}'
+        return self.dest_dir_path / _new
+
+    @property
+    def renamed_image_path(self) -> pathlib.Path:
         if self.is_output_to_same_dir:
             return self.renamed_image_path_in_same_dir
         return self.renamed_relative_image_path
@@ -447,11 +454,12 @@ class Rename:
             self.comparison
         )
         if self.run:
-            pathlib.Path.mkdir(
-                self.renamed_image_path,
-                parents=True,
-                exist_ok=True
-            )
+            if not self.is_output_to_same_dir:
+                pathlib.Path.mkdir(
+                    self.renamed_relative_image_parent_path,
+                    parents=True,
+                    exist_ok=True
+                )
 
             with tempfile.TemporaryDirectory() as td:
                 # Changing the name and location of an image will cause the image
