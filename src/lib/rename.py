@@ -101,6 +101,7 @@ class Rename:
     # this list is not initialized and the same list is used.
     comparison_log: ClassVar[list] = []
 
+    is_output_to_same_dir: bool = False
     run: bool = False
 
     def __post_init__(self):
@@ -246,6 +247,13 @@ class Rename:
                 default=DefaultValues.VALID_EXTENSIONS.value
             )
 
+            arg_parser.add_argument(
+                '-sd',
+                '--same_directory',
+                help='Output to the same directory.',
+                action='store_true'
+            )
+
             args = arg_parser.parse_args()
         return args
 
@@ -262,12 +270,23 @@ class Rename:
         return f'{self.renamed_image_stem}{self.ext}'
 
     @property
-    def renamed_parent_image_path(self) -> pathlib.Path:
+    def renamed_relative_image_path(self) -> pathlib.Path:
+        return self.renamed_relative_parent_image_path / self.renamed_image_name
+
+    @property
+    def renamed_relative_parent_image_path(self) -> pathlib.Path:
         return self.dest_dir_path / self.relative_image_parent_path
 
     @property
-    def renamed_image_path(self) -> pathlib.Path:
-        return self.renamed_parent_image_path / self.renamed_image_name
+    def renamed_image_path_in_same_dir(self) -> pathlib.Path:
+        # todo ネストされたディレクトリにある場合、それらをファイルのprefixに追加する。
+        return self.dest_dir_path / self.renamed_image_name
+
+    @property
+    def renamed_image_path(self):
+        if self.is_output_to_same_dir:
+            return self.renamed_image_path_in_same_dir
+        return self.renamed_relative_image_path
 
     @property
     def is_extension_valid(self) -> bool:
@@ -429,7 +448,7 @@ class Rename:
         )
         if self.run:
             pathlib.Path.mkdir(
-                self.renamed_parent_image_path,
+                self.renamed_image_path,
                 parents=True,
                 exist_ok=True
             )
