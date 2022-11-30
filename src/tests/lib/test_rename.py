@@ -634,7 +634,7 @@ class TestRename:
             temp_dir_path=_temp_dir
         )
 
-        # root dir exists.
+        # root dir.
         rename: OrigRename = rename_class_mock(
             image_path=_root_img_path,
             run=True,
@@ -651,8 +651,8 @@ class TestRename:
         assert rename.renamed_relative_image_parent_path.as_posix() == rename.dest_dir_path.as_posix()
 
         # check renamed image.
-        assert rename.renamed_image_path.samefile(rename.renamed_relative_image_path)
-        assert rename.renamed_image_path.samefile(rename.renamed_image_path_in_same_dir)
+        assert rename.renamed_image_path.samefile(rename.renamed_relative_image_path) is True
+        assert rename.renamed_image_path.samefile(rename.renamed_image_path_in_same_dir) is True
         assert rename.renamed_image_path.as_posix() == rename.renamed_image_path_in_same_dir.as_posix()
         assert rename.renamed_image_path.exists() is True
         assert rename.renamed_image_path.is_file() is True
@@ -673,17 +673,25 @@ class TestRename:
 
         # check name changed correctly
         assert rename.renamed_image_name != _dir1_img_path.name  # should add dir prefix
-        assert rename.renamed_image_name == f'{rename.dirs_prefix}{rename.separator}{_dir1_img_path.name}'
+        assert rename.renamed_image_name == f'{rename.dirs_prefix}{_dir1_img_path.name}'
 
         # check renamed image parent paths
         _dir1_img_parent: pathlib.Path = pathlib.Path(rename.dest_dir_path / _dir1_img).parent
         assert rename.renamed_relative_image_parent_path.as_posix() == _dir1_img_parent.as_posix()
-        assert rename.renamed_relative_image_parent_path.exists() is True
-        assert rename.renamed_relative_image_parent_path.is_dir() is True
+        assert rename.renamed_relative_image_parent_path.exists() is False
+        assert rename.renamed_relative_image_parent_path.is_dir() is False
 
         # check renamed image
-        assert rename.renamed_image_path.samefile(rename.renamed_relative_image_path)
-        assert rename.renamed_image_path.as_posix() == rename.renamed_relative_image_path.as_posix()
+        with pytest.raises(FileNotFoundError) as excinfo:
+            assert rename.renamed_image_path.samefile(rename.renamed_relative_image_path) is False
+        assert excinfo.value == FileNotFoundError(2, 'No such file or directory')
+
+
+        assert rename.renamed_image_path.samefile(rename.renamed_image_path_in_same_dir) is True
+        assert rename.renamed_image_path.as_posix() != rename.renamed_relative_image_path.as_posix()
+        assert rename.renamed_image_path.as_posix() == rename.renamed_image_path_in_same_dir.as_posix()
+        assert rename.renamed_image_path.as_posix() == rename.dest_dir_path.as_posix() \
+               + f'{rename.dirs_prefix}{rename.separator}{_dir1_img_path.name}'
         assert rename.renamed_image_path.exists() is True
         assert rename.renamed_image_path.is_file() is True
 

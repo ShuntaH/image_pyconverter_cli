@@ -281,11 +281,15 @@ class Rename:
     def dirs_prefix(self) -> str:
         """
         e.g.
-        root/dir1/dir2/img.png => root_dir1_dir2_
+        root/dir1/dir2/img.png => dir1_dir2_
         :return:
         """
-        return self.separator.join(
-            self.relative_image_parent_path._parts) + self.separator
+        parts = self.relative_image_parent_path._parts
+        prefix = self.separator.join(
+            self.relative_image_parent_path._parts)
+        if len(parts) > 0:
+            return prefix + self.separator
+        return prefix
 
     @property
     def renamed_image_path_in_same_dir(self) -> pathlib.Path:
