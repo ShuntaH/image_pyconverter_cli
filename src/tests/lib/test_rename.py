@@ -684,7 +684,8 @@ class TestRename:
         # check renamed image
         with pytest.raises(FileNotFoundError) as excinfo:
             assert rename.renamed_image_path.samefile(rename.renamed_relative_image_path) is False
-        assert excinfo.value == FileNotFoundError(2, 'No such file or directory')
+        assert excinfo.type is FileNotFoundError
+        assert excinfo.value.strerror == 'No such file or directory'
 
 
         assert rename.renamed_image_path.samefile(rename.renamed_image_path_in_same_dir) is True
