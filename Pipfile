@@ -6,6 +6,7 @@ name = "pypi"
 [packages]
 setuptools = "*"
 build = "*"
+image-pyconverter-cli = {editable = true, path = "."}
 
 [dev-packages]
 pytest = "*"

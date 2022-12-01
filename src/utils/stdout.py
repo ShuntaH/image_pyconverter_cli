@@ -31,4 +31,4 @@ class Stdout:
         :return: None
         """
         print(f"\n{style}"
-              f"{sentence}")
+              f"{sentence}{Bcolors.ENDC.value}")
