@@ -604,7 +604,7 @@ class TestRename:
         assert rename.image_path.is_file() is True
         assert rename.image_path.as_posix() == _dir2_img_path.as_posix()
 
-    def test_create_recursive_directories_as_prefix_for_output_to_same_dir(
+    def test_output_to_the_same_dir(
             self,
             temp_image_file,
             rename_class_mock
@@ -686,13 +686,11 @@ class TestRename:
             assert rename.renamed_image_path.samefile(rename.renamed_relative_image_path) is False
         assert excinfo.type is FileNotFoundError
         assert excinfo.value.strerror == 'No such file or directory'
-
-
-        assert rename.renamed_image_path.samefile(rename.renamed_image_path_in_same_dir) is True
         assert rename.renamed_image_path.as_posix() != rename.renamed_relative_image_path.as_posix()
+
         assert rename.renamed_image_path.as_posix() == rename.renamed_image_path_in_same_dir.as_posix()
         assert rename.renamed_image_path.as_posix() == rename.dest_dir_path.as_posix() \
-               + f'{rename.dirs_prefix}{rename.separator}{_dir1_img_path.name}'
+               + f'/{rename.dirs_prefix}{_dir1_img_path.name}'
         assert rename.renamed_image_path.exists() is True
         assert rename.renamed_image_path.is_file() is True
 

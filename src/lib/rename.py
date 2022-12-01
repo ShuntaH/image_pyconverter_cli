@@ -288,6 +288,7 @@ class Rename:
         prefix = self.separator.join(
             self.relative_image_parent_path._parts)
         if len(parts) > 0:
+            # if the image in root, parts length is 0
             return prefix + self.separator
         return prefix
 
