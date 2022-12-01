@@ -19,6 +19,10 @@ def rename_class_mock(temp_dest_path, temp_dir_path) -> 'RenameMock':
 
 
 class TestRename:
+    # todo 何かの引数が足りなくてエラーが起きないか、引数が渡されていなかったらデフォルト値が使われているか
+    def test_class_arguments(self):
+        pass
+
     def test_post_init(
             self,
             temp_image_file,
