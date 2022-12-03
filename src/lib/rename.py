@@ -64,7 +64,6 @@ class DefaultValues(enum.Enum):
 
 @dataclasses.dataclass
 class Rename:
-
     image_path: Union[str, pathlib.Path]
     dir_path: str
 
@@ -93,6 +92,7 @@ class Rename:
     is_serial_number_added: bool = False
     loop_count: Optional[int] = None
     zero_padding_digit: int = DefaultValues.ZERO_PADDING_DIGIT.value  # => 001 0001 ?
+
     valid_extensions: list[str] = dataclasses.field(
         default_factory=lambda: DefaultValues.VALID_EXTENSIONS.value)
 
@@ -202,7 +202,7 @@ class Rename:
                 '--replacement_with_separator_pattern',
                 help='Regular expression pattern of characters to be replaced by separators. e.g. [^-_a-zA-Z0-9]',
                 type=str,
-                default='[^-_a-zA-Z0-9]'
+                default='[ 　\t\n.,-ー_＿]'
             )
 
             arg_parser.add_argument(
@@ -284,6 +284,7 @@ class Rename:
         root/dir1/dir2/img.png => dir1_dir2_
         :return:
         """
+        # todo ファイル名になれないprefixになるかもしれない
         parts = self.relative_image_parent_path._parts
         prefix = self.separator.join(
             self.relative_image_parent_path._parts)
@@ -339,8 +340,8 @@ class Rename:
         # If the number of contents in the two arrays do not match,
         # the larger portion of the array is not processed.
         for before, after in zip(
-            self.chars_before_replacement,
-            self.chars_after_replacement
+                self.chars_before_replacement,
+                self.chars_after_replacement
         ):
             self.replace_word(before=before, after=after)
 
