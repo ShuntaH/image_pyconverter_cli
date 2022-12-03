@@ -1,5 +1,6 @@
 import dataclasses
 import pathlib
+import re
 from typing import Union
 
 import pytest
@@ -498,10 +499,13 @@ class TestRename:
         _after = '--------.png'
         _temp_image_file: pathlib.Path = temp_image_file(
             image_path=_before,
-            temp_dir_path=_temp_dir
-        )
-
+            temp_dir_path=_temp_dir)
         rename = rename_class_mock(image_path=_temp_image_file)
+        assert hasattr(rename.__class__, 'unavailable_file_name_char_pattern') is True
+        assert hasattr(rename, 'unavailable_file_name_char_pattern') is True
+        assert type(rename.unavailable_file_name_char_pattern) is re.Pattern
+        assert rename.alternative_unavailable_file_name_char == \
+               DefaultValues.ALTERNATIVE_UNAVAILABLE_FILE_NAME_CHAR.value
         rename.replace_unavailable_file_name_chars()
         assert rename.renamed_image_name == _after
 
