@@ -431,25 +431,34 @@ class TestRename:
     def test_add_serial_number(
             self,
             temp_image_file,
+            temp_dir_path,
             rename_class_mock
     ):
         _temp_dir: pathlib.Path = rename_class_mock.dir_path
+
+        # missing is_serial_number_added, loop_count, zero_padding_digit
+        _before = 'image.png'
+        _after = 'image001.png'
+        _dir_path = temp_dir_path()
+        _temp_image_file: pathlib.Path = temp_image_file(
+            image_path=_before,
+            temp_dir_path=_temp_dir)
+        rename = OrigRename(image_path=_temp_image_file, dir_path=_dir_path)
+        assert rename.is_serial_number_added is False
+        assert rename.loop_count is None
+        assert rename.zero_padding_digit == DefaultValues.ZERO_PADDING_DIGIT.value
+        with pytest.raises(ValueError) as excinfo:
+            rename.add_serial_number()
+        assert excinfo.value.args[0] == "'loop_count' should be start from 1."
+        rename = rename_class_mock(image_path=_temp_image_file, loop_count=1)
+        rename.add_serial_number()
+        assert rename.renamed_image_name == _before
 
         _before = 'image.png'
         _after = 'image001.png'
         _temp_image_file: pathlib.Path = temp_image_file(
             image_path=_before,
             temp_dir_path=_temp_dir)
-
-        # ok
-        rename = rename_class_mock(
-            image_path=_temp_image_file,
-            is_serial_number_added=True,
-            loop_count=1
-        )
-        rename.add_serial_number()
-        assert rename.renamed_image_name == _after
-
         # invalid
         rename = rename_class_mock(
             image_path=_temp_image_file,
@@ -458,6 +467,13 @@ class TestRename:
         with pytest.raises(ValueError) as excinfo:
             rename.add_serial_number()
         assert excinfo.value.args[0] == "'loop_count' should be start from 1."
+        # ok
+        rename = rename_class_mock(
+            image_path=_temp_image_file,
+            is_serial_number_added=True,
+            loop_count=1)
+        rename.add_serial_number()
+        assert rename.renamed_image_name == _after
 
         # missing loop_count argument
         rename = rename_class_mock(

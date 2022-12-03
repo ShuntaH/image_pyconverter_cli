@@ -92,6 +92,7 @@ class Rename:
     is_serial_number_added: bool = False
     loop_count: Optional[int] = None
     zero_padding_digit: int = DefaultValues.ZERO_PADDING_DIGIT.value  # => 001 0001 ?
+
     valid_extensions: list[str] = dataclasses.field(
         default_factory=lambda: DefaultValues.VALID_EXTENSIONS.value)
 
@@ -360,7 +361,7 @@ class Rename:
             return
 
         self.renamed_image_stem = self.renamed_image_stem \
-                                  + self.zero_padding_string.format(self.loop_count)
+            + self.zero_padding_string.format(self.loop_count)
 
     def zen2han(self) -> None:
         """
