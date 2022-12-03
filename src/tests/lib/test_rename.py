@@ -66,7 +66,6 @@ class TestRename:
 
         # missing chars_before_replacement and chars_after_replacement
         rename = rename_class_mock(image_path=_temp_image_file)
-        rename.replace_words()
         assert hasattr(rename.__class__, 'chars_before_replacement') is False
         assert hasattr(rename, 'chars_before_replacement') is True
         assert type(rename.chars_before_replacement) is list
@@ -75,6 +74,7 @@ class TestRename:
         assert hasattr(rename, 'chars_after_replacement') is True
         assert type(rename.chars_after_replacement) is list
         assert len(rename.chars_after_replacement) == 0
+        rename.replace_words()
         assert rename.renamed_image_name == _before  # not change
 
         # missing chars_after_replacement
@@ -232,18 +232,30 @@ class TestRename:
     ):
         _temp_dir: pathlib.Path = rename_class_mock.dir_path
 
+        # missing is_separator_and_delimiter_replaced
+        # replacement_with_separator_pattern
+        # separator
+        _before = 'space space.png'
+        _after = 'space_space.png'
+        _temp_image_file: pathlib.Path = temp_image_file(
+            image_path=_before,
+            temp_dir_path=_temp_dir)
+        rename = rename_class_mock(image_path=_temp_image_file)
+        assert rename.is_separator_and_delimiter_replaced is False
+        assert rename.replacement_with_separator_pattern == DefaultValues.REPLACEMENT_WITH_SEPARATOR_PATTERN.value
+        assert rename.separator == DefaultValues.SEPARATOR.value
+        rename.replace_with_separator()
+        assert rename.renamed_image_name == _before
+
         # replace half width space with a separator
         _before = 'space space.png'
         _after = 'space_space.png'
         _temp_image_file: pathlib.Path = temp_image_file(
             image_path=_before,
-            temp_dir_path=_temp_dir
-        )
-
+            temp_dir_path=_temp_dir)
         rename = rename_class_mock(
             image_path=_temp_image_file,
-            is_separator_and_delimiter_replaced=True
-        )
+            is_separator_and_delimiter_replaced=True)
         rename.replace_with_separator()
         assert rename.renamed_image_name == _after
 
@@ -252,13 +264,10 @@ class TestRename:
         _after = 'space_space.png'
         _temp_image_file: pathlib.Path = temp_image_file(
             image_path=_before,
-            temp_dir_path=_temp_dir
-        )
-
+            temp_dir_path=_temp_dir)
         rename = rename_class_mock(
             image_path=_temp_image_file,
-            is_separator_and_delimiter_replaced=True
-        )
+            is_separator_and_delimiter_replaced=True)
         rename.replace_with_separator()
         assert rename.renamed_image_name == _after
 
@@ -267,13 +276,10 @@ class TestRename:
         _after = 'space____space.png'
         _temp_image_file: pathlib.Path = temp_image_file(
             image_path=_before,
-            temp_dir_path=_temp_dir
-        )
-
+            temp_dir_path=_temp_dir)
         rename = rename_class_mock(
             image_path=_temp_image_file,
-            is_separator_and_delimiter_replaced=True
-        )
+            is_separator_and_delimiter_replaced=True)
         rename.replace_with_separator()
         assert rename.renamed_image_name == _after
 

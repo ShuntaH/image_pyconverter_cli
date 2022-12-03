@@ -64,7 +64,6 @@ class DefaultValues(enum.Enum):
 
 @dataclasses.dataclass
 class Rename:
-
     image_path: Union[str, pathlib.Path]
     dir_path: str
 
@@ -202,7 +201,7 @@ class Rename:
                 '--replacement_with_separator_pattern',
                 help='Regular expression pattern of characters to be replaced by separators. e.g. [^-_a-zA-Z0-9]',
                 type=str,
-                default='[^-_a-zA-Z0-9]'
+                default='[ 　\t\n.,-ー_＿]'
             )
 
             arg_parser.add_argument(
@@ -339,8 +338,8 @@ class Rename:
         # If the number of contents in the two arrays do not match,
         # the larger portion of the array is not processed.
         for before, after in zip(
-            self.chars_before_replacement,
-            self.chars_after_replacement
+                self.chars_before_replacement,
+                self.chars_after_replacement
         ):
             self.replace_word(before=before, after=after)
 
@@ -361,7 +360,7 @@ class Rename:
             return
 
         self.renamed_image_stem = self.renamed_image_stem \
-            + self.zero_padding_string.format(self.loop_count)
+                                  + self.zero_padding_string.format(self.loop_count)
 
     def zen2han(self) -> None:
         """
