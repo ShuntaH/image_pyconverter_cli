@@ -60,10 +60,38 @@ class TestRename:
             image_path=_before,
             temp_dir_path=_temp_dir
         )
-
         _after = 'replaced-bar_replaced-foo_replaced-fuga.png'
         chars_before_replacement: list[str] = ['bar', 'foo', 'fuga']
         chars_after_replacement: list[str] = ['replaced-bar', 'replaced-foo', 'replaced-fuga']
+
+        # missing chars_before_replacement and chars_after_replacement
+        rename = rename_class_mock(image_path=_temp_image_file)
+        rename.replace_words()
+        assert hasattr(rename.__class__, 'chars_before_replacement') is False
+        assert hasattr(rename, 'chars_before_replacement') is True
+        assert type(rename.chars_before_replacement) is list
+        assert len(rename.chars_before_replacement) == 0
+        assert hasattr(rename.__class__, 'chars_after_replacement') is False
+        assert hasattr(rename, 'chars_after_replacement') is True
+        assert type(rename.chars_after_replacement) is list
+        assert len(rename.chars_after_replacement) == 0
+        assert rename.renamed_image_name == _before  # not change
+
+        # missing chars_after_replacement
+        rename = rename_class_mock(
+            image_path=_temp_image_file,
+            chars_before_replacement=chars_before_replacement
+        )
+        rename.replace_words()
+        assert rename.renamed_image_name == _before  # not change
+
+        # missing chars_before_replacement
+        rename = rename_class_mock(
+            image_path=_temp_image_file,
+            chars_after_replacement=chars_after_replacement
+        )
+        rename.replace_words()
+        assert rename.renamed_image_name == _before   # not change
 
         rename = rename_class_mock(
             image_path=_temp_image_file,
@@ -117,8 +145,6 @@ class TestRename:
         )
         rename.replace_words()
         assert rename.renamed_image_name == _before
-
-        # subprocess.run(['ic_rename', abs_image_paths])
 
     def test_replace_full_width_characters_with_half_width(
             self,
