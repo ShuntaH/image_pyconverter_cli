@@ -522,19 +522,24 @@ class TestRename:
             temp_dir_path=_temp_dir
         )
 
+        # missing is_url_encoded_char_replaced,
+        # alternative_url_encoded_char
+        # and url_encoded_char_pattern
+        rename = rename_class_mock(image_path=_temp_image_file)
+        rename.replace_url_encoded_chars()
+        assert rename.renamed_image_name == _before
+
         # not replace
         rename = rename_class_mock(
             image_path=_temp_image_file,
-            is_url_encoded_char_replaced=False
-        )
+            is_url_encoded_char_replaced=False)
         rename.replace_url_encoded_chars()
         assert rename.renamed_image_name == _before
 
         # replace
         rename = rename_class_mock(
             image_path=_temp_image_file,
-            is_url_encoded_char_replaced=True
-        )
+            is_url_encoded_char_replaced=True)
         rename.replace_url_encoded_chars()
         assert rename.renamed_image_name == _after
 
