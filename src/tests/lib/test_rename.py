@@ -519,8 +519,7 @@ class TestRename:
         _after = 'XXXXabc123-_XXXXXX.png'
         _temp_image_file: pathlib.Path = temp_image_file(
             image_path=_before,
-            temp_dir_path=_temp_dir
-        )
+            temp_dir_path=_temp_dir)
 
         # missing is_url_encoded_char_replaced,
         # alternative_url_encoded_char
@@ -697,14 +696,15 @@ class TestRename:
         assert rename.renamed_image_name == _root_img_path.name
 
         # check renamed image parent paths
+        assert rename.renamed_relative_image_parent_path.as_posix() == rename.dest_dir_path.as_posix()
         assert rename.renamed_relative_image_parent_path.exists() is True  # root
         assert rename.renamed_relative_image_parent_path.is_dir() is True
-        assert rename.renamed_relative_image_parent_path.as_posix() == rename.dest_dir_path.as_posix()
 
         # check renamed image.
         assert rename.renamed_image_path.samefile(rename.renamed_relative_image_path) is True
         assert rename.renamed_image_path.samefile(rename.renamed_image_path_in_same_dir) is True
         assert rename.renamed_image_path.as_posix() == rename.renamed_image_path_in_same_dir.as_posix()
+        assert rename.renamed_relative_image_path.as_posix() == rename.renamed_image_path_in_same_dir.as_posix()
         assert rename.dirs_prefix == ''
         assert rename.renamed_image_path.exists() is True
         assert rename.renamed_image_path.is_file() is True
