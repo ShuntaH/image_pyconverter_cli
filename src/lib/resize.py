@@ -33,7 +33,6 @@ class DefaultValues(enum.Enum):
 def get_args():
     arg_parser = argparse.ArgumentParser()
     with add_extra_arguments_to(arg_parser) as arg_parser:
-        # todo フォルダ名に&が入るとダメ
         arg_parser.add_argument('width', type=int)
         arg_parser.add_argument('-hi', '--height', default=0, type=int)
         arg_parser.add_argument(

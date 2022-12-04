@@ -13,7 +13,8 @@ def add_extra_arguments_to(arg_parser):
         arg_parser.add_argument(
             'dir_path',
             type=str,
-            help='e.g. /Users/macbook/images'
+            help='e.g. /Users/macbook/images. '
+                 'please do not include unavailable characters in the directory name.'
         )
         arg_parser.add_argument('-r', '--run', action='store_true')
         yield arg_parser

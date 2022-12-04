@@ -303,7 +303,7 @@ class Rename:
         root/dir1/dir2/img.png => dir1_dir2_
         :return:
         """
-        # todo ファイル名になれないprefixになるかもしれない
+        # todo unavailble characters may be in filename
         parts = self.relative_image_parent_path._parts
         prefix = self.separator.join(
             self.relative_image_parent_path._parts)
