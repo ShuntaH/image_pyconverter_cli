@@ -165,7 +165,7 @@ class Rename:
                 help='The part of the image that will be renamed.'
             )
             arg_parser.add_argument(
-                '-after', '--chars_before_replacement',
+                '-after', '--chars_after_replacement',
                 nargs="*", type=str,
                 default=[],
                 help='The part of the image after being changed'
