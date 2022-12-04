@@ -23,7 +23,7 @@ class DefaultValues(enum.Enum):
     PREFIX = ''
     SUFFIX = ''
 
-    REPLACEMENT_WITH_SEPARATOR_PATTERN = r'[　\s.,\˗-–―﹣ー—－―⁃━─⁻_＿〜]'
+    REPLACEMENT_WITH_SEPARATOR_PATTERN = r'[　\s.,_＿〜～\―\‐\˗֊\‐\‑\‒\–\⁃\⁻\₋\−\﹣\－\—\―\━\─\-\ー]'
     SEPARATOR = '_'
 
     ###########################################################
