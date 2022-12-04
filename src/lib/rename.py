@@ -573,7 +573,7 @@ def main():
                 prefix=args.prefix,
                 suffix=args.suffix,
                 is_separator_and_delimiter_replaced=args.is_separator_and_delimiter_replaced,
-                replacement_with_separator_pattern=compile_pattern_from(args.replacement_with_separator_pattern),
+                replacement_with_separator_pattern=args.replacement_with_separator_pattern,
                 separator=args.separator,
                 alternative_unavailable_file_name_char=args.unavailable_file_name_char,
                 is_url_encoded_char_replaced=args.is_url_encoded_char_replaced,

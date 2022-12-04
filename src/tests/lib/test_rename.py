@@ -266,8 +266,8 @@ class TestRename:
             temp_dir_path=_temp_dir)
         rename = rename_class_mock(image_path=_temp_image_file)
         assert rename.is_separator_and_delimiter_replaced is False
-        assert rename.replacement_with_separator_pattern == compile_pattern_from(
-            DefaultValues.REPLACEMENT_WITH_SEPARATOR_PATTERN.value)
+        assert rename.replacement_with_separator_pattern.pattern == re.compile(
+            DefaultValues.REPLACEMENT_WITH_SEPARATOR_PATTERN.value).pattern
         assert rename.separator == DefaultValues.SEPARATOR.value
         rename.replace_with_separator()
         assert rename.renamed_image_name == _before
