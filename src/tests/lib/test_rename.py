@@ -443,7 +443,10 @@ class TestRename:
         _temp_image_file: pathlib.Path = temp_image_file(
             image_path=_before,
             temp_dir_path=_temp_dir)
-        rename = OrigRename(image_path=_temp_image_file, dir_path=_dir_path)
+        rename = OrigRename(
+            image_path=_temp_image_file,
+            dir_path=_dir_path,
+            dest=temp_dir_path())
         assert rename.is_serial_number_added is False
         assert rename.loop_count is None
         assert rename.zero_padding_digit == DefaultValues.ZERO_PADDING_DIGIT.value
@@ -572,7 +575,7 @@ class TestRename:
         )
 
         # root dir exists.
-        rename: OrigRename = rename_class_mock(
+        rename = rename_class_mock(
             image_path=_root_img_path,
             run=True,
             is_output_to_same_dir=False
@@ -600,7 +603,7 @@ class TestRename:
         assert rename.image_path.as_posix() == _root_img_path.as_posix()
 
         # dir1 exists.
-        rename: OrigRename = rename_class_mock(
+        rename = rename_class_mock(
             image_path=_dir1_img_path,
             run=True)
         rename.rename()
@@ -627,7 +630,7 @@ class TestRename:
         assert rename.image_path.as_posix() == _dir1_img_path.as_posix()
 
         # dir2 exists.
-        rename: OrigRename = rename_class_mock(
+        rename = rename_class_mock(
             image_path=_dir2_img_path,
             run=True)
         rename.rename()
@@ -684,7 +687,7 @@ class TestRename:
         )
 
         # root dir.
-        rename: OrigRename = rename_class_mock(
+        rename = rename_class_mock(
             image_path=_root_img_path,
             run=True,
             is_output_to_same_dir=True
@@ -715,7 +718,7 @@ class TestRename:
         assert rename.image_path.as_posix() == _root_img_path.as_posix()
 
         # dir1 exists.
-        rename: OrigRename = rename_class_mock(
+        rename = rename_class_mock(
             image_path=_dir1_img_path,
             run=True,
             is_output_to_same_dir=True
@@ -752,7 +755,7 @@ class TestRename:
         assert rename.image_path.as_posix() == _dir1_img_path.as_posix()
 
         # dir2 exists.
-        rename: OrigRename = rename_class_mock(
+        rename = rename_class_mock(
             image_path=_dir2_img_path,
             run=True,
             is_output_to_same_dir=True
@@ -802,7 +805,7 @@ class TestRename:
                 image_path=_image_path,
                 temp_dir_path=_temp_dir
             )
-            rename: OrigRename = rename_class_mock(
+            rename = rename_class_mock(
                 image_path=_temp_image_file,
                 loop_count=index,
                 run=True)
