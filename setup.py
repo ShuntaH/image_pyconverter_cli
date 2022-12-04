@@ -2,6 +2,8 @@
 from setuptools import setup
 
 LONG_DESCRIPTION = """
+This library is a CLI-based conversion tool for images, including renaming and resizing.
+Currently, only the renaming function is provided.
 """.strip()
 
 SHORT_DESCRIPTION = """
@@ -48,7 +50,7 @@ setup(
     entry_points={
         "console_scripts": [
             "ic_rename=app:rename",
-            "ic_resize=app:resize"
+            # "ic_resize=app:resize"
         ]
     },
     tests_require=TEST_DEPENDENCIES,
