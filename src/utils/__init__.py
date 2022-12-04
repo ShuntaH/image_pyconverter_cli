@@ -22,23 +22,38 @@ def get_image_paths_from_within(
     dir_p = pathlib.Path(dir_path)
     if not dir_p.exists():
         raise ValueError(f'"{dir_path} does not exists."')
-    ext_pattern: Pattern = create_valid_extension_pattern_from(valid_extensions=valid_extensions)
-    g = valid_image_paths_generator(dir_path=dir_p, pattern=ext_pattern)
+    ext_pattern: Pattern = compile_extension_pattern_from(
+        valid_extensions=valid_extensions)
+    g = image_paths_of_valid_extension_generator(
+        dir_path=dir_p,
+        pattern=ext_pattern)
 
     try:
         g.__next__()
     except StopIteration:
         raise ValueError(f'No images within "{dir_path}".')
 
-    return valid_image_paths_generator(dir_path=dir_p, pattern=ext_pattern)
+    return image_paths_of_valid_extension_generator(
+        dir_path=dir_p,
+        pattern=ext_pattern)
 
 
-def create_valid_extension_pattern_from(
-        valid_extensions: list[str] = VALID_EXTENSIONS) -> Pattern:
+def compile_pattern_from(pattern_string: str) -> Pattern:
+    """Both raw string(=r'') and pure string can be pattern string arg.
+    # >>> p = re.compile(r'[ 　\t\n.,\-ー_＿]')
+    >>> p
+    >>> re.compile('[ \u3000\\t\\n.,\\-ー_＿]')
+    """
+    return re.compile(f"{pattern_string}")
+
+
+def compile_extension_pattern_from(
+        valid_extensions: list[str] = VALID_EXTENSIONS
+) -> Pattern:
     return re.compile("/*(" + '|'.join(valid_extensions) + ")$")  # => /*(.jpg|.jpeg|.png)$
 
 
-def valid_image_paths_generator(
+def image_paths_of_valid_extension_generator(
         dir_path: Union[str, pathlib.Path],
         pattern: Pattern
 ) -> Iterator[pathlib.Path]:
@@ -98,4 +113,3 @@ def force_cleanup_temp():
         sentence=f"cleanup {root_path}."
     )
     # return pathlib.rm_rf(path=root_path)
-

@@ -4,14 +4,14 @@ from re import Pattern
 import pytest
 
 from utils import (
-    create_valid_extension_pattern_from,
+    compile_extension_pattern_from,
     get_image_paths_from_within,
     VALID_EXTENSIONS
 )
 
 
 def test_create_valid_extension_pattern_from():
-    p = create_valid_extension_pattern_from()
+    p = compile_extension_pattern_from()
     assert type(p) is Pattern
     assert p.pattern == '/*(.jpg|.jpeg|.JPG|.JPEG|.jpe|.jfif|.pjpeg|.pjp|.png|.gif|.tiff|.tif|.webp|.svg|.svgz)$'
 

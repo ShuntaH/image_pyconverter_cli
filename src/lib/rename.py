@@ -11,18 +11,19 @@ from jaconv import jaconv
 
 from src.utils.stdout import Stdout, Bcolors
 from src.utils.with_statements import task, add_extra_arguments_to
-from utils import get_image_paths_from_within, datetime2str
-from utils.rename import validate_replacement_with_separator_pattern_arg
+from utils import get_image_paths_from_within, datetime2str, compile_pattern_from
 
 
 class DefaultValues(enum.Enum):
+    DIR_PATH = pathlib.Path.cwd()
+
     DEST_DIR_NAME = f"RENAMED_IMAGES_{datetime2str()}"
     DEST = pathlib.Path.cwd()
 
     PREFIX = ''
     SUFFIX = ''
 
-    REPLACEMENT_WITH_SEPARATOR_PATTERN = re.compile(r'[ 　\t\n.,\-ー_＿]')
+    REPLACEMENT_WITH_SEPARATOR_PATTERN = r'[　\s.,\-ー_＿]'
     SEPARATOR = '_'
 
     ###########################################################
@@ -33,10 +34,10 @@ class DefaultValues(enum.Enum):
     # finder can use "/", but if you look at the filename in a shell,
     # you will see ":".
     ###########################################################
-    UNAVAILABLE_FILE_NAME_CHAR_PATTERN = re.compile(r'[\/:*?"<>|¥]')
+    UNAVAILABLE_FILE_NAME_CHAR_PATTERN = r'[\/:*?"<>|¥]'
     ALTERNATIVE_UNAVAILABLE_FILE_NAME_CHAR = '-'
 
-    URL_ENCODED_CHAR_PATTERN = re.compile(r'[^-_a-zA-Z0-9]')
+    URL_ENCODED_CHAR_PATTERN = r'[^-_a-zA-Z0-9]'
     ALTERNATIVE_URL_ENCODED_CHAR = 'X'
 
     ZERO_PADDING_DIGIT = 3
@@ -65,7 +66,7 @@ class DefaultValues(enum.Enum):
 @dataclasses.dataclass
 class Rename:
     image_path: Union[str, pathlib.Path]
-    dir_path: str
+    dir_path: Union[str, pathlib.Path] = DefaultValues.DIR_PATH.value
 
     dest: Union[str, pathlib.Path] = DefaultValues.DEST.value
     dest_dir_name: str = DefaultValues.DEST_DIR_NAME.value
@@ -77,17 +78,19 @@ class Rename:
     suffix: str = DefaultValues.SUFFIX.value
 
     # not to be option.
-    unavailable_file_name_char_pattern: ClassVar[Pattern] = DefaultValues.UNAVAILABLE_FILE_NAME_CHAR_PATTERN.value
+    unavailable_file_name_char_pattern: ClassVar[Pattern] = re.compile(
+        DefaultValues.UNAVAILABLE_FILE_NAME_CHAR_PATTERN.value)
     alternative_unavailable_file_name_char: str = DefaultValues.ALTERNATIVE_UNAVAILABLE_FILE_NAME_CHAR.value
 
     is_separator_and_delimiter_replaced: bool = False
-    replacement_with_separator_pattern: Pattern = DefaultValues.REPLACEMENT_WITH_SEPARATOR_PATTERN.value
+    replacement_with_separator_pattern: Union[str, Pattern] = re.compile(
+        DefaultValues.REPLACEMENT_WITH_SEPARATOR_PATTERN.value)
     separator: str = DefaultValues.SEPARATOR.value
 
     is_url_encoded_char_replaced: bool = False
     alternative_url_encoded_char: str = DefaultValues.ALTERNATIVE_URL_ENCODED_CHAR.value
     # not to be classVar
-    url_encoded_char_pattern: ClassVar[Pattern] = DefaultValues.URL_ENCODED_CHAR_PATTERN.value
+    url_encoded_char_pattern: ClassVar[Pattern] = re.compile(DefaultValues.URL_ENCODED_CHAR_PATTERN.value)
 
     is_serial_number_added: bool = False
     loop_count: Optional[int] = None
@@ -130,6 +133,10 @@ class Rename:
 
         self._renamed_image_stem: str = self.original_image_stem
         self.zero_padding_string: str = '{{0:0{}d}}'.format(self.zero_padding_digit)  # => {0:03}
+
+        if type(self.replacement_with_separator_pattern) is str:
+            self.replacement_with_separator_pattern = re.compile(
+                self.replacement_with_separator_pattern)
 
         self.dest_dir_path: pathlib.Path = self.dest / pathlib.Path(self.dest_dir_name)
         self.dest_dir_path.mkdir(exist_ok=True)
@@ -202,7 +209,7 @@ class Rename:
                 '--replacement_with_separator_pattern',
                 help='Regular expression pattern of characters to be replaced by separators. e.g. [^-_a-zA-Z0-9]',
                 type=str,
-                default='[ 　\t\n.,-ー_＿]'
+                default=DefaultValues.REPLACEMENT_WITH_SEPARATOR_PATTERN.value
             )
 
             arg_parser.add_argument(
@@ -302,15 +309,6 @@ class Rename:
         if self.is_output_to_same_dir:
             return self.renamed_image_path_in_same_dir
         return self.renamed_relative_image_path
-
-    @property
-    def is_extension_valid(self) -> bool:
-        if self.ext not in self.valid_extensions:
-            Stdout.styled_stdout(
-                Bcolors.WARNING.value,
-                f'{self.image_path} is skipped. the extension is not valid.')
-            return False
-        return True
 
     def replace_word(self, before: str, after: str) -> None:
         """
@@ -548,8 +546,6 @@ def main():
             valid_extensions=DefaultValues.VALID_EXTENSIONS.value
         )
 
-        replacement_with_separator_pattern = validate_replacement_with_separator_pattern_arg(args=args)
-
         for loop_count, image_path in enumerate(image_paths):
             # file '/User/macbook/a.jpg'
 
@@ -565,7 +561,7 @@ def main():
                 prefix=args.prefix,
                 suffix=args.suffix,
                 is_separator_and_delimiter_replaced=args.is_separator_and_delimiter_replaced,
-                replacement_with_separator_pattern=replacement_with_separator_pattern,
+                replacement_with_separator_pattern=compile_pattern_from(args.replacement_with_separator_pattern),
                 separator=args.separator,
                 alternative_unavailable_file_name_char=args.unavailable_file_name_char,
                 is_url_encoded_char_replaced=args.is_url_encoded_char_replaced,
