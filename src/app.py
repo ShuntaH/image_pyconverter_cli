@@ -3,6 +3,7 @@ def rename():
     main()
 
 
-def resize():
-    from lib.resize import main
-    main()
+# todo implement resize module
+# def resize():
+#     from lib.resize import main
+#     main()
