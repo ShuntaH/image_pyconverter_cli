@@ -38,8 +38,8 @@ def test_get_image_paths_from_within(
     assert f'No images within "{_empty_dir_path}".' == excinfo.value.args[0]
 
     _temp_dir_path: pathlib.Path = temp_dir_path()
-    valid_ext_image_png = temp_image_file(image_name='valid_ext_png.png', temp_dir_path=_temp_dir_path)
-    valid_ext_image_jpg = temp_image_file(image_name='valid_ext_jpg.jpg', temp_dir_path=_temp_dir_path)
+    valid_ext_image_png = temp_image_file(image_path='valid_ext_png.png', temp_dir_path=_temp_dir_path)
+    valid_ext_image_jpg = temp_image_file(image_path='valid_ext_jpg.jpg', temp_dir_path=_temp_dir_path)
     temp_text_file(temp_dir_path=_temp_dir_path)
 
     paths = get_image_paths_from_within(
