@@ -7,6 +7,10 @@ from PIL import Image
 from src.utils import Stdout, Bcolors, force_cleanup_temp
 
 
+def pytest_addoption(parser):
+    parser.addoption('dir_path', default=pathlib.Path.cwd())
+
+
 @pytest.fixture(scope='function', autouse=False)
 def force_cleanup():
     yield

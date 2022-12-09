@@ -6,7 +6,6 @@ from typing import Union
 import pytest
 
 from lib.rename import Rename as OrigRename, DefaultValues
-from utils import compile_pattern_from
 
 
 @pytest.fixture(scope='function')
@@ -21,11 +20,10 @@ def rename_class_mock(temp_dest_path, temp_dir_path) -> 'RenameMock':
 
 class TestRename:
 
-    def test_options(self):
-        args = OrigRename.get_args()
-        print(args)
-        assert hasattr(args, 'dir_path') is True
-        assert getattr(args, 'dest') == DefaultValues.DEST.value
+    def test_options(self, rename_class_mock):
+        args = rename_class_mock.get_args()
+        assert str(getattr(args, 'dir_path')) == str(pathlib.Path.cwd())
+        assert str(getattr(args, 'dest')) == str(pathlib.Path.cwd())
         assert getattr(args, 'dest_dir_name') == DefaultValues.DEST_DIR_NAME.value
         assert getattr(args, 'chars_before_replacement') == list()
         assert getattr(args, 'chars_after_replacement') == list()
