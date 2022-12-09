@@ -20,29 +20,29 @@ def rename_class_mock(temp_dest_path, temp_dir_path) -> 'RenameMock':
 
 class TestRename:
 
-    def test_options(self, rename_class_mock):
-        args = rename_class_mock.get_args()
-        assert str(getattr(args, 'dir_path')) == str(pathlib.Path.cwd())
-        assert str(getattr(args, 'dest')) == str(pathlib.Path.cwd())
-        assert getattr(args, 'dest_dir_name') == DefaultValues.DEST_DIR_NAME.value
-        assert getattr(args, 'chars_before_replacement') == list()
-        assert getattr(args, 'chars_after_replacement') == list()
-        assert getattr(args, 'prefix') == DefaultValues.PREFIX.value
-        assert getattr(args, 'suffix') == DefaultValues.SUFFIX.value
-        assert getattr(args, 'is_separator_and_delimiter_replaced') is False
-        assert getattr(args, 'separator') == DefaultValues.SEPARATOR.value
-        assert getattr(args, 'replacement_with_separator_pattern') == \
-               DefaultValues.REPLACEMENT_WITH_SEPARATOR_PATTERN.value
-        assert getattr(args, 'alternative_unavailable_file_name_char') == \
-            DefaultValues.ALTERNATIVE_UNAVAILABLE_FILE_NAME_CHAR.value
-        assert getattr(args, 'is_url_encoded_char_replaced') is False
-        assert getattr(args, 'alternative_url_encoded_char') == \
-               DefaultValues.ALTERNATIVE_URL_ENCODED_CHAR.value
-        assert getattr(args, 'is_serial_number_added') is False
-        assert getattr(args, 'serial_number_zero_padding_digit') == \
-               DefaultValues.ZERO_PADDING_DIGIT.value
-        assert getattr(args, 'valid_extensions') == DefaultValues.VALID_EXTENSIONS.value
-        assert getattr(args, 'same_directory') is False
+    # def test_options(self, rename_class_mock, dir_path_opt):
+    #     args = rename_class_mock.get_args()
+    #     assert str(getattr(args, 'dir_path')) == str(pathlib.Path.cwd())
+    #     assert str(getattr(args, 'dest')) == str(pathlib.Path.cwd())
+    #     assert getattr(args, 'dest_dir_name') == DefaultValues.DEST_DIR_NAME.value
+    #     assert getattr(args, 'chars_before_replacement') == list()
+    #     assert getattr(args, 'chars_after_replacement') == list()
+    #     assert getattr(args, 'prefix') == DefaultValues.PREFIX.value
+    #     assert getattr(args, 'suffix') == DefaultValues.SUFFIX.value
+    #     assert getattr(args, 'is_separator_and_delimiter_replaced') is False
+    #     assert getattr(args, 'separator') == DefaultValues.SEPARATOR.value
+    #     assert getattr(args, 'replacement_with_separator_pattern') == \
+    #            DefaultValues.REPLACEMENT_WITH_SEPARATOR_PATTERN.value
+    #     assert getattr(args, 'alternative_unavailable_file_name_char') == \
+    #         DefaultValues.ALTERNATIVE_UNAVAILABLE_FILE_NAME_CHAR.value
+    #     assert getattr(args, 'is_url_encoded_char_replaced') is False
+    #     assert getattr(args, 'alternative_url_encoded_char') == \
+    #            DefaultValues.ALTERNATIVE_URL_ENCODED_CHAR.value
+    #     assert getattr(args, 'is_serial_number_added') is False
+    #     assert getattr(args, 'serial_number_zero_padding_digit') == \
+    #            DefaultValues.ZERO_PADDING_DIGIT.value
+    #     assert getattr(args, 'valid_extensions') == DefaultValues.VALID_EXTENSIONS.value
+    #     assert getattr(args, 'same_directory') is False
 
     def test_post_init(
             self,

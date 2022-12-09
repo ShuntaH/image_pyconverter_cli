@@ -8,8 +8,11 @@ from src.utils import Stdout, Bcolors, force_cleanup_temp
 
 
 def pytest_addoption(parser):
-    parser.addoption('dir_path', default=pathlib.Path.cwd())
+    parser.addoption('--dir_path', default=pathlib.Path.cwd())
 
+@pytest.fixture
+def dir_path_opt(request):
+    return request.config.getoption('--dir_path')
 
 @pytest.fixture(scope='function', autouse=False)
 def force_cleanup():
