@@ -33,6 +33,9 @@ jobs:
     - name: Activate virtualenv
       run: pipenv shell
 
+    - name: Activate virtualenv
+      run: pipenv install --dev tox-gh-actions
+
     - name: Run tox
       run: tox
 
@@ -59,9 +62,6 @@ jobs:
 
     - name: Activate virtualenv
       run: pipenv shell
-
-    - name: Activate virtualenv
-      run: pipenv install --dev tox-gh-actions
 
     - name: Build package
       run: python -m build
