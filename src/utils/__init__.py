@@ -3,13 +3,13 @@ import os
 import pathlib
 import re
 import tempfile
-from typing import Iterator, Optional, Pattern, Union
+from typing import Iterator, List, Optional, Pattern, Union
 
 from src.utils.stdout import Bcolors, Stdout
 from utils.constants import VALID_EXTENSIONS
 
 
-def get_image_paths_from_within(dir_path: str, valid_extensions: list[str]) -> Iterator[pathlib.Path]:
+def get_image_paths_from_within(dir_path: str, valid_extensions: List[str]) -> Iterator[pathlib.Path]:
     """
     >>> get_image_paths_from_within(dir_path='/Users/macbook')
     ['/User/macbook/a.jpg', '/User/macbook/b.jpg', '/User/macbook/c.jpg']
@@ -39,7 +39,7 @@ def compile_pattern_from(pattern_string: str) -> Pattern:
     return re.compile(f"{pattern_string}")
 
 
-def compile_extension_pattern_from(valid_extensions: list[str] = VALID_EXTENSIONS) -> Pattern:
+def compile_extension_pattern_from(valid_extensions: List[str] = VALID_EXTENSIONS) -> Pattern:
     return re.compile("/*(" + "|".join(valid_extensions) + ")$")  # => /*(.jpg|.jpeg|.png)$
 
 

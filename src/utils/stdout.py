@@ -1,4 +1,5 @@
 from enum import Enum
+from typing import List
 
 
 class Bcolors(Enum):
@@ -15,11 +16,11 @@ class Bcolors(Enum):
     UNDERLINE = "\033[4m"
 
     @classmethod
-    def names(cls) -> list[str]:
+    def names(cls) -> List[str]:
         return [var.name for var in cls]
 
     @classmethod
-    def values(cls) -> list[str]:
+    def values(cls) -> List[str]:
         return [var.value for var in cls]
 
 
