@@ -30,6 +30,9 @@ jobs:
     - name: Install dependencies
       run: pipenv install --dev
 
+    - name: Activate virtualenv
+      run: pipenv shell
+
     - name: Run tox
       run: tox
 
