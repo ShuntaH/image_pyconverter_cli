@@ -373,8 +373,8 @@ class TestRename:
 
     def test_replace_unavailable_file_name_characters(self, temp_image_file, rename_class_mock):
         _temp_dir: pathlib.Path = rename_class_mock.dir_path
-
-        # exclude '/' because on Unix based-on OS
+        # todo windowsの方が使えない文字が多いので mac -> windows で渡すときに windows で使えない文字を無効化する
+        # exclude '/' because on OS like Unix
         # a temp image file which name contains '/' can not be created.
         _before = ':*?"<>|¥.png'
         _after = "--------.png"
