@@ -32,9 +32,6 @@ jobs:
     - name: Create virtualenv
       run: pipenv --python ${{ matrix.python-version }}
 
-    - name: Activate virtualenv
-      run: pipenv shell
-
     - name: Install dependencies
       run: pipenv sync --dev
 
@@ -42,7 +39,7 @@ jobs:
       run: pipenv install tox-gh-actions
 
     - name: Run tox
-      run: tox
+      run: pipenv run tox
 
 
   package:
@@ -67,14 +64,11 @@ jobs:
     - name: Create virtualenv
       run: pipenv --python ${{ matrix.python-version }}
 
-    - name: Activate virtualenv
-      run: pipenv shell
-
     - name: Install dependencies
       run: pipenv sync --dev
 
     - name: Build package
-      run: python -m build
+      run: pipenv run build
 
     - name: Show result
       run: ls -l dist
