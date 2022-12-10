@@ -18,7 +18,6 @@ pytest = "*"
 python-dotenv = "*"
 pre-commit = "*"
 tox = "*"
-tox-gh-actions = "*"
 
 [requires]
 python_version = "3.10"
