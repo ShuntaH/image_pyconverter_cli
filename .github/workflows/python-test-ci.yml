@@ -53,10 +53,13 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - uses: actions/setup-python@v2
-      env:
-        PYTHON_VERSION: "3.10"
       with:
-        python-version: $PYTHON_VERSION
+        python-version: "3.10"
+
+    - name: Set a python version variable
+      id: SET_PYTHON_VERSION
+      run: |
+        echo "::set-output name=v::3.10"
 
     - name: Install package manager pipenv
       run: |
@@ -64,7 +67,7 @@ jobs:
         python -m pip install pipenv
 
     - name: Create virtualenv
-      run: pipenv --python $PYTHON_VERSION
+      run: pipenv --python ${{ steps.SET_PYTHON_VERSION.outputs.v }}
 
     - name: Install dependencies
       run: pipenv sync --dev
