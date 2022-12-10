@@ -2,7 +2,7 @@
 import dataclasses
 import pathlib
 import re
-from typing import Union
+from typing import List, Union
 
 import pytest
 
@@ -73,8 +73,8 @@ class TestRename:
         _before = "bar_foo_fuga.png"
         _temp_image_file: pathlib.Path = temp_image_file(image_path=_before, temp_dir_path=_temp_dir)
         _after = "replaced-bar_replaced-foo_replaced-fuga.png"
-        chars_before_replacement: list[str] = ["bar", "foo", "fuga"]
-        chars_after_replacement: list[str] = ["replaced-bar", "replaced-foo", "replaced-fuga"]
+        chars_before_replacement: List[str] = ["bar", "foo", "fuga"]
+        chars_after_replacement: List[str] = ["replaced-bar", "replaced-foo", "replaced-fuga"]
 
         # missing chars_before_replacement and chars_after_replacement
         rename = rename_class_mock(image_path=_temp_image_file)
@@ -109,8 +109,8 @@ class TestRename:
 
         # short of chars_before_replacement
         _after = "replaced-bar_foo_fuga.png"
-        chars_before_replacement: list[str] = ["bar"]
-        chars_after_replacement: list[str] = ["replaced-bar", "replaced-foo", "replaced-fuga"]
+        chars_before_replacement: List[str] = ["bar"]
+        chars_after_replacement: List[str] = ["replaced-bar", "replaced-foo", "replaced-fuga"]
         rename = rename_class_mock(
             image_path=_temp_image_file,
             chars_before_replacement=chars_before_replacement,
@@ -121,8 +121,8 @@ class TestRename:
 
         # short of chars_after_replacement
         _after = "replaced-bar_foo_fuga.png"
-        chars_before_replacement: list[str] = ["bar", "foo", "fuga"]
-        chars_after_replacement: list[str] = ["replaced-bar"]
+        chars_before_replacement: List[str] = ["bar", "foo", "fuga"]
+        chars_after_replacement: List[str] = ["replaced-bar"]
         rename = rename_class_mock(
             image_path=_temp_image_file,
             chars_before_replacement=chars_before_replacement,
@@ -132,8 +132,8 @@ class TestRename:
         assert rename.renamed_image_name == _after
 
         # chars_before_replacement is empty
-        chars_before_replacement: list[str] = list()
-        chars_after_replacement: list[str] = ["replaced-bar"]
+        chars_before_replacement: List[str] = list()
+        chars_after_replacement: List[str] = ["replaced-bar"]
         rename = rename_class_mock(
             image_path=_temp_image_file,
             chars_before_replacement=chars_before_replacement,
@@ -143,8 +143,8 @@ class TestRename:
         assert rename.renamed_image_name == _before
 
         # chars_after_replacement is empty
-        chars_before_replacement: list[str] = ["bar", "foo"]
-        chars_after_replacement: list[str] = list()
+        chars_before_replacement: List[str] = ["bar", "foo"]
+        chars_after_replacement: List[str] = list()
         rename = rename_class_mock(
             image_path=_temp_image_file,
             chars_before_replacement=chars_before_replacement,

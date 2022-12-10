@@ -5,7 +5,7 @@ import pathlib
 import re
 import shutil
 import tempfile
-from typing import ClassVar, Optional, Pattern, Union
+from typing import ClassVar, List, Optional, Pattern, Union
 
 from jaconv import jaconv
 
@@ -83,8 +83,8 @@ class Rename:
     dest: Union[str, pathlib.Path] = DefaultValues.DEST.value
     dest_dir_name: str = DefaultValues.DEST_DIR_NAME.value
 
-    chars_before_replacement: list[str] = dataclasses.field(default_factory=lambda: [])
-    chars_after_replacement: list[str] = dataclasses.field(default_factory=lambda: [])
+    chars_before_replacement: List[str] = dataclasses.field(default_factory=lambda: [])
+    chars_after_replacement: List[str] = dataclasses.field(default_factory=lambda: [])
 
     prefix: str = DefaultValues.PREFIX.value
     suffix: str = DefaultValues.SUFFIX.value
@@ -110,7 +110,7 @@ class Rename:
     loop_count: Optional[int] = None
     zero_padding_digit: int = DefaultValues.ZERO_PADDING_DIGIT.value  # => 001 0001 ?
 
-    valid_extensions: list[str] = dataclasses.field(default_factory=lambda: DefaultValues.VALID_EXTENSIONS.value)
+    valid_extensions: List[str] = dataclasses.field(default_factory=lambda: DefaultValues.VALID_EXTENSIONS.value)
 
     # To create a list of names of converted images,
     # each time an instance is created from this class,
