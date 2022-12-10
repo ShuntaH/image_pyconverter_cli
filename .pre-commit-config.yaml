@@ -1,17 +1,17 @@
 repos:
-  - exclude: [
-    ".venv",
-    ".git",
-    "__pycache__",
-    ".tox",
-    "build",
-    "dist"
-  ]
+#  - exclude: [
+#    ".venv",
+#    ".git",
+#    "__pycache__",
+#    ".tox",
+#    "build",
+#    "dist"
+#  ]
   - repo: https://github.com/psf/black
-    rev: 21.12.0
+    rev: 22.12.0
     hooks:
       - id: black
-        args: [--line-length, "79"]
+        args: [--line-length, "120"]
 
   - repo: https://github.com/asottile/blacken-docs
     rev: v1.12.1
@@ -22,33 +22,26 @@ repos:
     rev: 6.0.0
     hooks:
       - id: flake8
-        args: [--ignore, "E203,W503"]
+        args: [--ignore, "E203,W503", --max-line-length, "120"]
         additional_dependencies: [flake8-bugbear]
 
   - repo: https://github.com/PyCQA/isort
     rev: 5.10.1
     hooks:
       - id: isort
-        args: [
-          --profile, "black",
-          --line_length, 79,
-          --import_heading_stdlib, "Standard",
-          --import_heading_thirdparty, "Third Party",
-          --import_heading_firstparty, "First Party",
-          --import_heading_localfolder, "Local"
-        ]
+        args: [--profile, "black"]
 
   - repo: https://github.com/pre-commit/mirrors-mypy
     rev: v0.991
     hooks:
       - id: mypy
         args: [
+#          --exclude, "src/tests/$",
           --ignore-missing-imports,
-          --show_error_context,
-          --show_column_numbers,
-          --no_implicit_optional,
-          --warn_return_any,
-          --warn_redundant_casts
+          --show-error-context,
+          --show-column-numbers,
+          --warn-return-any,
+          --warn-redundant-casts,
         ]
         additional_dependencies: [types-freezegun]
 

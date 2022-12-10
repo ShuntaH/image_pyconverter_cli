@@ -1,5 +1,6 @@
 def rename():
     from lib.rename import main
+
     main()
 
 

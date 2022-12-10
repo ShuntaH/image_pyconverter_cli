@@ -1,17 +1,17 @@
 import argparse
+import dataclasses
 import enum
 import pathlib
 import re
-import dataclasses
 import shutil
 import tempfile
-from typing import Optional, Pattern, ClassVar, Union
+from typing import ClassVar, Optional, Pattern, Union
 
 from jaconv import jaconv
 
-from src.utils.stdout import Stdout, Bcolors
-from src.utils.with_statements import task, add_extra_arguments_to
-from utils import get_image_paths_from_within, datetime2str, compile_pattern_from
+from src.utils.stdout import Bcolors, Stdout
+from src.utils.with_statements import add_extra_arguments_to, task
+from utils import datetime2str, get_image_paths_from_within
 
 
 class DefaultValues(enum.Enum):
@@ -20,11 +20,11 @@ class DefaultValues(enum.Enum):
     DEST_DIR_NAME = f"RENAMED_IMAGES_{datetime2str()}"
     DEST = pathlib.Path.cwd()
 
-    PREFIX = ''
-    SUFFIX = ''
+    PREFIX = ""
+    SUFFIX = ""
 
-    REPLACEMENT_WITH_SEPARATOR_PATTERN = r'[　\s.,_＿〜～\―\‐\˗֊\‐\‑\‒\–\⁃\⁻\₋\−\﹣\－\—\―\━\─\-\ー]'
-    SEPARATOR = '_'
+    REPLACEMENT_WITH_SEPARATOR_PATTERN = r"[　\s.,_＿〜～\―\‐\˗֊\‐\‑\‒\–\⁃\⁻\₋\−\﹣\－\—\―\━\─\-\ー]"
+    SEPARATOR = "_"
 
     ###########################################################
     # Characters that cannot be used in file メアドとパスはdevとprod同じ
@@ -47,32 +47,32 @@ class DefaultValues(enum.Enum):
     # you will see ":".
     ###########################################################
     UNAVAILABLE_FILE_NAME_CHAR_PATTERN = r'[\/:*?"<>|¥]'
-    ALTERNATIVE_UNAVAILABLE_FILE_NAME_CHAR = '-'
+    ALTERNATIVE_UNAVAILABLE_FILE_NAME_CHAR = "-"
 
-    URL_ENCODED_CHAR_PATTERN = r'[^-_a-zA-Z0-9]'
-    ALTERNATIVE_URL_ENCODED_CHAR = 'X'
+    URL_ENCODED_CHAR_PATTERN = r"[^-_a-zA-Z0-9]"
+    ALTERNATIVE_URL_ENCODED_CHAR = "X"
 
     ZERO_PADDING_DIGIT = 3
 
     VALID_EXTENSIONS = [
-        '.jpg',
-        '.jpeg',
-        '.JPG',
-        '.JPEG',
-        '.jpe',
-        '.jfif',
-        '.pjpeg',
-        '.pjp',
-        '.png',
-        '.gif',
-        '.tiff',
-        '.tif',
-        '.webp',
-        '.svg',
-        '.svgz'
+        ".jpg",
+        ".jpeg",
+        ".JPG",
+        ".JPEG",
+        ".jpe",
+        ".jfif",
+        ".pjpeg",
+        ".pjp",
+        ".png",
+        ".gif",
+        ".tiff",
+        ".tif",
+        ".webp",
+        ".svg",
+        ".svgz",
     ]
 
-    COMPARISON_FILE_NAME = 'comparison.txt'
+    COMPARISON_FILE_NAME = "comparison.txt"
 
 
 @dataclasses.dataclass
@@ -91,12 +91,14 @@ class Rename:
 
     # not to be option.
     unavailable_file_name_char_pattern: ClassVar[Pattern] = re.compile(
-        DefaultValues.UNAVAILABLE_FILE_NAME_CHAR_PATTERN.value)
+        DefaultValues.UNAVAILABLE_FILE_NAME_CHAR_PATTERN.value
+    )
     alternative_unavailable_file_name_char: str = DefaultValues.ALTERNATIVE_UNAVAILABLE_FILE_NAME_CHAR.value
 
     is_separator_and_delimiter_replaced: bool = False
     replacement_with_separator_pattern: Union[str, Pattern] = re.compile(
-        DefaultValues.REPLACEMENT_WITH_SEPARATOR_PATTERN.value)
+        DefaultValues.REPLACEMENT_WITH_SEPARATOR_PATTERN.value
+    )
     separator: str = DefaultValues.SEPARATOR.value
 
     is_url_encoded_char_replaced: bool = False
@@ -108,8 +110,7 @@ class Rename:
     loop_count: Optional[int] = None
     zero_padding_digit: int = DefaultValues.ZERO_PADDING_DIGIT.value  # => 001 0001 ?
 
-    valid_extensions: list[str] = dataclasses.field(
-        default_factory=lambda: DefaultValues.VALID_EXTENSIONS.value)
+    valid_extensions: list[str] = dataclasses.field(default_factory=lambda: DefaultValues.VALID_EXTENSIONS.value)
 
     # To create a list of names of converted images,
     # each time an instance is created from this class,
@@ -119,36 +120,33 @@ class Rename:
     is_output_to_same_dir: bool = False
     run: bool = False
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         if type(self.image_path) is str:
             self.image_path: pathlib.Path = pathlib.Path(self.image_path)
         if type(self.dest) is str:
-            self.dest = pathlib.Path(self.dest)
+            self.dest: pathlib.Path = pathlib.Path(self.dest)
 
         self.dir_path: pathlib.Path = pathlib.Path(self.dir_path)
 
-        self.relative_dir_path = self.dir_path.relative_to(self.dir_path)  # => '.'
-        self.relative_image_path = self.image_path.relative_to(self.dir_path)  # => './temp/img.png'
-        self.relative_image_parent_path = self.relative_image_path.parent  # => './temp/
+        self.relative_dir_path: pathlib.Path = self.dir_path.relative_to(self.dir_path)  # => '.' type: ignore
+        self.relative_image_path: pathlib.Path = self.image_path.relative_to(  # type: ignore
+            self.dir_path
+        )  # => './temp/img.png'
+        self.relative_image_parent_path: pathlib.Path = self.relative_image_path.parent  # => './temp/
 
-        self.original_image_name = self.image_path.name
-        self.original_image_stem = self.image_path.stem
+        self.original_image_name: str = self.image_path.name  # type: ignore
+        self.original_image_stem: str = self.image_path.stem  # type: ignore
 
         # The name of the file to be converted may contain characters that are mistaken for file extensions.
         # In that case, the confusing name is not the file extension, so remove from image_path.suffixes
-        self.ext = ''.join((
-            s
-            for s in self.image_path.suffixes
-            if s in self.valid_extensions
-        ))
+        self.ext: str = "".join((s for s in self.image_path.suffixes if s in self.valid_extensions))  # type: ignore
         # './test.tar.gz' => ['.tar', '.gz']
 
         self._renamed_image_stem: str = self.original_image_stem
-        self.zero_padding_string: str = '{{0:0{}d}}'.format(self.zero_padding_digit)  # => {0:03}
+        self.zero_padding_string: str = "{{0:0{}d}}".format(self.zero_padding_digit)  # => {0:03}
 
         if type(self.replacement_with_separator_pattern) is str:
-            self.replacement_with_separator_pattern = re.compile(
-                self.replacement_with_separator_pattern)
+            self.replacement_with_separator_pattern: Pattern = re.compile(self.replacement_with_separator_pattern)
 
         self.dest_dir_path: pathlib.Path = self.dest / pathlib.Path(self.dest_dir_name)
         self.dest_dir_path.mkdir(exist_ok=True)
@@ -165,112 +163,107 @@ class Rename:
         arg_parser = argparse.ArgumentParser()
         with add_extra_arguments_to(arg_parser) as arg_parser:
             arg_parser.add_argument(
-                '-d', '--dest',
+                "-d",
+                "--dest",
                 type=str,
-                help='The path where the directory containing the renamed images will be created.',
-                default=DefaultValues.DEST.value
+                help="The path where the directory containing the renamed images will be created.",
+                default=DefaultValues.DEST.value,
             )
             arg_parser.add_argument(
-                '-ddn', '--dest_dir_name',
+                "-ddn",
+                "--dest_dir_name",
                 type=str,
-                help='The directory to which the renamed images will be output.',
-                default=DefaultValues.DEST_DIR_NAME.value
+                help="The directory to which the renamed images will be output.",
+                default=DefaultValues.DEST_DIR_NAME.value,
             )
 
             arg_parser.add_argument(
-                '-before', '--chars_before_replacement',
-                nargs="*", type=str,
+                "-before",
+                "--chars_before_replacement",
+                nargs="*",
+                type=str,
                 default=[],
-                help='The part of the image that will be renamed.'
+                help="The part of the image that will be renamed.",
             )
             arg_parser.add_argument(
-                '-after', '--chars_after_replacement',
-                nargs="*", type=str,
+                "-after",
+                "--chars_after_replacement",
+                nargs="*",
+                type=str,
                 default=[],
-                help='The part of the image after being changed'
+                help="The part of the image after being changed",
             )
 
             arg_parser.add_argument(
-                '-p', '--prefix',
-                type=str,
-                help='image name prefix.',
-                default=DefaultValues.PREFIX.value
+                "-p", "--prefix", type=str, help="image name prefix.", default=DefaultValues.PREFIX.value
             )
             arg_parser.add_argument(
-                '-s', '--suffix',
-                type=str,
-                help='image name suffix.',
-                default=DefaultValues.SUFFIX.value
+                "-s", "--suffix", type=str, help="image name suffix.", default=DefaultValues.SUFFIX.value
             )
 
             arg_parser.add_argument(
-                '-replace_separator_and_delimiter',
-                '--is_separator_and_delimiter_replaced',
-                help='Whether to unify the delimiters and separators contained in the names of images.',
-                action='store_true'
+                "-replace_separator_and_delimiter",
+                "--is_separator_and_delimiter_replaced",
+                help="Whether to unify the delimiters and separators contained in the names of images.",
+                action="store_true",
             )
             arg_parser.add_argument(
-                '-sep',
-                '--separator',
-                type=str,
-                help='image name separator.',
-                default=DefaultValues.SEPARATOR.value
+                "-sep", "--separator", type=str, help="image name separator.", default=DefaultValues.SEPARATOR.value
             )
             arg_parser.add_argument(
-                '-rwsp',
-                '--replacement_with_separator_pattern',
-                help='Regular expression pattern of characters to be replaced by separators. e.g. [^-_a-zA-Z0-9]',
+                "-rwsp",
+                "--replacement_with_separator_pattern",
+                help="Regular expression pattern of characters to be replaced by separators. e.g. [^-_a-zA-Z0-9]",
                 type=str,
-                default=DefaultValues.REPLACEMENT_WITH_SEPARATOR_PATTERN.value
+                default=DefaultValues.REPLACEMENT_WITH_SEPARATOR_PATTERN.value,
             )
 
             arg_parser.add_argument(
-                '-alt_ufnc',
-                '--alternative_unavailable_file_name_char',
-                help='A character that replaces a character that cannot be used in the name of the image.',
+                "-alt_ufnc",
+                "--alternative_unavailable_file_name_char",
+                help="A character that replaces a character that cannot be used in the name of the image.",
                 type=str,
-                default=DefaultValues.ALTERNATIVE_UNAVAILABLE_FILE_NAME_CHAR.value
+                default=DefaultValues.ALTERNATIVE_UNAVAILABLE_FILE_NAME_CHAR.value,
             )
 
             arg_parser.add_argument(
-                '-replace_url_encoded_char',
-                '--is_url_encoded_char_replaced',
-                help='Whether to unify the characters that are percent-encoded in the URLs contained in the image.',
-                action='store_true'
+                "-replace_url_encoded_char",
+                "--is_url_encoded_char_replaced",
+                help="Whether to unify the characters that are percent-encoded in the URLs contained in the image.",
+                action="store_true",
             )
             arg_parser.add_argument(
-                '-alt_uuc',
-                '--alternative_url_encoded_char',
-                help='Alternatives to characters that cannot be percent-encoded in the URL.',
-                default=DefaultValues.ALTERNATIVE_URL_ENCODED_CHAR.value
+                "-alt_uuc",
+                "--alternative_url_encoded_char",
+                help="Alternatives to characters that cannot be percent-encoded in the URL.",
+                default=DefaultValues.ALTERNATIVE_URL_ENCODED_CHAR.value,
             )
 
             arg_parser.add_argument(
-                '-add_serial_number',
-                '--is_serial_number_added',
-                help='Whether to add the sequential number to the end of the image name.',
-                action='store_true'
+                "-add_serial_number",
+                "--is_serial_number_added",
+                help="Whether to add the sequential number to the end of the image name.",
+                action="store_true",
             )
             arg_parser.add_argument(
-                '-snzpd',
-                '--serial_number_zero_padding_digit',
-                help='Zero padding digit of serial number.',
+                "-snzpd",
+                "--serial_number_zero_padding_digit",
+                help="Zero padding digit of serial number.",
                 type=int,
-                default=DefaultValues.ZERO_PADDING_DIGIT.value
+                default=DefaultValues.ZERO_PADDING_DIGIT.value,
             )
 
             arg_parser.add_argument(
-                '-ext', '--valid_extensions',
-                nargs="*", type=str,
-                help='.png .jpg ...',
-                default=DefaultValues.VALID_EXTENSIONS.value
+                "-ext",
+                "--valid_extensions",
+                nargs="*",
+                type=str,
+                help=".png .jpg ...",
+                default=DefaultValues.VALID_EXTENSIONS.value,
             )
 
             arg_parser.add_argument(
-                '-sd',
-                '--same_directory',
-                help='Output to the same directory.',
-                action='store_true'
+                "-sd", "--same_directory", help="Output to the same directory.", action="store_true"
             )
 
             args = arg_parser.parse_args()
@@ -286,7 +279,7 @@ class Rename:
 
     @property
     def renamed_image_name(self) -> str:
-        return f'{self.renamed_image_stem}{self.ext}'
+        return f"{self.renamed_image_stem}{self.ext}"
 
     @property
     def renamed_relative_image_parent_path(self) -> pathlib.Path:
@@ -304,9 +297,8 @@ class Rename:
         :return:
         """
         # todo unavailble characters may be in filename
-        parts = self.relative_image_parent_path._parts
-        prefix = self.separator.join(
-            self.relative_image_parent_path._parts)
+        parts = self.relative_image_parent_path._parts  # type: ignore
+        prefix = self.separator.join(self.relative_image_parent_path._parts)  # type: ignore
         if len(parts) > 0:
             # if the image in root, parts length is 0
             return prefix + self.separator
@@ -349,20 +341,17 @@ class Rename:
 
         # If the number of contents in the two arrays do not match,
         # the larger portion of the array is not processed.
-        for before, after in zip(
-                self.chars_before_replacement,
-                self.chars_after_replacement
-        ):
+        for before, after in zip(self.chars_before_replacement, self.chars_after_replacement):
             self.replace_word(before=before, after=after)
 
     def add_prefix_suffix(self) -> None:
-        _prefix = f'{self.prefix}{self.separator}' \
-            if self.prefix and type(self.prefix) is str \
-            else DefaultValues.PREFIX.value
-        _suffix = f'{self.separator}{self.suffix}' \
-            if self.suffix and type(self.suffix) is str \
-            else DefaultValues.SUFFIX.value
-        self.renamed_image_stem = f'{_prefix}{self.renamed_image_stem}{_suffix}'
+        _prefix = (
+            f"{self.prefix}{self.separator}" if self.prefix and type(self.prefix) is str else DefaultValues.PREFIX.value
+        )
+        _suffix = (
+            f"{self.separator}{self.suffix}" if self.suffix and type(self.suffix) is str else DefaultValues.SUFFIX.value
+        )
+        self.renamed_image_stem = f"{_prefix}{self.renamed_image_stem}{_suffix}"
 
     def add_serial_number(self) -> None:
         if not self.loop_count:  # 0, None etc.
@@ -371,8 +360,7 @@ class Rename:
         if not self.is_serial_number_added:
             return
 
-        self.renamed_image_stem = self.renamed_image_stem \
-            + self.zero_padding_string.format(self.loop_count)
+        self.renamed_image_stem = self.renamed_image_stem + self.zero_padding_string.format(self.loop_count)
 
     def zen2han(self) -> None:
         """
@@ -380,10 +368,7 @@ class Rename:
         change illegal characters that can be fixed from full-width to half-width.
         >>> name００１.png => name001.png
         """
-        self.renamed_image_stem = jaconv.z2h(
-            self.renamed_image_stem,
-            kana=False, ascii=True, digit=True
-        )
+        self.renamed_image_stem = jaconv.z2h(self.renamed_image_stem, kana=False, ascii=True, digit=True)
 
     def replace_unavailable_file_name_chars(self) -> None:
         """
@@ -392,8 +377,7 @@ class Rename:
         '-_,!(XXXXXXXXX)あabc'
         """
         self.renamed_image_stem = self.unavailable_file_name_char_pattern.sub(
-            self.alternative_unavailable_file_name_char,
-            self.renamed_image_stem
+            self.alternative_unavailable_file_name_char, self.renamed_image_stem
         )
 
     def replace_url_encoded_chars(self) -> None:
@@ -406,8 +390,7 @@ class Rename:
         if not self.is_url_encoded_char_replaced:
             return
         self.renamed_image_stem = self.url_encoded_char_pattern.sub(
-            self.alternative_url_encoded_char,
-            self.renamed_image_stem
+            self.alternative_url_encoded_char, self.renamed_image_stem
         )
 
     def replace_with_separator(self) -> None:
@@ -421,9 +404,8 @@ class Rename:
         if not self.is_separator_and_delimiter_replaced:
             return
 
-        self.renamed_image_stem = self.replacement_with_separator_pattern.sub(
-            self.separator,
-            self.renamed_image_stem
+        self.renamed_image_stem = self.replacement_with_separator_pattern.sub(  # type: ignore
+            self.separator, self.renamed_image_stem
         )
 
     def add_dirs_prefix(self) -> None:
@@ -433,16 +415,13 @@ class Rename:
         """
         if not self.is_output_to_same_dir:
             return
-        self.renamed_image_stem = f'{self.dirs_prefix}{self.renamed_image_stem}'
+        self.renamed_image_stem = f"{self.dirs_prefix}{self.renamed_image_stem}"
 
     def _make_recursive_dirs(self) -> None:
         if not self.is_output_to_same_dir:
-            pathlib.Path.mkdir(
-                self.renamed_relative_image_parent_path,
-                parents=True,
-                exist_ok=True)
+            pathlib.Path.mkdir(self.renamed_relative_image_parent_path, parents=True, exist_ok=True)
 
-    def rename(self):
+    def rename(self) -> None:
         """
         # replace a word
         # name.png => new_name.png
@@ -484,10 +463,7 @@ class Rename:
         self.add_serial_number()
         self.add_dirs_prefix()
 
-        Stdout.styled_stdout(
-            Bcolors.OKGREEN.value,
-            self.comparison
-        )
+        Stdout.styled_stdout(Bcolors.OKGREEN.value, self.comparison)  # type: ignore
         if self.run:
             self._make_recursive_dirs()
             with tempfile.TemporaryDirectory() as td:
@@ -495,13 +471,13 @@ class Rename:
                 # to disappear from its original location, so to keep the original image intact,
                 # evacuate the original image, including metadata, to a temporary directory and
                 # return the evacuated image to its original location once the image is renamed.
-                td = pathlib.Path(td)
+                td: pathlib.Path = pathlib.Path(td)  # type: ignore
                 shutil.copy2(str(self.image_path), str(td))
-                copy_image: pathlib.Path = td / self.original_image_name
+                copy_image: pathlib.Path = td / self.original_image_name  # type:ignore
 
                 # use Path.replace instead of Path.rename.
                 # so FileExistsError will not be raised.
-                self.image_path.replace(self.renamed_image_path)
+                self.image_path.replace(self.renamed_image_path)  # type:ignore
 
                 # bring original image back to original location.
                 shutil.move(copy_image, self.image_path)
@@ -515,47 +491,40 @@ class Rename:
 
     @property
     def comparison(self) -> str:
-        return f'{self.image_path} => {self.renamed_image_path}'
+        return f"{self.image_path} => {self.renamed_image_path}"
 
     def append_comparison(self) -> None:
         self.comparison_log.append(self.comparison)
 
     @staticmethod
     def get_dest_dir_path(
-            dest: Union[str, pathlib.Path] = DefaultValues.DEST.value,
-            dest_dir_name: str = DefaultValues.DEST_DIR_NAME.value
-    ) -> pathlib:
+        dest: Union[str, pathlib.Path] = DefaultValues.DEST.value,
+        dest_dir_name: str = DefaultValues.DEST_DIR_NAME.value,
+    ) -> pathlib.Path:
         """The directory to which images are output is automatically generated
         after instantiation of Rename class, but this method is used to obtain
         the directory before instantiation. For example, use this when calling
         the make_comparison_file method.
         """
         if type(dest) is str:
-            dest = pathlib.Path(dest)
+            dest: pathlib.Path = pathlib.Path(dest)  # type: ignore
         return dest / pathlib.Path(dest_dir_name)
 
     @classmethod
-    def make_comparison_file(
-            cls,
-            dest_dir_path: Union[str, pathlib.Path]
-    ):
+    def make_comparison_file(cls, dest_dir_path: Union[str, pathlib.Path]):
         if type(dest_dir_path) is str:
-            dest_dir_path: pathlib.Path = pathlib.Path(dest_dir_path)
+            dest_dir_path: pathlib.Path = pathlib.Path(dest_dir_path)  # type: ignore
         file_path = dest_dir_path / pathlib.Path(DefaultValues.COMPARISON_FILE_NAME.value)
-        file_path.write_text('\n\n'.join(cls.comparison_log))
+        file_path.write_text("\n\n".join(cls.comparison_log))
 
         # init image_comparisons.
         cls.comparison_log = list()
 
 
 def main():
-    with task(
-            args=Rename.get_args(),
-            task_name='rename'  # function name
-    ) as args:
+    with task(args=Rename.get_args(), task_name="rename") as args:  # function name
         image_paths = get_image_paths_from_within(
-            dir_path=args.dir_path,
-            valid_extensions=DefaultValues.VALID_EXTENSIONS.value
+            dir_path=args.dir_path, valid_extensions=DefaultValues.VALID_EXTENSIONS.value
         )
 
         for loop_count, image_path in enumerate(image_paths):
@@ -582,13 +551,10 @@ def main():
                 loop_count=loop_count,
                 zero_padding_digit=args.serial_number_zero_padding_digit,
                 valid_extensions=args.valid_extensions,
-                run=args.run
+                run=args.run,
             )
 
             rename.rename()
 
-        _dest_dir_path = Rename.get_dest_dir_path(
-            dest=args.dest,
-            dest_dir_name=args.dest_dir_name
-        )
+        _dest_dir_path = Rename.get_dest_dir_path(dest=args.dest, dest_dir_name=args.dest_dir_name)
         Rename.make_comparison_file(dest_dir_path=_dest_dir_path)
