@@ -35,9 +35,6 @@ jobs:
     - name: Install dependencies
       run: pipenv sync --dev
 
-    - name: Install a dependency for tox
-      run: pipenv install tox-gh-actions
-
     - name: Run tox
       run: pipenv run tox
 
