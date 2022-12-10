@@ -1,0 +1,57 @@
+repos:
+#  - exclude: [
+#    ".venv",
+#    ".git",
+#    "__pycache__",
+#    ".tox",
+#    "build",
+#    "dist"
+#  ]
+  - repo: https://github.com/psf/black
+    rev: 22.12.0
+    hooks:
+      - id: black
+        args: [--line-length, "120"]
+
+  - repo: https://github.com/asottile/blacken-docs
+    rev: v1.12.1
+    hooks:
+      - id: blacken-docs
+
+  - repo: https://github.com/PyCQA/flake8
+    rev: 6.0.0
+    hooks:
+      - id: flake8
+        args: [--ignore, "E203,W503", --max-line-length, "120"]
+        additional_dependencies: [flake8-bugbear]
+
+  - repo: https://github.com/PyCQA/isort
+    rev: 5.10.1
+    hooks:
+      - id: isort
+        args: [--profile, "black"]
+
+  - repo: https://github.com/pre-commit/mirrors-mypy
+    rev: v0.991
+    hooks:
+      - id: mypy
+        args: [
+#          --exclude, "src/tests/$",
+          --ignore-missing-imports,
+          --show-error-context,
+          --show-column-numbers,
+          --warn-return-any,
+          --warn-redundant-casts,
+        ]
+        additional_dependencies: [types-freezegun]
+
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.1.0
+    hooks:
+      - id: check-json
+      - id: check-toml
+      - id: check-yaml
+      - id: debug-statements
+      - id: end-of-file-fixer
+      - id: fix-byte-order-marker
+      - id: trailing-whitespace

@@ -11,6 +11,8 @@ image-pyconverter-cli = {editable = true, path = "."}
 [dev-packages]
 pytest = "*"
 python-dotenv = "*"
+pre-commit = "*"
+tox = "*"
 
 [requires]
 python_version = "3.10"
