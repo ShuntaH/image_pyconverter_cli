@@ -33,10 +33,10 @@ jobs:
       run: pipenv --python ${{ matrix.python-version }}
 
     - name: Install dependencies
-      run: pipenv sync --dev
+      run: pipenv sync --dev --system
 
     - name: Install a dependency for tox
-      run: pipenv install tox-gh-actions
+      run: pipenv install tox-gh-actions --syste
 
     - name: Run tox
       run: pipenv run tox
