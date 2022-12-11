@@ -27,7 +27,7 @@ class DefaultValues(enum.Enum):
     SEPARATOR = "_"
 
     ###########################################################
-    # Characters that cannot be used in file メアドとパスはdevとprod同じ
+    # Characters that cannot be used in file
     # username hkpg
     #
     # prod
