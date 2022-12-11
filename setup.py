@@ -1,7 +1,7 @@
 """The setup.py file for image_pyconverter_cli."""
 from setuptools import setup
 
-from .src import __version__
+from src import __version__
 
 LONG_DESCRIPTION = """
 This library is a CLI-based conversion tool for images, including renaming and resizing.
