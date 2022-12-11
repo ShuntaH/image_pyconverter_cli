@@ -8,6 +8,9 @@ tox = "tox"
 pytest = "pytest -s"
 pre-commit = "pre-commit run --all-files"
 build = "python -m build"
+publish-conf-check = "twine check dist/*"
+publish-test = "twine upload -r testpypi dist/*"  # add username and password
+publish-prod = "twine upload dist/*"  # add username and password
 
 [packages]
 setuptools = "*"

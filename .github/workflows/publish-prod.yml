@@ -1,11 +1,12 @@
-name: Upload Python Package To Test Pypi
+name: Upload To Pypi
 
 on:
-  push:
-    branches: [ release ]
+  release:
+    types: [created]
 
 jobs:
   deploy:
+
     runs-on: ubuntu-latest
 
     steps:
@@ -14,21 +15,25 @@ jobs:
       with:
         python-version: "3.10"
 
-    - name: Install dependencies
+    - name: Install package manager pipenv
       run: |
         python --version
         python -m pip install --upgrade pip
-        python -m pip install build twine
+        python -m pip install pipenv
+
+    - name: Create virtualenv
+      run: |
+        pipenv --python ${{ matrix.python-version }}
 
     - name: Build package
-      run: python -m build
+      run: pipenv build
 
     - name: Checks whether your distribution’s long description will render correctly on PyPI
-      run: twine check dist/*
+      run: pipenv publish-conf-check
 
     - name: Publish Package
       env:
         USERNAME: ${{ secrets.PYPI_USERNAME }}
         PASSWORD: ${{ secrets.PYPI_PASSWORD }}
       run: |
-        twine upload -r testpypi dist/* -u $USERNAME -p $PASSWORD
+        pipenv publish -u $USERNAME -p $PASSWORD
