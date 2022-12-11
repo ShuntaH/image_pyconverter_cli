@@ -27,7 +27,7 @@ jobs:
     - name: Checks whether your distribution’s long description will render correctly on PyPI
       run: twine check
 
-    - name: Publish
+    - name: Publish Package
       env:
         POETRY_USERNAME: ${{ secrets.PYPI_USERNAME }}
         POETRY_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
