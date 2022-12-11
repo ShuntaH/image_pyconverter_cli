@@ -8,7 +8,6 @@ tox = "tox"
 pytest = "pytest -s"
 pre-commit = "pre-commit run --all-files"
 build = "python -m build"
-publish = "twine upload dist/*"
 
 [packages]
 setuptools = "*"
