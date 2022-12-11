@@ -1,6 +1,8 @@
 """The setup.py file for image_pyconverter_cli."""
 from setuptools import setup
 
+import src
+
 LONG_DESCRIPTION = """
 This library is a CLI-based conversion tool for images, including renaming and resizing.
 Currently, only the renaming function is provided.
@@ -11,7 +13,7 @@ Image Conversion Tools.""".strip()
 
 DEPENDENCIES = ["Pillow", "jaconv"]
 TEST_DEPENDENCIES = ["pytest"]
-VERSION = "1.0.0"
+VERSION = src.__version__
 AUTHOR = "ShuntaH"
 AUTHOR_EMAIL = "hskpg.contact@gmail.com"
 NAME = "image_pyconverter_cli"
