@@ -20,19 +20,15 @@ jobs:
         python -m pip install --upgrade pip
         python -m pip install pipenv
 
-    - name: Create virtualenv
-      run: |
-        pipenv --python ${{ matrix.python-version }}
-
     - name: Build package
-      run: pipenv build
+      run: pipenv run build
 
     - name: Checks whether your distribution’s long description will render correctly on PyPI
-      run: pipenv publish-conf-check
+      run: pipenv run publish-conf-check
 
     - name: Publish Package
       env:
         USERNAME: ${{ secrets.PYPI_USERNAME }}
         PASSWORD: ${{ secrets.PYPI_PASSWORD }}
       run: |
-        pipenv publish -u $USERNAME -p $PASSWORD
+        pipenv run publish-test -u $USERNAME -p $PASSWORD
