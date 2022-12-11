@@ -28,18 +28,6 @@ class DefaultValues(enum.Enum):
 
     ###########################################################
     # Characters that cannot be used in file
-    # username hkpg
-    #
-    # prod
-    # PyPI recovery codes
-    # fc53fe95cf84b712
-    # 851ebaaed0be032e
-    # 3bc26e2e4e0c0b95
-    # 87bc9b8f906a3fd0
-    # c41bde9afc28e5cc
-    # dc5745c65d439603
-    # d6d688460194b158
-    # be695c730441235dnames.
     # windows /:*?"<>|¥
     # mac /
     # On mac, "/" cannot be used in filenames because it is a path separator.
