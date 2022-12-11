@@ -32,7 +32,6 @@ setup(
     url=URL,
     keywords=["Image converter", "Rename"],
     classifiers=[
-        "Development Status :: 1 - Beta",
         "Intended Audience :: Developers",
         "Topic :: Software Development :: Libraries :: Python Modules",
         "License :: OSI Approved :: MIT License",
