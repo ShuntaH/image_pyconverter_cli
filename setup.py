@@ -12,7 +12,8 @@ Currently, only the renaming function is provided.
 SHORT_DESCRIPTION = """
 Image Conversion Tools.""".strip()
 
-DEPENDENCIES = ["Pillow", "jaconv"]
+DEPENDENCIES = ["Pillow", "jaconv", "python-dotenv"]
+
 TEST_DEPENDENCIES = ["pytest"]
 
 p: pathlib.Path = pathlib.Path("src").joinpath("__init__.py")
