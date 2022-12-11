@@ -371,20 +371,22 @@ class TestRename:
             rename.add_serial_number()
         assert excinfo.value.args[0] == "'loop_count' should be start from 1."
 
-    def test_replace_unavailable_file_name_characters(self, temp_image_file, rename_class_mock):
+    def test_replace_unavailable_file_name_characters_in_windows(self, temp_image_file, rename_class_mock):
+        import platform
+
+        if "Windows" in platform.system():
+            return
         _temp_dir: pathlib.Path = rename_class_mock.dir_path
-        # todo windowsの方が使えない文字が多いので mac -> windows で渡すときに windows で使えない文字を無効化する
-        # exclude '/' because on OS like Unix
-        # a temp image file which name contains '/' can not be created.
         _before = ':*?"<>|¥.png'
         _after = "--------.png"
         _temp_image_file: pathlib.Path = temp_image_file(image_path=_before, temp_dir_path=_temp_dir)
         rename = rename_class_mock(image_path=_temp_image_file)
-        assert hasattr(rename.__class__, "unavailable_file_name_char_pattern") is True
-        assert hasattr(rename, "unavailable_file_name_char_pattern") is True
-        assert type(rename.unavailable_file_name_char_pattern) is re.Pattern
+        assert hasattr(rename.__class__, "unavailable_char_in_windows_pattern") is True
+        assert hasattr(rename, "unavailable_char_in_windows_pattern") is True
+        assert type(rename.unavailable_char_in_windows_pattern) is re.Pattern
         assert (
-            rename.alternative_unavailable_file_name_char == DefaultValues.ALTERNATIVE_UNAVAILABLE_FILE_NAME_CHAR.value
+            rename.alternative_unavailable_char_in_windows
+            == DefaultValues.ALTERNATIVE_UNAVAILABLE_CHAR_IN_WINDOWS.value
         )
         rename.replace_unavailable_file_name_chars()
         assert rename.renamed_image_name == _after
