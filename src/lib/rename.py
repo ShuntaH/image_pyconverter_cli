@@ -547,7 +547,7 @@ def main():
                 is_separator_and_delimiter_replaced=args.is_separator_and_delimiter_replaced,
                 replacement_with_separator_pattern=args.replacement_with_separator_pattern,
                 separator=args.separator,
-                alternative_unavailable_file_name_char=args.unavailable_file_name_char,
+                alternative_unavailable_char_in_windows=args.alternative_char_in_windows,
                 is_url_encoded_char_replaced=args.is_url_encoded_char_replaced,
                 alternative_url_encoded_char=args.alternative_url_encoded_char,
                 is_serial_number_added=args.no_serial_number,
