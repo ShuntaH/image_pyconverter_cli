@@ -16,7 +16,7 @@ DEPENDENCIES = ["Pillow", "jaconv"]
 TEST_DEPENDENCIES = ["pytest"]
 
 p: pathlib.Path = pathlib.Path("src").joinpath("__init__.py")
-VERSION = re.compile(r".*__version__ = '(.*?)'", re.S).match(p.read_text()).group(1)  # type: ignore
+VERSION = re.compile(r'.*__version__ = "(.*?)"', re.S).match(p.read_text()).group(1)  # type: ignore
 AUTHOR = "ShuntaH"
 AUTHOR_EMAIL = "hskpg.contact@gmail.com"
 NAME = "image_pyconverter_cli"
