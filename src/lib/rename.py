@@ -550,7 +550,7 @@ def main():
                 alternative_unavailable_char_in_windows=args.alternative_char_in_windows,
                 is_url_encoded_char_replaced=args.is_url_encoded_char_replaced,
                 alternative_url_encoded_char=args.alternative_url_encoded_char,
-                is_serial_number_added=args.no_serial_number,
+                is_serial_number_added=args.is_serial_number_added,
                 loop_count=loop_count,
                 zero_padding_digit=args.serial_number_zero_padding_digit,
                 valid_extensions=args.valid_extensions,
