@@ -3,7 +3,7 @@ name: Upload Python Package To Test Pypi
 on:
   pull_request:
     branches: [ develop ]
-    types: [ close ]
+    types: [ closed ]
 
 jobs:
   deploy:
@@ -27,7 +27,7 @@ jobs:
     - name: Checks whether your distribution’s long description will render correctly on PyPI
       run: twine check
 
-    - name: Build and publish
+    - name: Publish Package
       env:
         POETRY_USERNAME: ${{ secrets.PYPI_USERNAME }}
         POETRY_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
