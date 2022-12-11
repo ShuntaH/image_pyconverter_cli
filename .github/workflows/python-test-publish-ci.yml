@@ -28,7 +28,7 @@ jobs:
 
     - name: Publish Package
       env:
-        POETRY_USERNAME: ${{ secrets.PYPI_USERNAME }}
-        POETRY_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
+        USERNAME: ${{ secrets.PYPI_USERNAME }}
+        PASSWORD: ${{ secrets.PYPI_PASSWORD }}
       run: |
-        twine upload -r testpypi dist/* -u $POETRY_USERNAME -p $POETRY_PASSWORD
+        twine upload -r testpypi dist/* -u $USERNAME -p $PASSWORD
