@@ -16,10 +16,10 @@ publish-prod = "twine upload dist/*"  # add username and password
 setuptools = "*"
 build = "*"
 image-pyconverter-cli = {editable = true, path = "."}
+python-dotenv = "*"
 
 [dev-packages]
 pytest = "*"
-python-dotenv = "*"
 pre-commit = "*"
 tox = "*"
 twine = "*"
