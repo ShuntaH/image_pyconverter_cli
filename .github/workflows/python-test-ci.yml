@@ -24,19 +24,15 @@ jobs:
       with:
         python-version: ${{ matrix.python-version }}
 
-    - name: Install package manager pipenv
+    - name: Install package manager pipenv and dependecies
       run: |
+        python --version
         python -m pip install --upgrade pip
-        python -m pip install pipenv
+        python -m pip install pipenv tox-gh-actions
 
     - name: Create virtualenv
-      run: pipenv --python ${{ matrix.python-version }}
-
-    - name: Install dependencies
-      run: pipenv sync --dev
-
-    - name: Install a dependency for tox
-      run: pipenv install tox-gh-actions
+      run: |
+        pipenv --python ${{ matrix.python-version }}
 
     - name: Run tox
       run: pipenv run tox
@@ -56,24 +52,14 @@ jobs:
       with:
         python-version: "3.10"
 
-    - name: Set a python version variable
-      id: SET_PYTHON_VERSION
-      run: |
-        echo "::set-output name=v::3.10"
-
-    - name: Install package manager pipenv
-      run: |
-        python -m pip install --upgrade pip
-        python -m pip install pipenv
-
-    - name: Create virtualenv
-      run: pipenv --python ${{ steps.SET_PYTHON_VERSION.outputs.v }}
-
     - name: Install dependencies
-      run: pipenv sync --dev
+      run: |
+        python --version
+        python -m pip install --upgrade pip
+        python -m pip install build
 
     - name: Build package
-      run: pipenv run build
+      run: python -m build
 
     - name: Show result
       run: ls -l dist

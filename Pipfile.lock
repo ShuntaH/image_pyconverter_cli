@@ -349,11 +349,11 @@
         },
         "tox": {
             "hashes": [
-                "sha256:11a2f5e18ac76b544f7006f6959821ec39bfe24e42cbf990fc0e212c1a07d092",
-                "sha256:e71aee9e77646791c00e226301d5ef8d26cf68ac46b1825d3d46ba538518c235"
+                "sha256:25fe4a5f4eb28b3b1ff672a48571f1adb4e9410221089fb52fb5ac6df473b963",
+                "sha256:69a991d22bdddf3ac168041dfa03ed29753dca35a72ee79722e7486a54eda2da"
             ],
             "index": "pypi",
-            "version": "==4.0.5"
+            "version": "==4.0.6"
         },
         "virtualenv": {
             "hashes": [

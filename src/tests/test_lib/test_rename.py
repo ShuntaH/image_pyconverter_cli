@@ -8,6 +8,7 @@ import pytest
 
 from lib.rename import DefaultValues
 from lib.rename import Rename as OrigRename
+from utils import is_os_windows
 
 
 @pytest.fixture(scope="function")
@@ -371,28 +372,28 @@ class TestRename:
             rename.add_serial_number()
         assert excinfo.value.args[0] == "'loop_count' should be start from 1."
 
-    def test_replace_unavailable_file_name_characters(self, temp_image_file, rename_class_mock):
+    def test_replace_unavailable_file_name_characters_in_windows(self, temp_image_file, rename_class_mock):
+        if is_os_windows():
+            return
         _temp_dir: pathlib.Path = rename_class_mock.dir_path
-        # todo windowsの方が使えない文字が多いので mac -> windows で渡すときに windows で使えない文字を無効化する
-        # exclude '/' because on OS like Unix
-        # a temp image file which name contains '/' can not be created.
         _before = ':*?"<>|¥.png'
         _after = "--------.png"
         _temp_image_file: pathlib.Path = temp_image_file(image_path=_before, temp_dir_path=_temp_dir)
         rename = rename_class_mock(image_path=_temp_image_file)
-        assert hasattr(rename.__class__, "unavailable_file_name_char_pattern") is True
-        assert hasattr(rename, "unavailable_file_name_char_pattern") is True
-        assert type(rename.unavailable_file_name_char_pattern) is re.Pattern
+        assert hasattr(rename.__class__, "unavailable_char_in_windows_pattern") is True
+        assert hasattr(rename, "unavailable_char_in_windows_pattern") is True
+        assert type(rename.unavailable_char_in_windows_pattern) is re.Pattern
         assert (
-            rename.alternative_unavailable_file_name_char == DefaultValues.ALTERNATIVE_UNAVAILABLE_FILE_NAME_CHAR.value
+            rename.alternative_unavailable_char_in_windows
+            == DefaultValues.ALTERNATIVE_UNAVAILABLE_CHAR_IN_WINDOWS.value
         )
         rename.replace_unavailable_file_name_chars()
         assert rename.renamed_image_name == _after
 
     def test_replace_url_encoded_characters(self, temp_image_file, rename_class_mock):
         _temp_dir: pathlib.Path = rename_class_mock.dir_path
-        _before = ",!()abc123-_あ* &^%.png"
-        _after = "XXXXabc123-_XXXXXX.png"
+        _before = ",!()abc123-_あ &^%.png"
+        _after = "XXXXabc123-_XXXXX.png"
         _temp_image_file: pathlib.Path = temp_image_file(image_path=_before, temp_dir_path=_temp_dir)
 
         # missing is_url_encoded_char_replaced,
@@ -565,7 +566,10 @@ class TestRename:
         with pytest.raises(FileNotFoundError) as excinfo:
             assert rename.renamed_image_path.samefile(rename.renamed_relative_image_path) is False
         assert excinfo.type is FileNotFoundError
-        assert excinfo.value.strerror == "No such file or directory"
+        if is_os_windows():
+            assert excinfo.value.strerror == "The system cannot find the path specified"
+        else:
+            assert excinfo.value.strerror == "No such file or directory"
         assert rename.renamed_image_path.as_posix() != rename.renamed_relative_image_path.as_posix()
 
         assert rename.renamed_image_path.as_posix() == rename.renamed_image_path_in_same_dir.as_posix()
@@ -601,7 +605,10 @@ class TestRename:
         with pytest.raises(FileNotFoundError) as excinfo:
             assert rename.renamed_image_path.samefile(rename.renamed_relative_image_path) is False
         assert excinfo.type is FileNotFoundError
-        assert excinfo.value.strerror == "No such file or directory"
+        if is_os_windows():
+            assert excinfo.value.strerror == "The system cannot find the path specified"
+        else:
+            assert excinfo.value.strerror == "No such file or directory"
         assert rename.renamed_image_path.as_posix() != rename.renamed_relative_image_path.as_posix()
 
         assert rename.renamed_image_path.as_posix() == rename.renamed_image_path_in_same_dir.as_posix()

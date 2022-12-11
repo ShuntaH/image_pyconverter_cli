@@ -46,8 +46,8 @@ class DefaultValues(enum.Enum):
     # finder can use "/", but if you look at the filename in a shell,
     # you will see ":".
     ###########################################################
-    UNAVAILABLE_FILE_NAME_CHAR_PATTERN = r'[\/:*?"<>|¥]'
-    ALTERNATIVE_UNAVAILABLE_FILE_NAME_CHAR = "-"
+    UNAVAILABLE_CHAR_IN_WINDOWS_PATTERN = r'[\\/:*?"<>|¥]'
+    ALTERNATIVE_UNAVAILABLE_CHAR_IN_WINDOWS = "-"
 
     URL_ENCODED_CHAR_PATTERN = r"[^-_a-zA-Z0-9]"
     ALTERNATIVE_URL_ENCODED_CHAR = "X"
@@ -90,10 +90,10 @@ class Rename:
     suffix: str = DefaultValues.SUFFIX.value
 
     # not to be option.
-    unavailable_file_name_char_pattern: ClassVar[Pattern] = re.compile(
-        DefaultValues.UNAVAILABLE_FILE_NAME_CHAR_PATTERN.value
+    unavailable_char_in_windows_pattern: ClassVar[Pattern] = re.compile(
+        DefaultValues.UNAVAILABLE_CHAR_IN_WINDOWS_PATTERN.value
     )
-    alternative_unavailable_file_name_char: str = DefaultValues.ALTERNATIVE_UNAVAILABLE_FILE_NAME_CHAR.value
+    alternative_unavailable_char_in_windows: str = DefaultValues.ALTERNATIVE_UNAVAILABLE_CHAR_IN_WINDOWS.value
 
     is_separator_and_delimiter_replaced: bool = False
     replacement_with_separator_pattern: Union[str, Pattern] = re.compile(
@@ -219,11 +219,11 @@ class Rename:
             )
 
             arg_parser.add_argument(
-                "-alt_ufnc",
-                "--alternative_unavailable_file_name_char",
+                "-alt_ciw",
+                "--alternative_char_in_windows",
                 help="A character that replaces a character that cannot be used in the name of the image.",
                 type=str,
-                default=DefaultValues.ALTERNATIVE_UNAVAILABLE_FILE_NAME_CHAR.value,
+                default=DefaultValues.ALTERNATIVE_UNAVAILABLE_CHAR_IN_WINDOWS.value,
             )
 
             arg_parser.add_argument(
@@ -372,12 +372,15 @@ class Rename:
 
     def replace_unavailable_file_name_chars(self) -> None:
         """
-        >>> p = re.compile(r'[/:*?"<>|¥]')
-        >>> p.sub('X', '-_,!(/:*?"<>|¥)あabc')
+        Since there are more characters that cannot be used in file names on windows os than on linux or mac os,
+        replace the characters that cannot be used for windows.
+        exclude '/' because it can't be used in Mac os.
+        >>> p = re.compile(r'[:*?"<>|¥]')
+        >>> p.sub('X', '-_,!(:*?"<>|¥)あabc')
         '-_,!(XXXXXXXXX)あabc'
         """
-        self.renamed_image_stem = self.unavailable_file_name_char_pattern.sub(
-            self.alternative_unavailable_file_name_char, self.renamed_image_stem
+        self.renamed_image_stem = self.unavailable_char_in_windows_pattern.sub(
+            self.alternative_unavailable_char_in_windows, self.renamed_image_stem
         )
 
     def replace_url_encoded_chars(self) -> None:
