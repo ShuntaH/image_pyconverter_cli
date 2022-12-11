@@ -1,6 +1,7 @@
 import datetime
 import os
 import pathlib
+import platform
 import re
 import tempfile
 from typing import Iterator, List, Optional, Pattern, Union
@@ -93,3 +94,7 @@ def force_cleanup_temp():
     root_path = get_temp_root_path()
     Stdout.styled_stdout(style=Bcolors.OKBLUE.value, sentence=f"cleanup {root_path}.")
     return pathlib.rm_rf(path=root_path)
+
+
+def is_os_windows():
+    return "Windows" in platform.system()

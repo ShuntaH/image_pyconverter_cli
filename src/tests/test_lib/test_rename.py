@@ -8,7 +8,7 @@ import pytest
 
 from lib.rename import DefaultValues
 from lib.rename import Rename as OrigRename
-from utils.test_utils import is_os_windows
+from utils import is_os_windows
 
 
 @pytest.fixture(scope="function")
@@ -373,7 +373,7 @@ class TestRename:
         assert excinfo.value.args[0] == "'loop_count' should be start from 1."
 
     def test_replace_unavailable_file_name_characters_in_windows(self, temp_image_file, rename_class_mock):
-        if is_os_windows:
+        if is_os_windows():
             return
         _temp_dir: pathlib.Path = rename_class_mock.dir_path
         _before = ':*?"<>|¥.png'
@@ -566,7 +566,7 @@ class TestRename:
         with pytest.raises(FileNotFoundError) as excinfo:
             assert rename.renamed_image_path.samefile(rename.renamed_relative_image_path) is False
         assert excinfo.type is FileNotFoundError
-        if is_os_windows:
+        if is_os_windows():
             assert excinfo.value.strerror == "The system cannot find the path specified"
         else:
             assert excinfo.value.strerror == "No such file or directory"
@@ -605,7 +605,7 @@ class TestRename:
         with pytest.raises(FileNotFoundError) as excinfo:
             assert rename.renamed_image_path.samefile(rename.renamed_relative_image_path) is False
         assert excinfo.type is FileNotFoundError
-        if is_os_windows:
+        if is_os_windows():
             assert excinfo.value.strerror == "The system cannot find the path specified"
         else:
             assert excinfo.value.strerror == "No such file or directory"

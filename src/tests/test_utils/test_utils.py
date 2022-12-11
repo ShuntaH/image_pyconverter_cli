@@ -1,6 +1,5 @@
 # mypy: ignore-errors
 import pathlib
-import platform
 from re import Pattern
 
 import pytest
@@ -45,8 +44,3 @@ def test_get_image_paths_from_within(
     paths = get_image_paths_from_within(dir_path=str(_temp_dir_path), valid_extensions=VALID_EXTENSIONS)
     for p in paths:
         assert str(p) in [str(valid_ext_image_jpg), str(valid_ext_image_png)]
-
-
-@property
-def is_os_windows():
-    return "Windows" in platform.system()
