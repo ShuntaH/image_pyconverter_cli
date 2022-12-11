@@ -1,7 +1,7 @@
 import sys
 from contextlib import contextmanager
 
-from src.utils.stdout import Bcolors, Stdout
+from utils.stdout import Bcolors, Stdout
 
 
 @contextmanager

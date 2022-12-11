@@ -4,7 +4,7 @@ from typing import Generator, Union
 import pytest
 from PIL import Image
 
-from src.utils import Bcolors, Stdout, force_cleanup_temp
+from utils import Bcolors, Stdout, force_cleanup_temp
 
 
 @pytest.fixture(scope="function", autouse=False)

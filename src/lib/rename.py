@@ -9,9 +9,9 @@ from typing import ClassVar, List, Optional, Pattern, Union
 
 from jaconv import jaconv
 
-from src.utils.stdout import Bcolors, Stdout
-from src.utils.with_statements import add_extra_arguments_to, task
 from utils import datetime2str, get_image_paths_from_within
+from utils.stdout import Bcolors, Stdout
+from utils.with_statements import add_extra_arguments_to, task
 
 
 class DefaultValues(enum.Enum):

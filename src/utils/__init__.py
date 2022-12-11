@@ -6,8 +6,8 @@ import re
 import tempfile
 from typing import Iterator, List, Optional, Pattern, Union
 
-from src.utils.stdout import Bcolors, Stdout
 from utils.constants import VALID_EXTENSIONS
+from utils.stdout import Bcolors, Stdout
 
 
 def get_image_paths_from_within(dir_path: str, valid_extensions: List[str]) -> Iterator[pathlib.Path]:
