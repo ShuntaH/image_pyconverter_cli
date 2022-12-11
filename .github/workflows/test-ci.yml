@@ -55,13 +55,10 @@ jobs:
         python --version
         python -m pip install --upgrade pip
         python -m pip install pipenv
-
-    - name: Create virtualenv
-      run: |
-        pipenv --python ${{ matrix.python-version }}
+        pipenv sync --dev
 
     - name: Build package
-      run: pipenv build
+      run: pipenv run build
 
     - name: Show result
       run: ls -l dist
