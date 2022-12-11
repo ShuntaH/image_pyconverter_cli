@@ -46,7 +46,7 @@ class DefaultValues(enum.Enum):
     # finder can use "/", but if you look at the filename in a shell,
     # you will see ":".
     ###########################################################
-    UNAVAILABLE_CHAR_IN_WINDOWS_PATTERN = r'[:*?"<>|¥]'
+    UNAVAILABLE_CHAR_IN_WINDOWS_PATTERN = r'[\\/:*?"<>|¥]'
     ALTERNATIVE_UNAVAILABLE_CHAR_IN_WINDOWS = "-"
 
     URL_ENCODED_CHAR_PATTERN = r"[^-_a-zA-Z0-9]"

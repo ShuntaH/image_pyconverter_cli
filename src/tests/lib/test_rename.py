@@ -393,8 +393,8 @@ class TestRename:
 
     def test_replace_url_encoded_characters(self, temp_image_file, rename_class_mock):
         _temp_dir: pathlib.Path = rename_class_mock.dir_path
-        _before = ",!()abc123-_あ* &^%.png"
-        _after = "XXXXabc123-_XXXXXX.png"
+        _before = ",!()abc123-_あ &^%.png"
+        _after = "XXXXabc123-_XXXXX.png"
         _temp_image_file: pathlib.Path = temp_image_file(image_path=_before, temp_dir_path=_temp_dir)
 
         # missing is_url_encoded_char_replaced,
