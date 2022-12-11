@@ -3,7 +3,7 @@ name: Upload Python Package To Test Pypi
 on:
   pull_request:
     branches: [ develop ]
-    types: [ close ]
+    types: [ closed ]
 
 jobs:
   deploy:
