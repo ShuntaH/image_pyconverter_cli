@@ -22,7 +22,7 @@ def get_image_paths_from_within(dir_path: str, valid_extensions: List[str]) -> I
         raise ValueError(f'"{dir_path} does not exists."')
 
     if not dir_p.is_dir():
-        raise ValueError(f'"{dir_path} is not a directory. Please specify a directory path."')
+        raise ValueError(f'"{dir_path}" is not a directory. Please specify a directory path.')
     ext_pattern: Pattern = compile_extension_pattern_from(valid_extensions=valid_extensions)
     g = image_paths_of_valid_extension_generator(dir_path=dir_p, pattern=ext_pattern)
 
