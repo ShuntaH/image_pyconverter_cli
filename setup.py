@@ -31,7 +31,7 @@ setup(
     author=AUTHOR,
     author_email=AUTHOR_EMAIL,
     url=URL,
-    keywords=["Image converter", "Rename"],
+    keywords=["Image converter", "Rename", "Python", "CLI"],
     classifiers=[
         "Intended Audience :: Developers",
         "Topic :: Software Development :: Libraries :: Python Modules",
