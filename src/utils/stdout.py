@@ -1,6 +1,8 @@
 from enum import Enum
 from typing import List
 
+from utils.exception import get_exception_message
+
 
 class Bcolors(Enum):
     # https://stackoverflow.com/questions/287871/how-do-i-print-colored-text-to-the-terminal
@@ -24,12 +26,15 @@ class Bcolors(Enum):
         return [var.value for var in cls]
 
 
-class Stdout:
-    @staticmethod
-    def styled_stdout(style: Bcolors = Bcolors.NONE.value, sentence: str = "") -> None:  # type:ignore
-        """
-        :param style: Bcolors.WARNING etc.
-        :param sentence: message sentence
-        :return: None
-        """
-        print(f"\n{style}" f"{sentence}{Bcolors.ENDC.value}")
+def styled_stdout(style: Bcolors = Bcolors.NONE.value, sentence: str = "") -> None:  # type:ignore
+    """
+    :param style: Bcolors.WARNING etc.
+    :param sentence: message sentence
+    :return: None
+    """
+    print(f"\n{style}" f"{sentence}{Bcolors.ENDC.value}")
+
+
+def stdout_exception_message(exception: Exception) -> None:
+    message = get_exception_message(exception)
+    styled_stdout(Bcolors.FAIL.value, message)  # type:ignore

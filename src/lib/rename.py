@@ -10,7 +10,7 @@ from typing import ClassVar, List, Optional, Pattern, Union
 from jaconv import jaconv
 
 from utils import datetime2str, get_image_paths_from_within
-from utils.stdout import Bcolors, Stdout
+from utils.stdout import Bcolors, stdout_exception_message, styled_stdout
 from utils.with_statements import add_extra_arguments_to, task
 
 
@@ -454,7 +454,7 @@ class Rename:
         self.add_serial_number()
         self.add_dirs_prefix()
 
-        Stdout.styled_stdout(Bcolors.OKGREEN.value, self.comparison)  # type: ignore
+        styled_stdout(Bcolors.OKGREEN.value, self.comparison)  # type: ignore
         if self.run:
             self._make_recursive_dirs()
             with tempfile.TemporaryDirectory() as td:
@@ -514,9 +514,13 @@ class Rename:
 
 def main():
     with task(args=Rename.get_args(), task_name="Rename") as args:  # function name
-        image_paths = get_image_paths_from_within(
-            dir_path=args.dir_path, valid_extensions=DefaultValues.VALID_EXTENSIONS.value
-        )
+        try:
+            image_paths = get_image_paths_from_within(
+                dir_path=args.dir_path, valid_extensions=DefaultValues.VALID_EXTENSIONS.value
+            )
+        except ValueError as value_error:
+            stdout_exception_message(value_error)
+            return
 
         for loop_count, image_path in enumerate(image_paths):
             # file '/User/macbook/a.jpg'

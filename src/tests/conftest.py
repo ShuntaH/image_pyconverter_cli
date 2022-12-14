@@ -4,14 +4,14 @@ from typing import Generator, Union
 import pytest
 from PIL import Image
 
-from utils import Bcolors, Stdout, force_cleanup_temp
+from utils import Bcolors, force_cleanup_temp, styled_stdout
 
 
 @pytest.fixture(scope="function", autouse=False)
 def force_cleanup():
     yield
     force_cleanup_temp()
-    Stdout.styled_stdout(Bcolors.OKBLUE.value, "cleanup done.")
+    styled_stdout(Bcolors.OKBLUE.value, "cleanup done.")
 
 
 @pytest.fixture(scope="function")

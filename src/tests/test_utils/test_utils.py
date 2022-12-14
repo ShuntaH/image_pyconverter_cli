@@ -47,4 +47,4 @@ def test_get_image_paths_from_within(
     # dir_path arg is not a directory
     with pytest.raises(ValueError) as excinfo:
         get_image_paths_from_within(dir_path=valid_ext_image_png, valid_extensions=VALID_EXTENSIONS)
-    assert f'"{valid_ext_image_png}" is not a directory. Please specify a directory path.'
+    assert f'"{valid_ext_image_png}" is not a directory. Please specify a directory path.' == excinfo.value.args[0]

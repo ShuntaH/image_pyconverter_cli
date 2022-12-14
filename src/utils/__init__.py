@@ -7,7 +7,7 @@ import tempfile
 from typing import Iterator, List, Optional, Pattern, Union
 
 from utils.constants import VALID_EXTENSIONS
-from utils.stdout import Bcolors, Stdout
+from utils.stdout import Bcolors, styled_stdout
 
 
 def get_image_paths_from_within(dir_path: str, valid_extensions: List[str]) -> Iterator[pathlib.Path]:
@@ -56,9 +56,9 @@ def image_paths_of_valid_extension_generator(
     for p in dir_path.glob("**/*"):  # type:ignore
         p_string = str(p)
         if not pattern.search(p_string):
-            Stdout.styled_stdout(Bcolors.WARNING.value, f"'{p_string}' is invalid extension.")  # type: ignore
+            styled_stdout(Bcolors.WARNING.value, f"'{p_string}' is invalid extension.")  # type: ignore
             continue
-        Stdout.styled_stdout(Bcolors.OKBLUE.value, f"yield '{p_string}.'")  # type: ignore
+        styled_stdout(Bcolors.OKBLUE.value, f"yield '{p_string}.'")  # type: ignore
         yield p
 
 
@@ -95,7 +95,7 @@ def force_cleanup_temp():
     from _pytest import pathlib
 
     root_path = get_temp_root_path()
-    Stdout.styled_stdout(style=Bcolors.OKBLUE.value, sentence=f"cleanup {root_path}.")
+    styled_stdout(style=Bcolors.OKBLUE.value, sentence=f"cleanup {root_path}.")
     return pathlib.rm_rf(path=root_path)
 
 
