@@ -513,7 +513,7 @@ class Rename:
 
 
 def main():
-    with task(args=Rename.get_args(), task_name="rename") as args:  # function name
+    with task(args=Rename.get_args(), task_name="Rename") as args:  # function name
         image_paths = get_image_paths_from_within(
             dir_path=args.dir_path, valid_extensions=DefaultValues.VALID_EXTENSIONS.value
         )
