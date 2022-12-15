@@ -1,3 +1,4 @@
+import pathlib
 import sys
 from contextlib import contextmanager
 
@@ -41,3 +42,20 @@ def task(args, task_name=""):
     # __exit__
     finally:
         styled_stdout(Bcolors.HEADER.value, f"{task_name} task ends. [RUN: {run}]")
+
+
+@contextmanager
+def stdout_to_text(text_file_path: pathlib.Path):
+    """I changed the destination of standard output to a text file in order to check the standard output messages,
+    and tried to change the destination of standard output back in the test teardown,
+    but this would have affected the standard output of the assert statement of tests,
+    so I decided to handle the temporary change of the destination of standard output with a with statement.
+    """
+    # __enter__
+    try:
+        sys.stdout = open(text_file_path, "w")
+        yield sys.stdout
+    # __exit__
+    finally:
+        # sys.stdout.close()
+        sys.stdout = sys.__stdout__

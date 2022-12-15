@@ -32,7 +32,7 @@ def styled_stdout(style: Bcolors = Bcolors.NONE.value, sentence: str = "") -> No
     :param sentence: message sentence
     :return: None
     """
-    print(f"\n{style}" f"{sentence}{Bcolors.ENDC.value}")
+    print(f"{style}{sentence}{Bcolors.ENDC.value}")
 
 
 def stdout_exception_message(exception: Exception) -> None:
