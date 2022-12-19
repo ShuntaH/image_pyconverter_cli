@@ -58,7 +58,6 @@ def image_paths_of_valid_extension_generator(
         if not pattern.search(p_string):
             styled_stdout(Bcolors.WARNING.value, f"'{p_string}' is invalid extension.")  # type: ignore
             continue
-        styled_stdout(Bcolors.OKBLUE.value, f"yield '{p_string}.'")  # type: ignore
         yield p
 
 
