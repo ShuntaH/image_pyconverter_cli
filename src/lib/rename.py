@@ -284,7 +284,7 @@ class Rename:
         root/dir1/dir2/img.png => dir1_dir2_
         :return:
         """
-        # todo unavailble characters may be in filename
+        # todo unavailable characters may be in filename
         parts = self.relative_image_parent_path._parts  # type: ignore
         prefix = self.separator.join(self.relative_image_parent_path._parts)  # type: ignore
         if len(parts) > 0:
@@ -549,7 +549,11 @@ def main():
                 run=args.run,
             )
 
-            rename.rename()
+            try:
+                rename.rename()
+            except ValueError as value_error:
+                stdout_exception_message(value_error)
+                return
 
         _dest_dir_path = Rename.get_dest_dir_path(dest=args.dest, dest_dir_name=args.dest_dir_name)
         Rename.make_comparison_file(dest_dir_path=_dest_dir_path)
