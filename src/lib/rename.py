@@ -9,15 +9,14 @@ from typing import ClassVar, List, Optional, Pattern, Union
 
 from jaconv import jaconv
 
-from utils import datetime2str, get_image_paths_from_within
-from utils.stdout import Bcolors, Stdout
+from utils import datetime2str, get_dest_dir_name, get_image_paths_from_within
+from utils.stdout import Bcolors, stdout_exception_message, styled_stdout
 from utils.with_statements import add_extra_arguments_to, task
 
 
 class DefaultValues(enum.Enum):
     DIR_PATH = pathlib.Path.cwd()
 
-    DEST_DIR_NAME = f"RENAMED_IMAGES_{datetime2str()}"
     DEST = pathlib.Path.cwd()
 
     PREFIX = ""
@@ -27,19 +26,7 @@ class DefaultValues(enum.Enum):
     SEPARATOR = "_"
 
     ###########################################################
-    # Characters that cannot be used in file メアドとパスはdevとprod同じ
-    # username hkpg
-    #
-    # prod
-    # PyPI recovery codes
-    # fc53fe95cf84b712
-    # 851ebaaed0be032e
-    # 3bc26e2e4e0c0b95
-    # 87bc9b8f906a3fd0
-    # c41bde9afc28e5cc
-    # dc5745c65d439603
-    # d6d688460194b158
-    # be695c730441235dnames.
+    # Characters that cannot be used in file
     # windows /:*?"<>|¥
     # mac /
     # On mac, "/" cannot be used in filenames because it is a path separator.
@@ -78,10 +65,10 @@ class DefaultValues(enum.Enum):
 @dataclasses.dataclass
 class Rename:
     image_path: Union[str, pathlib.Path]
+    now_str: str
     dir_path: Union[str, pathlib.Path] = DefaultValues.DIR_PATH.value
 
     dest: Union[str, pathlib.Path] = DefaultValues.DEST.value
-    dest_dir_name: str = DefaultValues.DEST_DIR_NAME.value
 
     chars_before_replacement: List[str] = dataclasses.field(default_factory=lambda: [])
     chars_after_replacement: List[str] = dataclasses.field(default_factory=lambda: [])
@@ -148,6 +135,8 @@ class Rename:
         if type(self.replacement_with_separator_pattern) is str:
             self.replacement_with_separator_pattern: Pattern = re.compile(self.replacement_with_separator_pattern)
 
+        self.dest_dir_name = get_dest_dir_name(dir_path=self.dir_path, now_str=self.now_str)
+
         self.dest_dir_path: pathlib.Path = self.dest / pathlib.Path(self.dest_dir_name)
         self.dest_dir_path.mkdir(exist_ok=True)
 
@@ -168,13 +157,6 @@ class Rename:
                 type=str,
                 help="The path where the directory containing the renamed images will be created.",
                 default=DefaultValues.DEST.value,
-            )
-            arg_parser.add_argument(
-                "-ddn",
-                "--dest_dir_name",
-                type=str,
-                help="The directory to which the renamed images will be output.",
-                default=DefaultValues.DEST_DIR_NAME.value,
             )
 
             arg_parser.add_argument(
@@ -296,7 +278,7 @@ class Rename:
         root/dir1/dir2/img.png => dir1_dir2_
         :return:
         """
-        # todo unavailble characters may be in filename
+        # todo unavailable characters may be in filename
         parts = self.relative_image_parent_path._parts  # type: ignore
         prefix = self.separator.join(self.relative_image_parent_path._parts)  # type: ignore
         if len(parts) > 0:
@@ -466,7 +448,7 @@ class Rename:
         self.add_serial_number()
         self.add_dirs_prefix()
 
-        Stdout.styled_stdout(Bcolors.OKGREEN.value, self.comparison)  # type: ignore
+        styled_stdout(Bcolors.OKGREEN.value, self.comparison)  # type: ignore
         if self.run:
             self._make_recursive_dirs()
             with tempfile.TemporaryDirectory() as td:
@@ -494,24 +476,30 @@ class Rename:
 
     @property
     def comparison(self) -> str:
-        return f"{self.image_path} => {self.renamed_image_path}"
+        return (
+            f"{self.original_image_name} => {self.renamed_image_name}\n"
+            f"PATH: {self.image_path} => {self.renamed_image_path}"
+        )
 
     def append_comparison(self) -> None:
         self.comparison_log.append(self.comparison)
 
     @staticmethod
     def get_dest_dir_path(
+        now_str: str,
+        dir_path: Union[str, pathlib.Path],
         dest: Union[str, pathlib.Path] = DefaultValues.DEST.value,
-        dest_dir_name: str = DefaultValues.DEST_DIR_NAME.value,
     ) -> pathlib.Path:
         """The directory to which images are output is automatically generated
         after instantiation of Rename class, but this method is used to obtain
-        the directory before instantiation. For example, use this when calling
+        the directory path before instantiation. For example, use this when calling
         the make_comparison_file method.
         """
         if type(dest) is str:
             dest: pathlib.Path = pathlib.Path(dest)  # type: ignore
-        return dest / pathlib.Path(dest_dir_name)
+        if type(dir_path) is str:
+            dir_path: pathlib.Path = pathlib.Path(dir_path)  # type: ignore
+        return dest / pathlib.Path(get_dest_dir_name(dir_path=dir_path, now_str=now_str))
 
     @classmethod
     def make_comparison_file(cls, dest_dir_path: Union[str, pathlib.Path]):
@@ -525,21 +513,26 @@ class Rename:
 
 
 def main():
-    with task(args=Rename.get_args(), task_name="rename") as args:  # function name
-        image_paths = get_image_paths_from_within(
-            dir_path=args.dir_path, valid_extensions=DefaultValues.VALID_EXTENSIONS.value
-        )
+    with task(args=Rename.get_args(), task_name="Rename") as args:  # function name
+        try:
+            image_paths = get_image_paths_from_within(
+                dir_path=args.dir_path, valid_extensions=DefaultValues.VALID_EXTENSIONS.value
+            )
+        except ValueError as value_error:
+            stdout_exception_message(value_error)
+            return
 
         for loop_count, image_path in enumerate(image_paths):
             # file '/User/macbook/a.jpg'
 
             loop_count += 1
+            now_str = datetime2str()
 
             rename = Rename(
                 image_path=image_path,
+                now_str=now_str,
                 dir_path=args.dir_path,
                 dest=args.dest,
-                dest_dir_name=args.dest_dir_name,
                 chars_before_replacement=args.chars_before_replacement,
                 chars_after_replacement=args.chars_after_replacement,
                 prefix=args.prefix,
@@ -557,7 +550,12 @@ def main():
                 run=args.run,
             )
 
-            rename.rename()
+            try:
+                rename.rename()
+            except ValueError as value_error:
+                stdout_exception_message(value_error)
+                return
 
-        _dest_dir_path = Rename.get_dest_dir_path(dest=args.dest, dest_dir_name=args.dest_dir_name)
-        Rename.make_comparison_file(dest_dir_path=_dest_dir_path)
+        Rename.make_comparison_file(
+            dest_dir_path=Rename.get_dest_dir_path(now_str=now_str, dir_path=args.dir_path, dest=args.dest)
+        )
