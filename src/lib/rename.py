@@ -476,7 +476,10 @@ class Rename:
 
     @property
     def comparison(self) -> str:
-        return f"{self.image_path} => {self.renamed_image_path}"
+        return (
+            f"{self.original_image_name} => {self.renamed_image_name}\n"
+            f"PATH: {self.image_path} => {self.renamed_image_path}"
+        )
 
     def append_comparison(self) -> None:
         self.comparison_log.append(self.comparison)
