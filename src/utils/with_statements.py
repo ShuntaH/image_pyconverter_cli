@@ -2,6 +2,7 @@ import pathlib
 import sys
 from contextlib import contextmanager
 
+from utils import datetime2str
 from utils.stdout import Bcolors, styled_stdout
 
 
@@ -36,12 +37,12 @@ def task(args, task_name=""):
     # __enter__
     try:
         run = args.run
-        styled_stdout(Bcolors.HEADER.value, f"{task_name} task starts. [RUN: {run}]")
+        styled_stdout(Bcolors.HEADER.value, f"{datetime2str()}: {task_name} task starts. [RUN: {run}]")
         yield args
 
     # __exit__
     finally:
-        styled_stdout(Bcolors.HEADER.value, f"{task_name} task ends. [RUN: {run}]")
+        styled_stdout(Bcolors.HEADER.value, f"{datetime2str()}: {task_name} task ends. [RUN: {run}]")
 
 
 @contextmanager

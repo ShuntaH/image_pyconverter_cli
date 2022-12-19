@@ -69,6 +69,11 @@ def datetime2str(dt: Optional[datetime.datetime] = None):
     return dt.strftime("%Y-%m-%d_%H-%M-%S")
 
 
+def get_dest_dir_name(dir_path: pathlib.Path, now_str: str) -> str:
+    """Get the name of the directory where the converted images will be output."""
+    return f"{dir_path.parts[-1]}_{now_str}"
+
+
 def get_user() -> str:
     """Return the current user name, or default value if getuser() does not work
     in the current environment (see #1010)."""

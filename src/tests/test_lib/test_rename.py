@@ -6,16 +6,16 @@ from typing import List, Union
 
 import pytest
 
-from lib.rename import DefaultValues
-from lib.rename import Rename as OrigRename
-from utils import is_os_windows
+from lib.rename import DefaultValues, Rename
+from utils import datetime2str, get_dest_dir_name, is_os_windows
 
 
 @pytest.fixture(scope="function")
-def rename_class_mock(temp_dest_path, temp_dir_path) -> OrigRename:
+def rename_class_mock(temp_dest_path, temp_dir_path) -> Rename:
     @dataclasses.dataclass
-    class RenameMock(OrigRename):
+    class RenameMock(Rename):
         dir_path: pathlib.Path = temp_dir_path()
+        now_str: str = datetime2str()
         dest: Union[str, pathlib.Path] = temp_dest_path()
         loop_count: int = 1
 
@@ -23,31 +23,6 @@ def rename_class_mock(temp_dest_path, temp_dir_path) -> OrigRename:
 
 
 class TestRename:
-
-    # def test_options(self, rename_class_mock, dir_path_opt):
-    #     args = rename_class_mock.get_args()
-    #     assert str(getattr(args, 'dir_path')) == str(pathlib.Path.cwd())
-    #     assert str(getattr(args, 'dest')) == str(pathlib.Path.cwd())
-    #     assert getattr(args, 'dest_dir_name') == DefaultValues.DEST_DIR_NAME.value
-    #     assert getattr(args, 'chars_before_replacement') == list()
-    #     assert getattr(args, 'chars_after_replacement') == list()
-    #     assert getattr(args, 'prefix') == DefaultValues.PREFIX.value
-    #     assert getattr(args, 'suffix') == DefaultValues.SUFFIX.value
-    #     assert getattr(args, 'is_separator_and_delimiter_replaced') is False
-    #     assert getattr(args, 'separator') == DefaultValues.SEPARATOR.value
-    #     assert getattr(args, 'replacement_with_separator_pattern') == \
-    #            DefaultValues.REPLACEMENT_WITH_SEPARATOR_PATTERN.value
-    #     assert getattr(args, 'alternative_unavailable_file_name_char') == \
-    #         DefaultValues.ALTERNATIVE_UNAVAILABLE_FILE_NAME_CHAR.value
-    #     assert getattr(args, 'is_url_encoded_char_replaced') is False
-    #     assert getattr(args, 'alternative_url_encoded_char') == \
-    #            DefaultValues.ALTERNATIVE_URL_ENCODED_CHAR.value
-    #     assert getattr(args, 'is_serial_number_added') is False
-    #     assert getattr(args, 'serial_number_zero_padding_digit') == \
-    #            DefaultValues.ZERO_PADDING_DIGIT.value
-    #     assert getattr(args, 'valid_extensions') == DefaultValues.VALID_EXTENSIONS.value
-    #     assert getattr(args, 'same_directory') is False
-
     def test_post_init(self, temp_image_file, rename_class_mock):
         _temp_dir: pathlib.Path = rename_class_mock.dir_path
         _temp_dest: pathlib.Path = rename_class_mock.dest
@@ -66,6 +41,7 @@ class TestRename:
         assert rename.zero_padding_string == "{{0:0{}d}}".format(rename.zero_padding_digit)
         assert type(rename.replacement_with_separator_pattern) is re.Pattern
         assert rename.dest == _temp_dest
+        assert rename.dest_dir_name == get_dest_dir_name(dir_path=_temp_dir, now_str=rename.now_str)
         assert rename.dest_dir_path == _temp_dest / rename.dest_dir_name
         assert rename.dest_dir_path.exists() is True
 
@@ -336,13 +312,13 @@ class TestRename:
 
     def test_add_serial_number(self, temp_image_file, temp_dir_path, rename_class_mock):
         _temp_dir: pathlib.Path = rename_class_mock.dir_path
-
+        _now_str = datetime2str()
         # missing is_serial_number_added, loop_count, zero_padding_digit
         _before = "image.png"
         _after = "image001.png"
         _dir_path = temp_dir_path()
         _temp_image_file: pathlib.Path = temp_image_file(image_path=_before, temp_dir_path=_temp_dir)
-        rename = OrigRename(image_path=_temp_image_file, dir_path=_dir_path, dest=temp_dir_path())
+        rename = Rename(image_path=_temp_image_file, now_str=_now_str, dir_path=_dir_path, dest=temp_dir_path())
         assert rename.is_serial_number_added is False
         assert rename.loop_count is None
         assert rename.zero_padding_digit == DefaultValues.ZERO_PADDING_DIGIT.value
@@ -643,7 +619,7 @@ class TestRename:
 
             # make file.
             _dest_dir = rename_class_mock.get_dest_dir_path(
-                dest=rename_class_mock.dest, dest_dir_name=rename_class_mock.dest
+                now_str=rename.now_str, dir_path=rename.dir_path, dest=rename.dest
             )
             rename_class_mock.make_comparison_file(dest_dir_path=_dest_dir)
 

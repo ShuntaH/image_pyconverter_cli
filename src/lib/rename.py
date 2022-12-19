@@ -9,7 +9,7 @@ from typing import ClassVar, List, Optional, Pattern, Union
 
 from jaconv import jaconv
 
-from utils import datetime2str, get_image_paths_from_within
+from utils import datetime2str, get_dest_dir_name, get_image_paths_from_within
 from utils.stdout import Bcolors, stdout_exception_message, styled_stdout
 from utils.with_statements import add_extra_arguments_to, task
 
@@ -17,7 +17,6 @@ from utils.with_statements import add_extra_arguments_to, task
 class DefaultValues(enum.Enum):
     DIR_PATH = pathlib.Path.cwd()
 
-    DEST_DIR_NAME = f"RENAMED_IMAGES_{datetime2str()}"
     DEST = pathlib.Path.cwd()
 
     PREFIX = ""
@@ -66,10 +65,10 @@ class DefaultValues(enum.Enum):
 @dataclasses.dataclass
 class Rename:
     image_path: Union[str, pathlib.Path]
+    now_str: str
     dir_path: Union[str, pathlib.Path] = DefaultValues.DIR_PATH.value
 
     dest: Union[str, pathlib.Path] = DefaultValues.DEST.value
-    dest_dir_name: str = DefaultValues.DEST_DIR_NAME.value
 
     chars_before_replacement: List[str] = dataclasses.field(default_factory=lambda: [])
     chars_after_replacement: List[str] = dataclasses.field(default_factory=lambda: [])
@@ -136,6 +135,8 @@ class Rename:
         if type(self.replacement_with_separator_pattern) is str:
             self.replacement_with_separator_pattern: Pattern = re.compile(self.replacement_with_separator_pattern)
 
+        self.dest_dir_name = get_dest_dir_name(dir_path=self.dir_path, now_str=self.now_str)
+
         self.dest_dir_path: pathlib.Path = self.dest / pathlib.Path(self.dest_dir_name)
         self.dest_dir_path.mkdir(exist_ok=True)
 
@@ -156,13 +157,6 @@ class Rename:
                 type=str,
                 help="The path where the directory containing the renamed images will be created.",
                 default=DefaultValues.DEST.value,
-            )
-            arg_parser.add_argument(
-                "-ddn",
-                "--dest_dir_name",
-                type=str,
-                help="The directory to which the renamed images will be output.",
-                default=DefaultValues.DEST_DIR_NAME.value,
             )
 
             arg_parser.add_argument(
@@ -489,17 +483,20 @@ class Rename:
 
     @staticmethod
     def get_dest_dir_path(
+        now_str: str,
+        dir_path: Union[str, pathlib.Path],
         dest: Union[str, pathlib.Path] = DefaultValues.DEST.value,
-        dest_dir_name: str = DefaultValues.DEST_DIR_NAME.value,
     ) -> pathlib.Path:
         """The directory to which images are output is automatically generated
         after instantiation of Rename class, but this method is used to obtain
-        the directory before instantiation. For example, use this when calling
+        the directory path before instantiation. For example, use this when calling
         the make_comparison_file method.
         """
         if type(dest) is str:
             dest: pathlib.Path = pathlib.Path(dest)  # type: ignore
-        return dest / pathlib.Path(dest_dir_name)
+        if type(dir_path) is str:
+            dir_path: pathlib.Path = pathlib.Path(dir_path)  # type: ignore
+        return dest / pathlib.Path(get_dest_dir_name(dir_path=dir_path, now_str=now_str))
 
     @classmethod
     def make_comparison_file(cls, dest_dir_path: Union[str, pathlib.Path]):
@@ -526,12 +523,13 @@ def main():
             # file '/User/macbook/a.jpg'
 
             loop_count += 1
+            now_str = datetime2str()
 
             rename = Rename(
                 image_path=image_path,
+                now_str=now_str,
                 dir_path=args.dir_path,
                 dest=args.dest,
-                dest_dir_name=args.dest_dir_name,
                 chars_before_replacement=args.chars_before_replacement,
                 chars_after_replacement=args.chars_after_replacement,
                 prefix=args.prefix,
@@ -555,5 +553,6 @@ def main():
                 stdout_exception_message(value_error)
                 return
 
-        _dest_dir_path = Rename.get_dest_dir_path(dest=args.dest, dest_dir_name=args.dest_dir_name)
-        Rename.make_comparison_file(dest_dir_path=_dest_dir_path)
+        Rename.make_comparison_file(
+            dest_dir_path=Rename.get_dest_dir_path(now_str=now_str, dir_path=args.dir_path, dest=args.dest)
+        )
