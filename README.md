@@ -10,6 +10,7 @@ New features will be added as needed.
 
 ## Rename
 
+
 ```shell
 ic_rename example-directry
 ```

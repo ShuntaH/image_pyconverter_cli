@@ -22,6 +22,8 @@ class DefaultValues(enum.Enum):
     PREFIX = ""
     SUFFIX = ""
 
+    NEW_NAME = ""
+
     REPLACEMENT_WITH_SEPARATOR_PATTERN = r"[　\s.,_＿〜～\―\‐\˗֊\‐\‑\‒\–\⁃\⁻\₋\−\﹣\－\—\―\━\─\-\ー]"
     SEPARATOR = "_"
 
@@ -69,6 +71,9 @@ class Rename:
     dir_path: Union[str, pathlib.Path] = DefaultValues.DIR_PATH.value
 
     dest: Union[str, pathlib.Path] = DefaultValues.DEST.value
+
+    is_all_replaced_with_new_name: bool = False
+    new_name: str = ""
 
     chars_before_replacement: List[str] = dataclasses.field(default_factory=lambda: [])
     chars_after_replacement: List[str] = dataclasses.field(default_factory=lambda: [])
@@ -157,6 +162,16 @@ class Rename:
                 type=str,
                 help="The path where the directory containing the renamed images will be created.",
                 default=DefaultValues.DEST.value,
+            )
+
+            arg_parser.add_argument(
+                "-replace_all_with_new_name",
+                "--is_all_replaced_with_new_name",
+                help="Whether to replace all but a portion of the name of the image with the new name.",
+                action="store_true",
+            )
+            arg_parser.add_argument(
+                "-nn", "--new_name", type=str, help="New name.", default=DefaultValues.NEW_NAME.value
             )
 
             arg_parser.add_argument(
@@ -296,6 +311,19 @@ class Rename:
             return self.renamed_image_path_in_same_dir
         return self.renamed_relative_image_path
 
+    def replace_all(self) -> None:
+        """Replace all but a portion of the name of an image.
+        And since they will have the same name,
+        we will also give them sequential numbers.
+        """
+        if not self.is_all_replaced_with_new_name:
+            return
+
+        if not self.new_name:
+            raise ValueError("Specify the name of the new image. (e.g. --new_name newname)")
+
+        self.renamed_image_stem = self.renamed_image_stem.replace(self.renamed_image_stem, self.new_name)
+
     def replace_word(self, before: str, after: str) -> None:
         """
         The image name must not be changed before the replacement is made,
@@ -318,6 +346,9 @@ class Rename:
         self.renamed_image_stem = self.renamed_image_stem.replace(before, after)
 
     def replace_words(self) -> None:
+        if self.is_all_replaced_with_new_name:
+            return
+
         if not self.chars_before_replacement:
             return
 
@@ -339,7 +370,7 @@ class Rename:
         if not self.loop_count:  # 0, None etc.
             raise ValueError("'loop_count' should be start from 1.")
 
-        if not self.is_serial_number_added:
+        if not self.is_all_replaced_with_new_name and not self.is_serial_number_added:
             return
 
         self.renamed_image_stem = self.renamed_image_stem + self.zero_padding_string.format(self.loop_count)
@@ -439,6 +470,7 @@ class Rename:
         bar.png => bar002.png
         """
 
+        self.replace_all()
         self.replace_words()
         self.zen2han()
         self.replace_with_separator()
@@ -533,6 +565,8 @@ def main():
                 now_str=now_str,
                 dir_path=args.dir_path,
                 dest=args.dest,
+                is_all_replaced_with_new_name=args.is_all_replaced_with_new_name,
+                new_name=args.new_name,
                 chars_before_replacement=args.chars_before_replacement,
                 chars_after_replacement=args.chars_after_replacement,
                 prefix=args.prefix,
