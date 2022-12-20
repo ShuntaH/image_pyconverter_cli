@@ -325,7 +325,7 @@ class Rename:
             return
 
         if not self.new_name:
-            raise ValueError("Specify the name of the new image. (e.g. --new_name newname)")
+            raise ValueError("Specify a new name of the image. (e.g. --new_name newname)")
 
         self.renamed_image_stem = self.renamed_image_stem.replace(self.renamed_image_stem, self.new_name)
 
