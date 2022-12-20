@@ -23,6 +23,7 @@ class DefaultValues(enum.Enum):
     SUFFIX = ""
 
     NEW_NAME = ""
+    ANY_EXTENSION_PATTERN = r"[\..+$]"
 
     REPLACEMENT_WITH_SEPARATOR_PATTERN = r"[　\s.,_＿〜～\―\‐\˗֊\‐\‑\‒\–\⁃\⁻\₋\−\﹣\－\—\―\━\─\-\ー]"
     SEPARATOR = "_"
@@ -73,7 +74,7 @@ class Rename:
     dest: Union[str, pathlib.Path] = DefaultValues.DEST.value
 
     is_all_replaced_with_new_name: bool = False
-    new_name: str = ""
+    new_name: str = DefaultValues.NEW_NAME.value
 
     chars_before_replacement: List[str] = dataclasses.field(default_factory=lambda: [])
     chars_after_replacement: List[str] = dataclasses.field(default_factory=lambda: [])
@@ -137,6 +138,10 @@ class Rename:
         self._renamed_image_stem: str = self.original_image_stem
         self.zero_padding_string: str = "{{0:0{}d}}".format(self.zero_padding_digit)  # => {0:03}
 
+        ext_pattern = re.compile(DefaultValues.ANY_EXTENSION_PATTERN.value)
+        result = ext_pattern.search(self.new_name)
+        if result is not None:
+            raise ValueError(f'"--new_name option {self.new_name}" includes extension characters.')
         if type(self.replacement_with_separator_pattern) is str:
             self.replacement_with_separator_pattern: Pattern = re.compile(self.replacement_with_separator_pattern)
 

@@ -45,6 +45,39 @@ class TestRename:
         assert rename.dest_dir_path == _temp_dest / rename.dest_dir_name
         assert rename.dest_dir_path.exists() is True
 
+    def test_replace_all(self, temp_image_file, rename_class_mock):
+        _temp_dir: pathlib.Path = rename_class_mock.dir_path
+        _original_path = "original.png"
+        _temp_image_file: pathlib.Path = temp_image_file(image_path=_original_path, temp_dir_path=_temp_dir)
+        _new_path = "new.png"
+
+        # missing is_all_replaced_with_new_name and new_name
+        rename = rename_class_mock(image_path=_temp_image_file)
+        assert hasattr(rename.__class__, "is_all_replaced_with_new_name") is True
+        assert hasattr(rename, "is_all_replaced_with_new_name") is True
+        assert rename.is_all_replaced_with_new_name is False
+        assert hasattr(rename.__class__, "new_name") is True
+        assert hasattr(rename, "new_name") is True
+        assert rename.new_name == ""
+        rename.replace_all()
+        assert rename.renamed_image_name == _original_path  # not change
+
+        # missing is_all_replaced_with_new_name but new name option is passed.
+        rename = rename_class_mock(image_path=_temp_image_file, new_name="new_name")
+        rename.replace_all()
+        assert rename.renamed_image_name == _original_path  # not change
+
+        # missing new_name but is_all_replaced_with_new_name is True
+        rename = rename_class_mock(image_path=_temp_image_file, is_all_replaced_with_new_name=True)
+        with pytest.raises(ValueError) as excinfo:
+            rename.replace_all()
+        assert excinfo.value.args[0] == "Specify the name of the new image. (e.g. --new_name newname)"
+
+        rename = rename_class_mock(image_path=_temp_image_file, is_all_replaced_with_new_name=True, new_name=_new_path)
+        rename.replace_all()
+        assert rename.renamed_image_name == _new_path
+        assert _new_path != _original_path
+
     def test_replace_words(self, temp_image_file, rename_class_mock):
         _temp_dir: pathlib.Path = rename_class_mock.dir_path
         _before = "bar_foo_fuga.png"
