@@ -10,6 +10,8 @@ from typing import ClassVar, List, Optional, Pattern, Union
 from jaconv import jaconv
 
 from utils import datetime2str, get_dest_dir_name, get_image_paths_from_within
+from utils.constants import ANY_EXTENSION_PATTERN as COMMON_ANY_EXTENSION_PATTERN
+from utils.constants import VALID_EXTENSIONS as COMMON_VALID_EXTENSIONS
 from utils.stdout import Bcolors, stdout_exception_message, styled_stdout
 from utils.with_statements import add_extra_arguments_to, task
 
@@ -23,9 +25,9 @@ class DefaultValues(enum.Enum):
     SUFFIX = ""
 
     NEW_NAME = ""
-    ANY_EXTENSION_PATTERN = r"[\..+$]"
+    ANY_EXTENSION_PATTERN: Pattern = COMMON_ANY_EXTENSION_PATTERN
 
-    REPLACEMENT_WITH_SEPARATOR_PATTERN = r"[　\s.,_＿〜～\―\‐\˗֊\‐\‑\‒\–\⁃\⁻\₋\−\﹣\－\—\―\━\─\-\ー]"
+    REPLACEMENT_WITH_SEPARATOR_PATTERN: Pattern = re.compile(r"[　\s.,_＿〜～\―\‐\˗֊\‐\‑\‒\–\⁃\⁻\₋\−\﹣\－\—\―\━\─\-\ー]")
     SEPARATOR = "_"
 
     ###########################################################
@@ -36,31 +38,15 @@ class DefaultValues(enum.Enum):
     # finder can use "/", but if you look at the filename in a shell,
     # you will see ":".
     ###########################################################
-    UNAVAILABLE_CHAR_IN_WINDOWS_PATTERN = r'[\\/:*?"<>|¥]'
     ALTERNATIVE_UNAVAILABLE_CHAR_IN_WINDOWS = "-"
+    UNAVAILABLE_CHAR_IN_WINDOWS_PATTERN: Pattern = re.compile(r'[\\/:*?"<>|¥]')
 
-    URL_ENCODED_CHAR_PATTERN = r"[^-_a-zA-Z0-9]"
     ALTERNATIVE_URL_ENCODED_CHAR = "X"
+    URL_ENCODED_CHAR_PATTERN: Pattern = re.compile(r"[^-_a-zA-Z0-9]")
 
     ZERO_PADDING_DIGIT = 3
 
-    VALID_EXTENSIONS = [
-        ".jpg",
-        ".jpeg",
-        ".JPG",
-        ".JPEG",
-        ".jpe",
-        ".jfif",
-        ".pjpeg",
-        ".pjp",
-        ".png",
-        ".gif",
-        ".tiff",
-        ".tif",
-        ".webp",
-        ".svg",
-        ".svgz",
-    ]
+    VALID_EXTENSIONS: List[str] = COMMON_VALID_EXTENSIONS
 
     COMPARISON_FILE_NAME = "comparison.txt"
 
@@ -82,22 +68,13 @@ class Rename:
     prefix: str = DefaultValues.PREFIX.value
     suffix: str = DefaultValues.SUFFIX.value
 
-    # not to be option.
-    unavailable_char_in_windows_pattern: ClassVar[Pattern] = re.compile(
-        DefaultValues.UNAVAILABLE_CHAR_IN_WINDOWS_PATTERN.value
-    )
     alternative_unavailable_char_in_windows: str = DefaultValues.ALTERNATIVE_UNAVAILABLE_CHAR_IN_WINDOWS.value
 
     is_separator_and_delimiter_replaced: bool = False
-    replacement_with_separator_pattern: Union[str, Pattern] = re.compile(
-        DefaultValues.REPLACEMENT_WITH_SEPARATOR_PATTERN.value
-    )
     separator: str = DefaultValues.SEPARATOR.value
 
     is_url_encoded_char_replaced: bool = False
     alternative_url_encoded_char: str = DefaultValues.ALTERNATIVE_URL_ENCODED_CHAR.value
-    # not to be classVar
-    url_encoded_char_pattern: ClassVar[Pattern] = re.compile(DefaultValues.URL_ENCODED_CHAR_PATTERN.value)
 
     is_serial_number_added: bool = False
     loop_count: Optional[int] = None
@@ -135,15 +112,8 @@ class Rename:
         self.ext: str = "".join((s for s in self.image_path.suffixes if s in self.valid_extensions))  # type: ignore
         # './test.tar.gz' => ['.tar', '.gz']
 
-        self._renamed_image_stem: str = self.original_image_stem
+        self.renamed_image_stem: str = self.original_image_stem
         self.zero_padding_string: str = "{{0:0{}d}}".format(self.zero_padding_digit)  # => {0:03}
-
-        ext_pattern = re.compile(DefaultValues.ANY_EXTENSION_PATTERN.value)
-        result = ext_pattern.search(self.new_name)
-        if result is not None:
-            raise ValueError(f'--new_name option "{self.new_name}" includes extension characters.')
-        if type(self.replacement_with_separator_pattern) is str:
-            self.replacement_with_separator_pattern: Pattern = re.compile(self.replacement_with_separator_pattern)
 
         self.dest_dir_name = get_dest_dir_name(dir_path=self.dir_path, now_str=self.now_str)
 
@@ -212,13 +182,6 @@ class Rename:
             arg_parser.add_argument(
                 "-sep", "--separator", type=str, help="image name separator.", default=DefaultValues.SEPARATOR.value
             )
-            arg_parser.add_argument(
-                "-rwsp",
-                "--replacement_with_separator_pattern",
-                help="Regular expression pattern of characters to be replaced by separators. e.g. [^-_a-zA-Z0-9]",
-                type=str,
-                default=DefaultValues.REPLACEMENT_WITH_SEPARATOR_PATTERN.value,
-            )
 
             arg_parser.add_argument(
                 "-alt_ciw",
@@ -272,12 +235,16 @@ class Rename:
         return args
 
     @property
-    def renamed_image_stem(self) -> str:
-        return self._renamed_image_stem
+    def unavailable_char_in_windows_pattern(self) -> Pattern:
+        return DefaultValues.UNAVAILABLE_CHAR_IN_WINDOWS_PATTERN.value
 
-    @renamed_image_stem.setter
-    def renamed_image_stem(self, image_stem: str):
-        self._renamed_image_stem = image_stem
+    @property
+    def url_encoded_char_pattern(self) -> Pattern:
+        return DefaultValues.URL_ENCODED_CHAR_PATTERN.value
+
+    @property
+    def replacement_with_separator_pattern(self) -> Pattern:
+        return DefaultValues.REPLACEMENT_WITH_SEPARATOR_PATTERN.value
 
     @property
     def renamed_image_name(self) -> str:

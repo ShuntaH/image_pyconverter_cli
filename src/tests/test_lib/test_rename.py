@@ -49,7 +49,7 @@ class TestRename:
         _temp_dir: pathlib.Path = rename_class_mock.dir_path
         _original_path = "original.png"
         _temp_image_file: pathlib.Path = temp_image_file(image_path=_original_path, temp_dir_path=_temp_dir)
-        _new_path = "new.png"
+        _new_name = "new"
 
         # missing is_all_replaced_with_new_name and new_name
         rename = rename_class_mock(image_path=_temp_image_file)
@@ -58,12 +58,12 @@ class TestRename:
         assert rename.is_all_replaced_with_new_name is False
         assert hasattr(rename.__class__, "new_name") is True
         assert hasattr(rename, "new_name") is True
-        assert rename.new_name == ""
+        assert rename.new_name == DefaultValues.NEW_NAME.value
         rename.replace_all()
         assert rename.renamed_image_name == _original_path  # not change
 
         # missing is_all_replaced_with_new_name but new name option is passed.
-        rename = rename_class_mock(image_path=_temp_image_file, new_name="new_name")
+        rename = rename_class_mock(image_path=_temp_image_file, new_name=_new_name)
         rename.replace_all()
         assert rename.renamed_image_name == _original_path  # not change
 
@@ -73,10 +73,19 @@ class TestRename:
             rename.replace_all()
         assert excinfo.value.args[0] == "Specify a new name of the image. (e.g. --new_name newname)"
 
-        rename = rename_class_mock(image_path=_temp_image_file, is_all_replaced_with_new_name=True, new_name=_new_path)
+        # new_name contains file extension characters.
+        _new_name_with_ext = "new.png"
+        rename = rename_class_mock(
+            image_path=_temp_image_file, is_all_replaced_with_new_name=True, new_name=_new_name_with_ext
+        )
+        with pytest.raises(ValueError) as excinfo:
+            rename.replace_all()
+        assert excinfo.value.args[0] == f'--new_name option "{_new_name_with_ext}" contains extension characters.'
+
+        rename = rename_class_mock(image_path=_temp_image_file, is_all_replaced_with_new_name=True, new_name=_new_name)
         rename.replace_all()
-        assert rename.renamed_image_name == _new_path
-        assert _new_path != _original_path
+        assert rename.renamed_image_name == _new_name
+        assert _new_name != _original_path
 
     def test_replace_words(self, temp_image_file, rename_class_mock):
         _temp_dir: pathlib.Path = rename_class_mock.dir_path
