@@ -92,7 +92,7 @@ class TestRename:
 
         rename = rename_class_mock(image_path=_temp_image_file, is_all_replaced_with_new_name=True, new_name=_new_name)
         rename.replace_all()
-        assert rename.renamed_image_name == _new_name
+        assert rename.renamed_image_stem == _new_name
         assert _new_name != _original_path
 
     def test_replace_words(self, temp_image_file, rename_class_mock):
