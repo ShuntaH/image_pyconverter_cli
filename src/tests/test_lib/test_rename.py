@@ -353,42 +353,45 @@ class TestRename:
         assert rename.renamed_image_name == _after
 
     def test_add_serial_number(self, temp_image_file, temp_dir_path, rename_class_mock):
-        _temp_dir: pathlib.Path = rename_class_mock.dir_path
-        _now_str = datetime2str()
         # missing is_serial_number_added, loop_count, zero_padding_digit
         _before = "image.png"
         _after = "image001.png"
         _dir_path = temp_dir_path()
-        _temp_image_file: pathlib.Path = temp_image_file(image_path=_before, temp_dir_path=_temp_dir)
-        rename = Rename(image_path=_temp_image_file, now_str=_now_str, dir_path=_dir_path, dest=temp_dir_path())
+        _temp_image_file: pathlib.Path = temp_image_file(image_path=_before, temp_dir_path=_dir_path)
+
+        # check default values of args
+        rename = rename_class_mock(image_path=_temp_image_file, is_serial_number_added=False, loop_count=None)
         assert rename.is_serial_number_added is False
         assert rename.loop_count is None
         assert rename.zero_padding_digit == DefaultValues.ZERO_PADDING_DIGIT.value
+
         with pytest.raises(ValueError) as excinfo:
             rename.add_serial_number()
         assert excinfo.value.args[0] == "'loop_count' should be start from 1."
-        rename = rename_class_mock(image_path=_temp_image_file, loop_count=1)
+
+        # is_serial_number_added is False
+        rename = rename_class_mock(image_path=_temp_image_file)
         rename.add_serial_number()
         assert rename.renamed_image_name == _before
 
-        _before = "image.png"
-        _after = "image001.png"
-        _temp_image_file: pathlib.Path = temp_image_file(image_path=_before, temp_dir_path=_temp_dir)
-        # invalid
+        # loop_count is 0
         rename = rename_class_mock(image_path=_temp_image_file, is_serial_number_added=True, loop_count=0)
         with pytest.raises(ValueError) as excinfo:
             rename.add_serial_number()
         assert excinfo.value.args[0] == "'loop_count' should be start from 1."
+
         # ok
-        rename = rename_class_mock(image_path=_temp_image_file, is_serial_number_added=True, loop_count=1)
+        rename = rename_class_mock(image_path=_temp_image_file, is_serial_number_added=True)
         rename.add_serial_number()
         assert rename.renamed_image_name == _after
 
-        # missing loop_count argument
-        rename = rename_class_mock(image_path=_temp_image_file, is_serial_number_added=True, loop_count=None)
-        with pytest.raises(ValueError) as excinfo:
-            rename.add_serial_number()
-        assert excinfo.value.args[0] == "'loop_count' should be start from 1."
+        # if is_all_replaced_with_new_name is True and is_serial_number_added is False
+        # serial_number should be added.
+        rename = rename_class_mock(
+            image_path=_temp_image_file, is_serial_number_added=False, is_all_replaced_with_new_name=True
+        )
+        rename.add_serial_number()
+        assert rename.renamed_image_name == _after
 
     def test_replace_unavailable_file_name_characters_in_windows(self, temp_image_file, rename_class_mock):
         if is_os_windows():
