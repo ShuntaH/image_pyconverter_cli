@@ -51,6 +51,25 @@ class DefaultValues(enum.Enum):
     COMPARISON_FILE_NAME = "comparison.txt"
 
 
+class RenameArgsValidator:
+    def __init__(self, args):
+        self.options = args
+
+    def validate_options(self):
+        for class_arg in Rename.__dataclass_fields__.keys():
+            if not hasattr(self.options, class_arg):
+                raise ValueError(f'"{class_arg}" options is not passed.')
+
+    def validate_new_name(self):
+        ext_pattern = DefaultValues.ANY_EXTENSION_PATTERN.value
+        if ext_pattern.search(self.options.new_name):
+            raise ValueError(f'--new_name option "{self.options.new_name}" contains extension characters.')
+
+    def validate(self):
+        self.validate_options()
+        self.validate_new_name()
+
+
 @dataclasses.dataclass
 class Rename:
     image_path: Union[str, pathlib.Path]
@@ -522,6 +541,8 @@ def main():
             image_paths = get_image_paths_from_within(
                 dir_path=args.dir_path, valid_extensions=DefaultValues.VALID_EXTENSIONS.value
             )
+            validator = RenameArgsValidator(args=args)
+            validator.validate()
         except ValueError as value_error:
             stdout_exception_message(value_error)
             return
@@ -544,7 +565,6 @@ def main():
                 prefix=args.prefix,
                 suffix=args.suffix,
                 is_separator_and_delimiter_replaced=args.is_separator_and_delimiter_replaced,
-                replacement_with_separator_pattern=args.replacement_with_separator_pattern,
                 separator=args.separator,
                 alternative_unavailable_char_in_windows=args.alternative_char_in_windows,
                 is_url_encoded_char_replaced=args.is_url_encoded_char_replaced,

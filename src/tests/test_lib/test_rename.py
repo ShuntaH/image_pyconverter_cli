@@ -6,7 +6,7 @@ from typing import List, Union
 
 import pytest
 
-from lib.rename import DefaultValues, Rename
+from lib.rename import DefaultValues, Rename, RenameArgsValidator
 from utils import datetime2str, get_dest_dir_name, is_os_windows
 
 
@@ -20,6 +20,23 @@ def rename_class_mock(temp_dest_path, temp_dir_path) -> Rename:
         loop_count: int = 1
 
     yield RenameMock
+
+
+class TestRenameArgsValidator:
+    # todo make arg mock
+
+    @dataclasses.dataclass
+    class ArgMock:
+        new_name: str
+
+    def test_validate_new_name(self, temp_image_file, rename_class_mock):
+        # new_name contains file extension characters.
+        _new_name_with_ext = "new.png"
+        args = self.ArgMock(new_name=_new_name_with_ext)
+        validator = RenameArgsValidator(args=args)
+        with pytest.raises(ValueError) as excinfo:
+            validator.validate_new_name()
+        assert excinfo.value.args[0] == f'--new_name option "{_new_name_with_ext}" contains extension characters.'
 
 
 class TestRename:
@@ -72,15 +89,6 @@ class TestRename:
         with pytest.raises(ValueError) as excinfo:
             rename.replace_all()
         assert excinfo.value.args[0] == "Specify a new name of the image. (e.g. --new_name newname)"
-
-        # new_name contains file extension characters.
-        _new_name_with_ext = "new.png"
-        rename = rename_class_mock(
-            image_path=_temp_image_file, is_all_replaced_with_new_name=True, new_name=_new_name_with_ext
-        )
-        with pytest.raises(ValueError) as excinfo:
-            rename.replace_all()
-        assert excinfo.value.args[0] == f'--new_name option "{_new_name_with_ext}" contains extension characters.'
 
         rename = rename_class_mock(image_path=_temp_image_file, is_all_replaced_with_new_name=True, new_name=_new_name)
         rename.replace_all()
@@ -386,7 +394,7 @@ class TestRename:
         assert rename.renamed_image_name == _after
 
         # if is_all_replaced_with_new_name is True and is_serial_number_added is False
-        # serial_number should be added.
+        # serial numbers should be added.
         rename = rename_class_mock(
             image_path=_temp_image_file, is_serial_number_added=False, is_all_replaced_with_new_name=True
         )
