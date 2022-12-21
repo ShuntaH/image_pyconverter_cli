@@ -141,7 +141,7 @@ class Rename:
         ext_pattern = re.compile(DefaultValues.ANY_EXTENSION_PATTERN.value)
         result = ext_pattern.search(self.new_name)
         if result is not None:
-            raise ValueError(f'"--new_name option {self.new_name}" includes extension characters.')
+            raise ValueError(f'--new_name option "{self.new_name}" includes extension characters.')
         if type(self.replacement_with_separator_pattern) is str:
             self.replacement_with_separator_pattern: Pattern = re.compile(self.replacement_with_separator_pattern)
 

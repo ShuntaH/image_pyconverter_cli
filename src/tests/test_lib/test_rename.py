@@ -71,7 +71,7 @@ class TestRename:
         rename = rename_class_mock(image_path=_temp_image_file, is_all_replaced_with_new_name=True)
         with pytest.raises(ValueError) as excinfo:
             rename.replace_all()
-        assert excinfo.value.args[0] == "Specify the name of the new image. (e.g. --new_name newname)"
+        assert excinfo.value.args[0] == "Specify a new name of the image. (e.g. --new_name newname)"
 
         rename = rename_class_mock(image_path=_temp_image_file, is_all_replaced_with_new_name=True, new_name=_new_path)
         rename.replace_all()
