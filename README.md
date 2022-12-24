@@ -11,6 +11,26 @@ New features will be added as needed.
 ## Rename
 
 
-```shell
+```bash
+ic_rename example-directry
+```
+
+```bash
+ic_rename example-directry
+```
+
+```bash
+ic_rename example-directry
+```
+
+```bash
+ic_rename example-directry
+```
+
+```bash
+ic_rename example-directry
+```
+
+```bash
 ic_rename example-directry
 ```
