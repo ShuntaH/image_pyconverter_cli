@@ -55,17 +55,17 @@ class RenameArgsValidator:
     def __init__(self, args):
         self.options = args
 
-    def validate_options(self):
+    def validate_options(self) -> None:
         for class_arg in Rename.__dataclass_fields__.keys():
             if not hasattr(self.options, class_arg):
                 raise ValueError(f'"{class_arg}" options is not passed.')
 
-    def validate_new_name(self):
+    def validate_new_name(self) -> None:
         ext_pattern = DefaultValues.ANY_EXTENSION_PATTERN.value
         if ext_pattern.search(self.options.new_name):
             raise ValueError(f'--new_name option "{self.options.new_name}" contains extension characters.')
 
-    def validate(self):
+    def validate(self) -> None:
         self.validate_options()
         self.validate_new_name()
 
