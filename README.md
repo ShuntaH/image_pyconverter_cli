@@ -10,9 +10,27 @@ New features will be added as needed.
 
 ## Rename
 
-
 ```bash
-ic_rename example-directry
+directry-containing-images
+├── dir1
+│   ├── dir1-image.png
+│   └── dir2
+│       └── dir2-image.png
+└── image.png
+
+```
+```bash
+$ ic_rename directory-containing-images --is_all_replaced_with_new_name --new_name new-name
+```
+->
+```shell
+directry-containing-imagesg-images
+├── dir1
+│   ├── dir1-image.png
+│   └── dir2
+│       └── dir2-image.png
+└── image.png
+
 ```
 
 ```bash

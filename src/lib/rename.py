@@ -56,9 +56,22 @@ class RenameArgsValidator:
         self.options = args
 
     def validate_options(self) -> None:
+        skip_fields = [
+            "image_path",  # get image_path arg in loop of image_paths
+            "now_str",
+            "loop_count",
+            "comparison_log",
+        ]
         for class_arg in Rename.__dataclass_fields__.keys():
+            if class_arg in skip_fields:
+                continue
             if not hasattr(self.options, class_arg):
                 raise ValueError(f'"{class_arg}" options is not passed.')
+
+    def validate_image_paths(self) -> None:
+        get_image_paths_from_within(
+            dir_path=self.options.dir_path, valid_extensions=DefaultValues.VALID_EXTENSIONS.value
+        )
 
     def validate_new_name(self) -> None:
         ext_pattern = DefaultValues.ANY_EXTENSION_PATTERN.value
@@ -67,6 +80,7 @@ class RenameArgsValidator:
 
     def validate(self) -> None:
         self.validate_options()
+        self.validate_image_paths()
         self.validate_new_name()
 
 
@@ -203,8 +217,8 @@ class Rename:
             )
 
             arg_parser.add_argument(
-                "-alt_ciw",
-                "--alternative_char_in_windows",
+                "-alt_uciw",
+                "--alternative_unavailable_char_in_windows",
                 help="A character that replaces a character that cannot be used in the name of the image.",
                 type=str,
                 default=DefaultValues.ALTERNATIVE_UNAVAILABLE_CHAR_IN_WINDOWS.value,
@@ -230,8 +244,8 @@ class Rename:
                 action="store_true",
             )
             arg_parser.add_argument(
-                "-snzpd",
-                "--serial_number_zero_padding_digit",
+                "-zpd",
+                "--zero_padding_digit",
                 help="Zero padding digit of serial number.",
                 type=int,
                 default=DefaultValues.ZERO_PADDING_DIGIT.value,
@@ -247,7 +261,10 @@ class Rename:
             )
 
             arg_parser.add_argument(
-                "-sd", "--same_directory", help="Output to the same directory.", action="store_true"
+                "-output_to_same_dir",
+                "--is_output_to_same_dir",
+                help="Output to the same directory.",
+                action="store_true",
             )
 
             args = arg_parser.parse_args()
@@ -500,8 +517,8 @@ class Rename:
     @property
     def comparison(self) -> str:
         return (
-            f"{self.original_image_name} => {self.renamed_image_name}\n"
-            f"PATH: {self.image_path} => {self.renamed_image_path}"
+            f"\nNAME: {self.original_image_name} => {self.renamed_image_name}\n"
+            f"PATH: {self.image_path} => {self.renamed_image_path}\n"
         )
 
     def append_comparison(self) -> None:
@@ -566,12 +583,12 @@ def main():
                 suffix=args.suffix,
                 is_separator_and_delimiter_replaced=args.is_separator_and_delimiter_replaced,
                 separator=args.separator,
-                alternative_unavailable_char_in_windows=args.alternative_char_in_windows,
+                alternative_unavailable_char_in_windows=args.alternative_unavailable_char_in_windows,
                 is_url_encoded_char_replaced=args.is_url_encoded_char_replaced,
                 alternative_url_encoded_char=args.alternative_url_encoded_char,
                 is_serial_number_added=args.is_serial_number_added,
                 loop_count=loop_count,
-                zero_padding_digit=args.serial_number_zero_padding_digit,
+                zero_padding_digit=args.zero_padding_digit,
                 valid_extensions=args.valid_extensions,
                 run=args.run,
             )

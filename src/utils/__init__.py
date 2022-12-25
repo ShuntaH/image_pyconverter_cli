@@ -46,7 +46,7 @@ def image_paths_of_valid_extension_generator(
 
     for p in dir_path.glob("**/*"):  # type:ignore
         p_string = str(p)
-        if not pattern.search(p_string):
+        if not pattern.search(p_string) and not p.is_dir():
             styled_stdout(Bcolors.WARNING.value, f"'{p_string}' is invalid extension.")  # type: ignore
             continue
         yield p
