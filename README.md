@@ -33,4 +33,6 @@ ic_rename example-directry
 
 ```bash
 ic_rename example-directry
+
+ci
 ```
