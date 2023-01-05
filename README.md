@@ -2,6 +2,10 @@
 
 ---------------------------------------
 
+[![PyPI version](https://badge.fury.io/py/pyseto.svg)](https://badge.fury.io/py/pyseto)
+![PyPI - Python Version](https://img.shields.io/pypi/pyversions/pyseto)
+![Github CI](https://github.com/shuntaH/image_pyconverter_cli/actions/workflows/test-ci.yml/badge.svg)
+
 CLI providing simple image conversion functionality in python.
 
 New features will be added as needed.
