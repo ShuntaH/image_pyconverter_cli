@@ -1,10 +1,11 @@
 """The setup.py file for image_pyconverter_cli."""
 import pathlib
 import re
+from os import path
 
 from setuptools import setup
 
-LONG_DESCRIPTION = "%s\n\n%s" % open("README.md", encoding="utf8").read().strip()
+LONG_DESCRIPTION = open(path.join(".", "README.md"), encoding="utf-8").read().replace("\r", "")
 
 SHORT_DESCRIPTION = """
 Image Conversion Tools.""".strip()
