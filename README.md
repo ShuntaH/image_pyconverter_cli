@@ -2,8 +2,9 @@
 
 ---------------------------------------
 
-[![PyPI version](https://badge.fury.io/py/pyseto.svg)](https://badge.fury.io/py/pyseto)
-![PyPI - Python Version](https://img.shields.io/pypi/pyversions/pyseto)
+[//]: # ([![PyPI version]&#40;https://badge.fury.io/py/pyseto.svg&#41;]&#40;https://badge.fury.io/py/pyseto&#41;)
+
+[//]: # (![PyPI - Python Version]&#40;https://img.shields.io/pypi/pyversions/image_pyconverter_cli&#41;)
 ![Github CI](https://github.com/shuntaH/image_pyconverter_cli/actions/workflows/test-ci.yml/badge.svg)
 
 CLI providing simple image conversion functionality in python.
