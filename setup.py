@@ -1,13 +1,11 @@
 """The setup.py file for image_pyconverter_cli."""
 import pathlib
 import re
+from os import path
 
 from setuptools import setup
 
-LONG_DESCRIPTION = """
-This library is a CLI-based conversion tool for images, including renaming and resizing.
-Currently, only the renaming function is provided.
-""".strip()
+LONG_DESCRIPTION = open(path.join(".", "README.md"), encoding="utf-8").read().replace("\r", "")
 
 SHORT_DESCRIPTION = """
 Image Conversion Tools.""".strip()
@@ -22,15 +20,18 @@ AUTHOR = "ShuntaH"
 AUTHOR_EMAIL = "hskpg.contact@gmail.com"
 NAME = "image_pyconverter_cli"
 URL = "https://github.com/ShuntaH/image_pyconverter_cli"
+LICENSE = "MIT License"
 
 setup(
     name=NAME,
     version=VERSION,
     description=SHORT_DESCRIPTION,
-    long_description=LONG_DESCRIPTION,
+    # long_description=LONG_DESCRIPTION,
     author=AUTHOR,
     author_email=AUTHOR_EMAIL,
     url=URL,
+    license=LICENSE,
+    platforms=["POSIX", "Windows", "Unix", "MacOS"],
     keywords=["Image converter", "Rename", "Python", "CLI"],
     classifiers=[
         "Intended Audience :: Developers",
@@ -39,6 +40,7 @@ setup(
         "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3.9",
         "Programming Language :: Python :: 3.10",
+        "Programming Language :: Python :: 3.11",
         "Operating System :: OS Independent",
         "Operating System :: POSIX",
         "Operating System :: Microsoft",

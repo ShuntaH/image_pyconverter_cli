@@ -34,17 +34,8 @@ def get_image_paths_from_within(dir_path: str, valid_extensions: List[str]) -> I
     return image_paths_of_valid_extension_generator(dir_path=dir_p, pattern=ext_pattern)
 
 
-def compile_pattern_from(pattern_string: str) -> Pattern:
-    """Both raw string(=r'') and pure string can be pattern string arg.
-    # >>> p = re.compile(r'[ 　\t\n.,-ー_＿]')
-    >>> p
-    >>> re.compile(r'[ \u3000\\t\\n.,-ー_＿]')
-    """
-    return re.compile(f"{pattern_string}")
-
-
 def compile_extension_pattern_from(valid_extensions: List[str] = VALID_EXTENSIONS) -> Pattern:
-    return re.compile("/*(" + "|".join(valid_extensions) + ")$")  # => /*(.jpg|.jpeg|.png)$
+    return re.compile(r".*(" + "|".join(valid_extensions) + ")$")  # => /*(.jpg|.jpeg|.png)$
 
 
 def image_paths_of_valid_extension_generator(
@@ -55,7 +46,7 @@ def image_paths_of_valid_extension_generator(
 
     for p in dir_path.glob("**/*"):  # type:ignore
         p_string = str(p)
-        if not pattern.search(p_string):
+        if not pattern.search(p_string) and not p.is_dir():
             styled_stdout(Bcolors.WARNING.value, f"'{p_string}' is invalid extension.")  # type: ignore
             continue
         yield p

@@ -6,7 +6,7 @@ from typing import List, Union
 
 import pytest
 
-from lib.rename import DefaultValues, Rename
+from lib.rename import DefaultValues, Rename, RenameArgsValidator
 from utils import datetime2str, get_dest_dir_name, is_os_windows
 
 
@@ -20,6 +20,23 @@ def rename_class_mock(temp_dest_path, temp_dir_path) -> Rename:
         loop_count: int = 1
 
     yield RenameMock
+
+
+class TestRenameArgsValidator:
+    # todo make arg mock
+
+    @dataclasses.dataclass
+    class ArgMock:
+        new_name: str
+
+    def test_validate_new_name(self, temp_image_file, rename_class_mock):
+        # new_name contains file extension characters.
+        _new_name_with_ext = "new.png"
+        args = self.ArgMock(new_name=_new_name_with_ext)
+        validator = RenameArgsValidator(args=args)
+        with pytest.raises(ValueError) as excinfo:
+            validator.validate_new_name()
+        assert excinfo.value.args[0] == f'--new_name option "{_new_name_with_ext}" contains extension characters.'
 
 
 class TestRename:
@@ -44,6 +61,39 @@ class TestRename:
         assert rename.dest_dir_name == get_dest_dir_name(dir_path=_temp_dir, now_str=rename.now_str)
         assert rename.dest_dir_path == _temp_dest / rename.dest_dir_name
         assert rename.dest_dir_path.exists() is True
+
+    def test_replace_all(self, temp_image_file, rename_class_mock):
+        _temp_dir: pathlib.Path = rename_class_mock.dir_path
+        _original_path = "original.png"
+        _temp_image_file: pathlib.Path = temp_image_file(image_path=_original_path, temp_dir_path=_temp_dir)
+        _new_name = "new"
+
+        # missing is_all_replaced_with_new_name and new_name
+        rename = rename_class_mock(image_path=_temp_image_file)
+        assert hasattr(rename.__class__, "is_all_replaced_with_new_name") is True
+        assert hasattr(rename, "is_all_replaced_with_new_name") is True
+        assert rename.is_all_replaced_with_new_name is False
+        assert hasattr(rename.__class__, "new_name") is True
+        assert hasattr(rename, "new_name") is True
+        assert rename.new_name == DefaultValues.NEW_NAME.value
+        rename.replace_all()
+        assert rename.renamed_image_name == _original_path  # not change
+
+        # missing is_all_replaced_with_new_name but new name option is passed.
+        rename = rename_class_mock(image_path=_temp_image_file, new_name=_new_name)
+        rename.replace_all()
+        assert rename.renamed_image_name == _original_path  # not change
+
+        # missing new_name but is_all_replaced_with_new_name is True
+        rename = rename_class_mock(image_path=_temp_image_file, is_all_replaced_with_new_name=True)
+        with pytest.raises(ValueError) as excinfo:
+            rename.replace_all()
+        assert excinfo.value.args[0] == "Specify a new name of the image. (e.g. --new_name newname)"
+
+        rename = rename_class_mock(image_path=_temp_image_file, is_all_replaced_with_new_name=True, new_name=_new_name)
+        rename.replace_all()
+        assert rename.renamed_image_stem == _new_name
+        assert _new_name != _original_path
 
     def test_replace_words(self, temp_image_file, rename_class_mock):
         _temp_dir: pathlib.Path = rename_class_mock.dir_path
@@ -311,42 +361,45 @@ class TestRename:
         assert rename.renamed_image_name == _after
 
     def test_add_serial_number(self, temp_image_file, temp_dir_path, rename_class_mock):
-        _temp_dir: pathlib.Path = rename_class_mock.dir_path
-        _now_str = datetime2str()
         # missing is_serial_number_added, loop_count, zero_padding_digit
         _before = "image.png"
         _after = "image001.png"
         _dir_path = temp_dir_path()
-        _temp_image_file: pathlib.Path = temp_image_file(image_path=_before, temp_dir_path=_temp_dir)
-        rename = Rename(image_path=_temp_image_file, now_str=_now_str, dir_path=_dir_path, dest=temp_dir_path())
+        _temp_image_file: pathlib.Path = temp_image_file(image_path=_before, temp_dir_path=_dir_path)
+
+        # check default values of args
+        rename = rename_class_mock(image_path=_temp_image_file, is_serial_number_added=False, loop_count=None)
         assert rename.is_serial_number_added is False
         assert rename.loop_count is None
         assert rename.zero_padding_digit == DefaultValues.ZERO_PADDING_DIGIT.value
+
         with pytest.raises(ValueError) as excinfo:
             rename.add_serial_number()
         assert excinfo.value.args[0] == "'loop_count' should be start from 1."
-        rename = rename_class_mock(image_path=_temp_image_file, loop_count=1)
+
+        # is_serial_number_added is False
+        rename = rename_class_mock(image_path=_temp_image_file)
         rename.add_serial_number()
         assert rename.renamed_image_name == _before
 
-        _before = "image.png"
-        _after = "image001.png"
-        _temp_image_file: pathlib.Path = temp_image_file(image_path=_before, temp_dir_path=_temp_dir)
-        # invalid
+        # loop_count is 0
         rename = rename_class_mock(image_path=_temp_image_file, is_serial_number_added=True, loop_count=0)
         with pytest.raises(ValueError) as excinfo:
             rename.add_serial_number()
         assert excinfo.value.args[0] == "'loop_count' should be start from 1."
+
         # ok
-        rename = rename_class_mock(image_path=_temp_image_file, is_serial_number_added=True, loop_count=1)
+        rename = rename_class_mock(image_path=_temp_image_file, is_serial_number_added=True)
         rename.add_serial_number()
         assert rename.renamed_image_name == _after
 
-        # missing loop_count argument
-        rename = rename_class_mock(image_path=_temp_image_file, is_serial_number_added=True, loop_count=None)
-        with pytest.raises(ValueError) as excinfo:
-            rename.add_serial_number()
-        assert excinfo.value.args[0] == "'loop_count' should be start from 1."
+        # if is_all_replaced_with_new_name is True and is_serial_number_added is False
+        # serial numbers should be added.
+        rename = rename_class_mock(
+            image_path=_temp_image_file, is_serial_number_added=False, is_all_replaced_with_new_name=True
+        )
+        rename.add_serial_number()
+        assert rename.renamed_image_name == _after
 
     def test_replace_unavailable_file_name_characters_in_windows(self, temp_image_file, rename_class_mock):
         if is_os_windows():
