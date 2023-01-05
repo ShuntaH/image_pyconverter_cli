@@ -26,7 +26,7 @@ setup(
     name=NAME,
     version=VERSION,
     description=SHORT_DESCRIPTION,
-    long_description=LONG_DESCRIPTION,
+    # long_description=LONG_DESCRIPTION,
     author=AUTHOR,
     author_email=AUTHOR_EMAIL,
     url=URL,
