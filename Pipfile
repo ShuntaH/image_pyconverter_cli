@@ -3,6 +3,15 @@ url = "https://pypi.org/simple"
 verify_ssl = true
 name = "pypi"
 
+[scripts]
+tox = "tox"
+pytest = "pytest -s"
+pre-commit = "pre-commit run --all-files"
+build = "python -m build"
+publish-conf-check = "twine check dist/*"
+publish-test = "twine upload -r testpypi dist/*"  # add username and password
+publish-prod = "twine upload dist/*"  # add username and password
+
 [packages]
 setuptools = "*"
 build = "*"
@@ -10,9 +19,9 @@ image-pyconverter-cli = {editable = true, path = "."}
 
 [dev-packages]
 pytest = "*"
-python-dotenv = "*"
 pre-commit = "*"
 tox = "*"
+twine = "*"
 
 [requires]
 python_version = "3.10"

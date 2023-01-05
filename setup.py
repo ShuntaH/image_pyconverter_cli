@@ -1,46 +1,47 @@
 """The setup.py file for image_pyconverter_cli."""
+import pathlib
+import re
+from os import path
+
 from setuptools import setup
 
-LONG_DESCRIPTION = """
-This library is a CLI-based conversion tool for images, including renaming and resizing.
-Currently, only the renaming function is provided.
-""".strip()
+LONG_DESCRIPTION = open(path.join(".", "README.md"), encoding="utf-8").read().replace("\r", "")
 
 SHORT_DESCRIPTION = """
 Image Conversion Tools.""".strip()
 
-DEPENDENCIES = ["Pillow", "jaconv"]
+DEPENDENCIES = ["Pillow", "jaconv", "python-dotenv"]
+
 TEST_DEPENDENCIES = ["pytest"]
-VERSION = "1.0.0"
+
+p: pathlib.Path = pathlib.Path("src").joinpath("__init__.py")
+VERSION = re.compile(r'.*__version__ = "(.*?)"', re.S).match(p.read_text()).group(1)  # type: ignore
 AUTHOR = "ShuntaH"
 AUTHOR_EMAIL = "hskpg.contact@gmail.com"
 NAME = "image_pyconverter_cli"
 URL = "https://github.com/ShuntaH/image_pyconverter_cli"
+LICENSE = "MIT License"
 
 setup(
     name=NAME,
     version=VERSION,
     description=SHORT_DESCRIPTION,
     long_description=LONG_DESCRIPTION,
+    long_description_content_type="text/markdown",
     author=AUTHOR,
     author_email=AUTHOR_EMAIL,
     url=URL,
-    keywords=["Image converter", "Rename"],
+    license=LICENSE,
+    platforms=["POSIX", "Windows", "Unix", "MacOS"],
+    keywords=["Image converter", "Rename", "Python", "CLI"],
     classifiers=[
-        "Development Status :: 1 - Beta",
         "Intended Audience :: Developers",
         "Topic :: Software Development :: Libraries :: Python Modules",
         "License :: OSI Approved :: MIT License",
-        # 'Programming Language :: Python',
-        # 'Programming Language :: Python :: 2',
-        # 'Programming Language :: Python :: 2.7',
-        # 'Programming Language :: Python :: 3',
-        # 'Programming Language :: Python :: 3.5',
-        # 'Programming Language :: Python :: 3.6',
-        # 'Programming Language :: Python :: 3.7',
         "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3.9",
         "Programming Language :: Python :: 3.10",
+        "Programming Language :: Python :: 3.11",
         "Operating System :: OS Independent",
         "Operating System :: POSIX",
         "Operating System :: Microsoft",

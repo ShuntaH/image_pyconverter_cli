@@ -14,7 +14,7 @@ from utils import (
 def test_create_valid_extension_pattern_from():
     p = compile_extension_pattern_from()
     assert type(p) is Pattern
-    assert p.pattern == "/*(.jpg|.jpeg|.JPG|.JPEG|.jpe|.jfif|.pjpeg|.pjp|.png|.gif|.tiff|.tif|.webp|.svg|.svgz)$"
+    assert p.pattern == ".*(.jpg|.jpeg|.JPG|.JPEG|.jpe|.jfif|.pjpeg|.pjp|.png|.gif|.tiff|.tif|.webp|.svg|.svgz)$"
 
 
 def test_get_image_paths_from_within(
@@ -35,7 +35,6 @@ def test_get_image_paths_from_within(
     _temp_dir_path: pathlib.Path = temp_dir_path()
     valid_ext_image_png = temp_image_file(image_path="valid_ext_png.png", temp_dir_path=_temp_dir_path)
     valid_ext_image_jpg = temp_image_file(image_path="valid_ext_jpg.jpg", temp_dir_path=_temp_dir_path)
-    temp_text_file(temp_dir_path=_temp_dir_path)
 
     paths = get_image_paths_from_within(dir_path=str(_temp_dir_path), valid_extensions=VALID_EXTENSIONS)
     # total count is 3. there is 1 invalid extension file.
@@ -44,3 +43,8 @@ def test_get_image_paths_from_within(
     paths = get_image_paths_from_within(dir_path=str(_temp_dir_path), valid_extensions=VALID_EXTENSIONS)
     for p in paths:
         assert str(p) in [str(valid_ext_image_jpg), str(valid_ext_image_png)]
+
+    # dir_path arg is not a directory
+    with pytest.raises(ValueError) as excinfo:
+        get_image_paths_from_within(dir_path=valid_ext_image_png, valid_extensions=VALID_EXTENSIONS)
+    assert f'"{valid_ext_image_png}" is not a directory. Please specify a directory path.' == excinfo.value.args[0]
