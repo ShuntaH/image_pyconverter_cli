@@ -505,7 +505,7 @@ class Rename:
                 self.image_path.replace(self.renamed_image_path)  # type:ignore
 
                 # bring original image back to original location.
-                shutil.move(copy_image, self.image_path)
+                shutil.move(copy_image, self.image_path)  # type:ignore
 
             self.append_comparison()
 
