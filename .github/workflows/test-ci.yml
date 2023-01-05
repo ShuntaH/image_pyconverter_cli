@@ -26,9 +26,9 @@ jobs:
         python -m pip install --upgrade pip
         python -m pip install pipenv tox-gh-actions
 
-    - name: Create virtualenv
-      run: |
-        pipenv --python ${{ matrix.python-version }}
+#    - name: Create virtualenv
+#      run: |
+#        pipenv --python ${{ matrix.python-version }}
 
     - name: Run tox
       run: pipenv run tox
